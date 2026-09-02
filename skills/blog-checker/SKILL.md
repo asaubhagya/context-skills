@@ -8,7 +8,7 @@ description: >-
   rendered preview + models), and raise the reviewRequest only on pass.
 depends: [rules-blog, rules]
 license: MIT
-version: 1
+version: 2
 attach: [templates/verdict.md, templates/checklist.md]
 ---
 
@@ -152,6 +152,13 @@ post_task_update {id: <issue>, state: "in_review",
 
 Then hand over: `get_events {cursor, waitMs: 25000}` belongs to the driver
 session, not to you. Never a second `reviewRequest`, never `publish`.
+
+**Locale variants cascade.** An issue whose `locale:` differs from its EN
+master's and whose description says `Cascade` moves to `in_review`
+**without** a `reviewRequest` on pass — the EN approval cascades to it and
+`blog-publisher` moves it to `done` when the master is live (`rules-blog`
+§5). Everything else above (verdict, preview, `check_record`, models) is
+attached exactly the same way.
 
 ## Never
 

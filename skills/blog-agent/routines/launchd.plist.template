@@ -7,11 +7,16 @@
   Verify: launchctl list | grep me.onecontext.blog ; tail -f <log path>
   Remove: launchctl bootout gui/$(id -u)/me.onecontext.blog.<tenant>.<routine>
 
-  Schedules (see chat-routines.md for the prompt each routine runs):
-    daily-brief      StartCalendarInterval Hour 8  Minute 0            (install FIRST)
-    blog-drafter     StartCalendarInterval Hour 2  Minute 0            (nightly)
-    blog-publisher   StartInterval 10800                               (every 3 h)
-    blog-assessment  StartCalendarInterval Weekday 1 Hour 9 Minute 0   (weekly, Monday)
+  Schedules (see chat-routines.md for the prompt each routine runs; the skill named there carries the procedure):
+    daily-brief      StartCalendarInterval Hour 8  Minute 0            (install FIRST · skill daily-brief)
+    blog-drafter     StartCalendarInterval Hour 2  Minute 0            (nightly · skill blog-drafter + blog-checker)
+    blog-publisher   StartInterval 10800                               (every 3 h · skill blog-publisher)
+    blog-assessment  StartCalendarInterval Weekday 1 Hour 9 Minute 0   (weekly, Monday · blog-agent / rules-blog)
+
+  Recommended: point ProgramArguments at a small wrapper script in the repo
+  (loads keys by name from the secret store, holds a per-routine lock, extracts
+  the prompt section, runs the agent, logs to .build/routines/) instead of
+  inlining the agent call below.
 
   Secrets: the program loads keys BY NAME from the host's secret store
   (e.g. `vault get OPENROUTER_API_KEY`). Never write a key value into this file.

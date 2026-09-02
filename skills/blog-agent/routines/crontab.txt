@@ -2,7 +2,8 @@
 # Install: crontab -e → paste, replace <…>. Order of installation: daily-brief FIRST.
 # Times are in the crontab's TZ; set CRON_TZ (Linux) or convert to the host's zone.
 # Keys are loaded BY NAME inside the run (e.g. `vault get OPENROUTER_API_KEY`); never put a value here.
-# Each line runs the host agent non-interactively with the routine's prompt from chat-routines.md.
+# Each line runs the host agent non-interactively with the routine's prompt from chat-routines.md;
+# the procedure lives in the skill the prompt names (daily-brief, blog-drafter + blog-checker, blog-publisher).
 
 CRON_TZ=<Asia/Singapore>
 CONTEXT_BLOG_TENANT=<tenant slug>
