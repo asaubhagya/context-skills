@@ -24,6 +24,9 @@ every file against its sha256 before serving it.
 | [`blog-checker`](skills/blog-checker/SKILL.md) | skill | Independent quality gate between the maker and the human: MACHINE checks via the Blog MCP (`content_lint`, `preview_render`), JUDGEMENT checks + fact-check, verdict `pass · bounce · escalate` recorded on the Context issue (`check_record`); raises the `reviewRequest` only on pass (locale variants cascade without one). Ships `templates/`. | Context Blog MCP |
 | [`blog-drafter`](skills/blog-drafter/SKILL.md) | skill | Nightly maker: buffer floor, hub-bound topic pick, cited research, `article_upsert` honouring the lint (two bounces then escalate), hand-off to `blog-checker` in a separate call, locale variants as `relates` issues. Never publishes. Ships `templates/`. | Context Blog MCP |
 | [`blog-publisher`](skills/blog-publisher/SKILL.md) | skill | Every 3 h: `done` ∧ `due` ≤ now < `due` + 3 h ∧ no live link → `publish {assert_context_done, context_issue_id}` → live link on the issue; cascade to checked locale variants; missed windows re-slotted; idempotent. | Context Blog MCP |
+| [`instagram-drafter`](skills/instagram-drafter/SKILL.md) | skill | Instagram maker: slides from the paper-cards template, assets + `instagram_post_upsert`, hand-off to `blog-checker`; runs inside the drafter routine after the blog pass. | Context Blog MCP |
+| [`instagram-publisher`](skills/instagram-publisher/SKILL.md) | skill | Schedules approved Instagram posts through Postiz (`POSTIZ_API_KEY` by name) only when the issue is `done`, dedupe guard; runs inside the publisher routine. | Context Blog MCP |
+| [`site-builder`](skills/site-builder/SKILL.md) | skill | `setup {workflow: "site"}`: one-time site / landing page — one-round interview (goal, audience, sections, CTA, design tokens), `page_upsert` honouring the lint, `preview_render`, `blog-checker` in a separate call, one `gate:artifact` review in Context, `publish` only after approval. Ships `templates/page-brief.md`. | Context Blog MCP |
 | [`wayfinder`](skills/third-party/wayfinder/SKILL.md) | skill (third-party) | Plan a huge chunk of work as a shared map of decision tickets. | dependency of `setup-context` / `blog-agent` |
 | [`grill-me`](skills/third-party/grill-me/SKILL.md) | skill (third-party) | Grill the user relentlessly about a plan, decision, or idea. | dependency of `setup-context` / `blog-agent` |
 
@@ -38,9 +41,9 @@ You normally never install these by hand — each MCP's `setup` tool does it:
 - **Context iOS MCP** and **Context Web MCP** (`app.onecontext.me`):
   `setup {workflow: "harness", harness, canWriteFiles}` resolves `rules`,
   `setup-context`, `daily-brief` and their dependencies `wayfinder` / `grill-me`.
-- **Context Blog MCP** (`sites.onecontext.me`): `setup {workflow: "blog" | …,
+- **Context Blog MCP** (`blog.onecontext.me/api/mcp`): `setup {workflow: "blog" | "site" | "instagram",
   harness, canWriteFiles, installedSkills}` resolves `rules-blog` + the workflow
-  skill (`blog-agent`) and adds the harness skills unless you report them installed.
+  skill (`blog-agent` · `site-builder` · `instagram-drafter`) and adds the harness skills unless you report them installed.
 
 `setup` returns either `mode: "files"` — the exact files to write for your host —
 or `mode: "chat"` (claude.ai, ChatGPT: no filesystem) with links to each skill on

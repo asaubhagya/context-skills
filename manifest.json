@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-02T19:38:56.361Z",
-  "ref": "v4",
+  "generatedAt": "2026-09-02T20:12:12.415Z",
+  "ref": "v5",
   "skills": [
     {
       "key": "blog-agent",
       "kind": "skill",
       "title": "blog-agent",
       "description": "Set up blog\" for any agent connected to Context + the Context Blog MCP: detect an existing tenant epic and reuse it (redo = re-interview + updated brand guides), or interview the owner (grill-me / wayfinder), fetch the facts, chart a tenant epic with brand, audience and design documents, one parent issue per channel with every piece as its child, one Backlog, the standing issues, then install and verify the routines on this machine (daily brief first) and raise one combined map + spec review. Blog · site · Instagram, once or recurring, Artifact · Review · Hosted.",
-      "version": 4,
+      "version": 5,
       "deps": [
         "rules-blog",
         "rules",
@@ -19,7 +19,8 @@
         "blog-checker",
         "blog-publisher",
         "instagram-drafter",
-        "instagram-publisher"
+        "instagram-publisher",
+        "site-builder"
       ],
       "license": "MIT",
       "source_url": null,
@@ -28,8 +29,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-agent/SKILL.md",
-          "sha256": "3f5040094d2b68c67dcca483588dbc3ec04df8ee41bd3301ee5a32b29966bd11",
-          "bytes": 20237
+          "sha256": "e0fdefd0ad0d036ad073db1ea9a1942806f5c07ff71b4aa56379416cefeff2ef",
+          "bytes": 20582
         },
         {
           "path": "routines/chat-routines.md",
@@ -82,8 +83,8 @@
         {
           "path": "templates/design-tokens.json",
           "src": "skills/blog-agent/templates/design-tokens.json",
-          "sha256": "653469bc09504f7f0763ee64ef32f99eb11f8c2b954d78216d3a1e53739f5e4d",
-          "bytes": 1471
+          "sha256": "dfaaf64cd1cc58455b1c0a3b980dccdfee7ef30e11049ee6807be61b9ec37159",
+          "bytes": 1470
         },
         {
           "path": "templates/design-tokens.md",
@@ -316,7 +317,7 @@
       "kind": "rules",
       "title": "rules-blog",
       "description": "Rules for every Context Blog workflow, layered on the Context harness: the three forks (what · how often · output tier), the label vocabulary, the checker and publish gates, key names only, daily brief first, and which server does what. Every blog, site and Instagram skill inherits this.",
-      "version": 2,
+      "version": 3,
       "deps": [
         "rules"
       ],
@@ -327,8 +328,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/rules-blog/SKILL.md",
-          "sha256": "90b0641b053036aa0af72268fa057e3ef800064342a5efbac45cc9bccbfdfacc",
-          "bytes": 10192
+          "sha256": "7bec187f3a9c9b9ee42fb68e6fd30eac1dd0769641047cbacfa1146958b11c58",
+          "bytes": 10191
         }
       ]
     },
@@ -352,6 +353,36 @@
           "src": "skills/setup-context/SKILL.md",
           "sha256": "bfb15a69b774ce0b92cded9e6b11ff2446d82b2b3237aef8f9373c1d545b5597",
           "bytes": 22500
+        }
+      ]
+    },
+    {
+      "key": "site-builder",
+      "kind": "skill",
+      "title": "site-builder",
+      "description": "One-time site / landing page for a Context Blog tenant: fix the page goal, audience, sections (hero, how it works, tiers, proof, CTA) and design tokens in a short interview, draft straight into the Blog MCP page shape, `page_upsert` honouring the lint (dry run first), `preview_render`, hand the draft to `blog-checker` in a separate call, leave the Context issue behind one `gate:artifact` review, and `publish` only after the owner approved it there. Never publishes unapproved; never a second CTA.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules",
+        "blog-checker",
+        "grill-me"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/site-builder/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/site-builder/SKILL.md",
+          "sha256": "9013de683d9977f624f6ed043184c815779d895754469b72100aa21f178dda7a",
+          "bytes": 10199
+        },
+        {
+          "path": "templates/page-brief.md",
+          "src": "skills/site-builder/templates/page-brief.md",
+          "sha256": "1c606b2087fdc80d71f2474c046220364c9647d15d6e845bf0994e79c733599e",
+          "bytes": 1974
         }
       ]
     },
