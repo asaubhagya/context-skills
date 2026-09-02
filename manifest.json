@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-02T14:34:58.444Z",
-  "ref": "v3",
+  "generatedAt": "2026-09-02T19:38:56.361Z",
+  "ref": "v4",
   "skills": [
     {
       "key": "blog-agent",
       "kind": "skill",
       "title": "blog-agent",
-      "description": "Set up blog\" for any agent connected to Context + the Context Blog MCP: interview the owner (grill-me / wayfinder), fetch the facts, chart a tenant epic with brand, audience and design documents, standing lanes and first publish issues, install the routines (daily brief first), raise one combined map + spec review. Blog · site · Instagram, once or recurring, Artifact · Review · Hosted.",
-      "version": 2,
+      "description": "Set up blog\" for any agent connected to Context + the Context Blog MCP: detect an existing tenant epic and reuse it (redo = re-interview + updated brand guides), or interview the owner (grill-me / wayfinder), fetch the facts, chart a tenant epic with brand, audience and design documents, one parent issue per channel with every piece as its child, one Backlog, the standing issues, then install and verify the routines on this machine (daily brief first) and raise one combined map + spec review. Blog · site · Instagram, once or recurring, Artifact · Review · Hosted.",
+      "version": 4,
       "deps": [
         "rules-blog",
         "rules",
@@ -17,7 +17,9 @@
         "daily-brief",
         "blog-drafter",
         "blog-checker",
-        "blog-publisher"
+        "blog-publisher",
+        "instagram-drafter",
+        "instagram-publisher"
       ],
       "license": "MIT",
       "source_url": null,
@@ -26,26 +28,32 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-agent/SKILL.md",
-          "sha256": "0a359a06997690066e54fa6b564edc951b8bb1267a8b631bec3ed98b97e052cf",
-          "bytes": 13496
+          "sha256": "3f5040094d2b68c67dcca483588dbc3ec04df8ee41bd3301ee5a32b29966bd11",
+          "bytes": 20237
         },
         {
           "path": "routines/chat-routines.md",
           "src": "skills/blog-agent/routines/chat-routines.md",
-          "sha256": "cc4bdd874715e93959cf13e06548ffd8fe8a9798c18b22556362bd8afed00a11",
-          "bytes": 4817
+          "sha256": "a4e579c3e3bef565b040147158de0a1b132a5ed46982660c62f547bbb03ffd24",
+          "bytes": 8408
         },
         {
           "path": "routines/crontab.txt",
           "src": "skills/blog-agent/routines/crontab.txt",
-          "sha256": "9e2ab3aeba4046760527d1dae890a4aaef8bbea1a5b8a130e0ac6de3a0da28fa",
-          "bytes": 1643
+          "sha256": "e085edd6268ca6df4b67f78bb6b5d6e1cf407514df1c1403d3954f76f3d64eea",
+          "bytes": 1750
         },
         {
           "path": "routines/launchd.plist.template",
           "src": "skills/blog-agent/routines/launchd.plist.template",
-          "sha256": "39886a7f0c41795d6da5fe7dc953d69aeae474367b60a0f71161583bc72c2ff9",
-          "bytes": 2907
+          "sha256": "aac4f7714ae1134c8b0e36fd9c45e1c5bb9ab41c0c7cbd5acfef442e4a5c5b70",
+          "bytes": 2995
+        },
+        {
+          "path": "routines/no-machine.md",
+          "src": "skills/blog-agent/routines/no-machine.md",
+          "sha256": "c573a7de0e8cf199aa368fdf6551b6d19a1b71295017bfbb9453578055d70a20",
+          "bytes": 2711
         },
         {
           "path": "templates/audience.md",
@@ -86,8 +94,8 @@
         {
           "path": "templates/lanes.md",
           "src": "skills/blog-agent/templates/lanes.md",
-          "sha256": "8d86e86926317a042852bab3b82eabdcd8983ff8776e9179d771d0893f48bba4",
-          "bytes": 6390
+          "sha256": "114294192095970704a2a7ce6921714531ecd9ecf20925b7582e6eac7bbc6a92",
+          "bytes": 12417
         }
       ]
     },
@@ -96,7 +104,7 @@
       "kind": "skill",
       "title": "blog-checker",
       "description": "Independent quality gate between the maker and the human for Context Blog content: run the MACHINE checks through the Blog MCP (content_lint, preview_render), do the JUDGEMENT checks and the fact-check yourself, record a pass / bounce / escalate verdict on the Context issue (review doc + rendered preview + models), and raise the reviewRequest only on pass.",
-      "version": 2,
+      "version": 3,
       "deps": [
         "rules-blog",
         "rules"
@@ -108,8 +116,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-checker/SKILL.md",
-          "sha256": "b55f63a769f54af6da9f78d71fd1d9b9695ae4ab1adffac67ed6014393117138",
-          "bytes": 9072
+          "sha256": "b0abd3680085f8c5f43ee07dbefc3e2b4d5e88377e5001d51764ad90fa771d6a",
+          "bytes": 9290
         },
         {
           "path": "templates/checklist.md",
@@ -129,8 +137,8 @@
       "key": "blog-drafter",
       "kind": "skill",
       "title": "blog-drafter",
-      "description": "Nightly maker for Context Blog: keep the tenant's draft buffer at or above the floor, take the next hub-bound topic from the slotted publish issues or the Topic Lane, research it with cited sources, draft through the Blog MCP `article_upsert` (lint-gated, fix and retry, two bounces then escalate), hand the draft to `blog-checker` in a separate call, spawn the locale variants as linked issues, and leave the publish issue carrying draft + verdict + preview + models behind one blocking reviewRequest. Never publishes.",
-      "version": 1,
+      "description": "Nightly maker for Context Blog: keep the tenant's draft buffer at or above the floor, take the next hub-bound topic from the slotted publish issues under the tenant's `Blog` parent or graduate one from the `Backlog`, research it with cited sources, draft through the Blog MCP `article_upsert` (lint-gated, fix and retry, two bounces then escalate), hand the draft to `blog-checker` in a separate call, spawn the locale variants as linked issues, and leave the publish issue carrying draft + verdict + preview + models behind one blocking reviewRequest. Never publishes.",
+      "version": 2,
       "deps": [
         "rules-blog",
         "rules",
@@ -143,8 +151,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-drafter/SKILL.md",
-          "sha256": "864c1511790f85c3508da89996691a0fd0ab74764ffacb302102e324b0c77a16",
-          "bytes": 11715
+          "sha256": "7b003654d4be2016a1ce693f51648e5a06f35a0069ae059e6ed94fc22f2dbcd1",
+          "bytes": 12825
         },
         {
           "path": "templates/draft-notes.md",
@@ -159,7 +167,7 @@
       "kind": "skill",
       "title": "blog-publisher",
       "description": "Every 3 hours, publish exactly the Context Blog pieces the owner approved: Context issue `done`, `due` ≤ now < `due` + 3 h, no live link yet — through the Blog MCP (`article_set_status` forward, then `publish {assert_context_done: true, context_issue_id}`), post the live link on the issue, cascade to the checked locale variants, re-slot missed windows, and stay idempotent. Refuses anything that is not `done`.",
-      "version": 1,
+      "version": 2,
       "deps": [
         "rules-blog",
         "rules"
@@ -171,8 +179,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-publisher/SKILL.md",
-          "sha256": "bbe6407d01c39252613ae249d7f615b465615fd1acb1599755a18476932764b2",
-          "bytes": 6498
+          "sha256": "f78e2bf6cba212ad23957a057413e82b9dac9bd0def7994919d6f6b01792eca1",
+          "bytes": 6820
         }
       ]
     },
@@ -180,8 +188,8 @@
       "key": "daily-brief",
       "kind": "skill",
       "title": "daily-brief",
-      "description": "Daily heartbeat for any recurring agent workflow tracked in Context: once a day, post one comment on the workflow's designated Daily Brief issue saying what published, what awaits approval, what failed and what is next. A missing brief is the outage alert.",
-      "version": 1,
+      "description": "Daily heartbeat for any recurring agent workflow tracked in Context: once a day, post one comment on the workflow's designated Daily Brief issue saying what published, what awaits approval, what failed and what is next, and rebuild the epic's `## Runs` block (schedule · next slots · routine health · last 7 briefs) so the owner sees it on the epic. A missing brief is the outage alert.",
+      "version": 2,
       "deps": [
         "rules"
       ],
@@ -192,8 +200,83 @@
         {
           "path": "SKILL.md",
           "src": "skills/daily-brief/SKILL.md",
-          "sha256": "c521df599c8830a05a75c8e7c09432838f31d246f51392152daca4d451b82bcb",
-          "bytes": 3362
+          "sha256": "9ddf15938764bee13eb4829f10650c036a7f587ad4ab10ad5ff35b7724e8be89",
+          "bytes": 6230
+        }
+      ]
+    },
+    {
+      "key": "instagram-drafter",
+      "kind": "skill",
+      "title": "instagram-drafter",
+      "description": "Maker for Context Blog Instagram carousels and posters: take the next `channel:instagram` publish issue of the tenant epic, write the caption and the slide copy from its linked blog topic in the tenant's voice, render the slides from the paper-cards template with headless Chrome, upload them as tenant assets, `instagram_post_upsert`, attach slides + caption + models to the Context issue, hand it to `blog-checker`, and leave one blocking reviewRequest. Degrades to copy-only when the host has no renderer. Never publishes, never schedules.",
+      "version": 2,
+      "deps": [
+        "rules-blog",
+        "rules",
+        "blog-checker"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/instagram-drafter/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/instagram-drafter/SKILL.md",
+          "sha256": "484497209d540d1a0b13d0b2a68d0f64ebd5a266e661717606dbf8ba2ae73211",
+          "bytes": 10445
+        },
+        {
+          "path": "scripts/attach-artifact.sh",
+          "src": "skills/instagram-drafter/scripts/attach-artifact.sh",
+          "sha256": "08d3bb875a996a9e46659c45c374039c4e2bb7e291fb4ec7666c65f94e62b99e",
+          "bytes": 2305
+        },
+        {
+          "path": "scripts/render-cards.sh",
+          "src": "skills/instagram-drafter/scripts/render-cards.sh",
+          "sha256": "0a3a0abb6e75cf393ec1ae0a395aae82b003b58f379571d5c53299ae5a707c77",
+          "bytes": 3022
+        },
+        {
+          "path": "templates/motifs.html",
+          "src": "skills/instagram-drafter/templates/motifs.html",
+          "sha256": "9fe97d26cc166e06d0098013af7e461d691d97e49f4ffef2d566efd6da39e3c9",
+          "bytes": 9305
+        },
+        {
+          "path": "templates/paper-cards.html",
+          "src": "skills/instagram-drafter/templates/paper-cards.html",
+          "sha256": "eae685a3b27b353b906c1837f476607e14be50fff96d2af1434fec359079c564",
+          "bytes": 4899
+        }
+      ]
+    },
+    {
+      "key": "instagram-publisher",
+      "kind": "skill",
+      "title": "instagram-publisher",
+      "description": "Every 3 hours, post exactly the Instagram carousels the owner approved: Context issue `done`, `due` ≤ now < `due` + 3 h, no live link yet — upload the slides to Postiz with `POSTIZ_API_KEY` (by name, host only), schedule the post on the tenant's Instagram channel found by name, `publish` the instagram_post on the Blog MCP, and post the Postiz id, then the permalink, on the issue. Dedupe guard before any call; idempotent; refuses anything that is not `done`; degrades to owner self-publish without a key.",
+      "version": 2,
+      "deps": [
+        "rules-blog",
+        "rules"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/instagram-publisher/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/instagram-publisher/SKILL.md",
+          "sha256": "b3e0e2e017e83d43ff68fed1418db273e75e9c9db4a853ed1a3386050a98e15b",
+          "bytes": 8773
+        },
+        {
+          "path": "scripts/postiz.sh",
+          "src": "skills/instagram-publisher/scripts/postiz.sh",
+          "sha256": "f5f32ab576cea66c9bdaefc942587844efee0b74cdd45fa3e703a4e3f2c7044b",
+          "bytes": 1970
         }
       ]
     },
@@ -233,7 +316,7 @@
       "kind": "rules",
       "title": "rules-blog",
       "description": "Rules for every Context Blog workflow, layered on the Context harness: the three forks (what · how often · output tier), the label vocabulary, the checker and publish gates, key names only, daily brief first, and which server does what. Every blog, site and Instagram skill inherits this.",
-      "version": 1,
+      "version": 2,
       "deps": [
         "rules"
       ],
@@ -244,8 +327,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/rules-blog/SKILL.md",
-          "sha256": "17c74bbaa60f7a8cb18964519fdbe0e7c6ff45241295e4f3d1c9d86243094ba2",
-          "bytes": 8890
+          "sha256": "90b0641b053036aa0af72268fa057e3ef800064342a5efbac45cc9bccbfdfacc",
+          "bytes": 10192
         }
       ]
     },

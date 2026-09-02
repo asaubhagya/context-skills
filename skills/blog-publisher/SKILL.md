@@ -9,7 +9,7 @@ description: >-
   stay idempotent. Refuses anything that is not `done`.
 depends: [rules-blog, rules]
 license: MIT
-version: 1
+version: 2
 ---
 
 # Blog publisher — approved → live
@@ -24,17 +24,21 @@ no content decisions; you verify, publish, record, and report.
 
 1. **Tenant** — slug and epic id from the routine prompt (or
    `CONTEXT_BLOG_TENANT`). State the tenant before any write.
-2. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+2. **Parent** — the epic's `Blog` parent (`list_tasks {kind: "issue",
+   parentId: <epic>, label: "lane:blog"}` → `<blog parent>`; the routine
+   prompt or the epic's `## Structure` may carry the id — confirm with
+   `get_task`). Every blog piece is its child (`rules-blog` §3 Hierarchy).
+3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
    `get_capabilities`: `publish`, `article_get`, `article_set_status` in
    `tools[]` (else `rules-blog` §8: say which is missing, post the payload
    you would have sent on the issue, stop).
-3. **Now** — the host clock in the tenant timezone (`tenant_get.timezone`).
+4. **Now** — the host clock in the tenant timezone (`tenant_get.timezone`).
    The window is `[due, due + 3 h)`.
 
 ## 1. Candidates
 
-`list_tasks {kind: "issue", parentId: <epic>, state: "done", includeClosed:
-true, label: "channel:blog"}` — follow `nextCursor` to the end — then
+`list_tasks {kind: "issue", parentId: <blog parent>, state: "done",
+includeClosed: true, label: "channel:blog"}` — follow `nextCursor` to the end — then
 `get_task` each (the list is a hint; the record is the truth). Sort by
 `dueAt`:
 
@@ -106,7 +110,7 @@ its own approval unless the owner approved it in Context.
 
 1. Next free cadence slot: from `tenant_get.recurrence` (or the epic's
    `## Rules`), the first slot after now where no other `channel:blog`
-   issue is due.
+   child of `<blog parent>` is due.
 2. `save_work {id, due: <next slot>}` and `post_task_update {body: "Missed
    window <old due>: re-slotted to <new due> — <reason if known: host down,
    routine failed, verdict missing>"}`.
