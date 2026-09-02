@@ -9,9 +9,9 @@ description: >-
   standing issues, then install and verify the routines on this machine
   (daily brief first) and raise one combined map + spec review. Blog · site ·
   Instagram, once or recurring, Artifact · Review · Hosted.
-depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher]
+depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher, site-builder]
 license: MIT
-version: 4
+version: 5
 attach: [templates/brand-guide.md, templates/audience.md, templates/design-tokens.json, templates/design-tokens.md, templates/decision-record.md, templates/brief.md, templates/lanes.md, routines/launchd.plist.template, routines/crontab.txt, routines/chat-routines.md, routines/no-machine.md]
 ---
 
@@ -121,7 +121,9 @@ the site (style, palette, fonts, imagery) · locale depth per language.
 Persona tiers (compulsory tier first) · 4–6 hubs with a pillar each ·
 first 10 topics (hub, persona, target query, kind) · ~30 target queries
 (mark answer-engine phrasing) · cadence per channel · slots · timezone.
-Sites: page goal, sections, CTA.
+Sites: page goal, sections, CTA — the one-round interview in `site-builder`;
+a site-only owner (`setup {workflow: "site"}`) goes straight there and
+skips the blog rounds.
 
 ### Round 4 — operations
 Channels confirmed · routines this host installs (daily brief **first**,
@@ -315,7 +317,10 @@ and rebuilds the epic's `## Runs` block (schedule · next slots · routine
 health · last 7 briefs). Every rule in `rules-blog` §3–5 applies. The
 driver session (you) only intervenes on `changes_requested`, on ideas the
 owner drops into the `Backlog` (one child each, `stage:idea`), and on
-`kind:refresh` proposals from the Performance Report.
+`kind:refresh` proposals from the Performance Report. Site pieces
+(children of the `Site` parent, `channel:site`) are one-time: `site-builder`
+builds each page through the same maker → checker → owner → `publish`
+chain, without a routine.
 
 ## What this skill never does
 
