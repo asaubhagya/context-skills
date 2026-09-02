@@ -41,7 +41,7 @@ You normally never install these by hand — each MCP's `setup` tool does it:
 - **Context iOS MCP** and **Context Web MCP** (`app.onecontext.me`):
   `setup {workflow: "harness", harness, canWriteFiles}` resolves `rules`,
   `setup-context`, `daily-brief` and their dependencies `wayfinder` / `grill-me`.
-- **Context Blog MCP** (`sites.onecontext.me`): `setup {workflow: "blog" | "site" | "instagram",
+- **Context Blog MCP** (`blog.onecontext.me/api/mcp`): `setup {workflow: "blog" | "site" | "instagram",
   harness, canWriteFiles, installedSkills}` resolves `rules-blog` + the workflow
   skill (`blog-agent` · `site-builder` · `instagram-drafter`) and adds the harness skills unless you report them installed.
 

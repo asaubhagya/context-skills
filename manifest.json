@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T19:57:26.651Z",
+  "generatedAt": "2026-09-02T20:12:12.415Z",
   "ref": "v5",
   "skills": [
     {
@@ -83,8 +83,8 @@
         {
           "path": "templates/design-tokens.json",
           "src": "skills/blog-agent/templates/design-tokens.json",
-          "sha256": "653469bc09504f7f0763ee64ef32f99eb11f8c2b954d78216d3a1e53739f5e4d",
-          "bytes": 1471
+          "sha256": "dfaaf64cd1cc58455b1c0a3b980dccdfee7ef30e11049ee6807be61b9ec37159",
+          "bytes": 1470
         },
         {
           "path": "templates/design-tokens.md",
@@ -317,7 +317,7 @@
       "kind": "rules",
       "title": "rules-blog",
       "description": "Rules for every Context Blog workflow, layered on the Context harness: the three forks (what · how often · output tier), the label vocabulary, the checker and publish gates, key names only, daily brief first, and which server does what. Every blog, site and Instagram skill inherits this.",
-      "version": 2,
+      "version": 3,
       "deps": [
         "rules"
       ],
@@ -328,8 +328,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/rules-blog/SKILL.md",
-          "sha256": "90b0641b053036aa0af72268fa057e3ef800064342a5efbac45cc9bccbfdfacc",
-          "bytes": 10192
+          "sha256": "7bec187f3a9c9b9ee42fb68e6fd30eac1dd0769641047cbacfa1146958b11c58",
+          "bytes": 10191
         }
       ]
     },

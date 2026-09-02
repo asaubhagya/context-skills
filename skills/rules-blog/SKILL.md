@@ -7,7 +7,7 @@ description: >-
   server does what. Every blog, site and Instagram skill inherits this.
 depends: [rules]
 license: MIT
-version: 2
+version: 3
 ---
 
 # Context Blog — rules
@@ -24,7 +24,7 @@ handoff before stopping). This file adds only what is blog-specific.
 | Server | Owns | Never |
 |---|---|---|
 | **Context MCP** (`app.onecontext.me`) | work: epic, issues, labels, `due`, documents, comments, `reviewRequest`, approvals, `get_events` | content bytes, publishing |
-| **Context Blog MCP** (`sites.onecontext.me/api/mcp`) | tenants, brand/hubs/topics, drafts, preview render, `publish`, sites, domains, analytics, AI-visibility | tracking, approving, reading Context |
+| **Context Blog MCP** (`blog.onecontext.me/api/mcp`) | tenants, brand/hubs/topics, drafts, preview render, `publish`, sites, domains, analytics, AI-visibility | tracking, approving, reading Context |
 
 Hold both connections. *You* carry the link: every piece of content is **one
 Context issue**, and its id rides as `context_issue_id` on every Blog MCP
