@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-02T20:12:12.415Z",
-  "ref": "v5",
+  "generatedAt": "2026-09-02T21:00:19.839Z",
+  "ref": "v6",
   "skills": [
     {
       "key": "blog-agent",
       "kind": "skill",
       "title": "blog-agent",
       "description": "Set up blog\" for any agent connected to Context + the Context Blog MCP: detect an existing tenant epic and reuse it (redo = re-interview + updated brand guides), or interview the owner (grill-me / wayfinder), fetch the facts, chart a tenant epic with brand, audience and design documents, one parent issue per channel with every piece as its child, one Backlog, the standing issues, then install and verify the routines on this machine (daily brief first) and raise one combined map + spec review. Blog · site · Instagram, once or recurring, Artifact · Review · Hosted.",
-      "version": 5,
+      "version": 6,
       "deps": [
         "rules-blog",
         "rules",
@@ -20,7 +20,8 @@
         "blog-publisher",
         "instagram-drafter",
         "instagram-publisher",
-        "site-builder"
+        "site-builder",
+        "blog-assessment"
       ],
       "license": "MIT",
       "source_url": null,
@@ -29,14 +30,14 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-agent/SKILL.md",
-          "sha256": "e0fdefd0ad0d036ad073db1ea9a1942806f5c07ff71b4aa56379416cefeff2ef",
-          "bytes": 20582
+          "sha256": "4437dacdcd015119e62321247112c43776ac90d9f3276c109817953a875c0a0a",
+          "bytes": 20599
         },
         {
           "path": "routines/chat-routines.md",
           "src": "skills/blog-agent/routines/chat-routines.md",
-          "sha256": "a4e579c3e3bef565b040147158de0a1b132a5ed46982660c62f547bbb03ffd24",
-          "bytes": 8408
+          "sha256": "f442143883f49ccbdea5696fe64c0d80e95d62c419ee9ece5c03f7b4710d4d35",
+          "bytes": 9496
         },
         {
           "path": "routines/crontab.txt",
@@ -97,6 +98,46 @@
           "src": "skills/blog-agent/templates/lanes.md",
           "sha256": "114294192095970704a2a7ce6921714531ecd9ecf20925b7582e6eac7bbc6a92",
           "bytes": 12417
+        }
+      ]
+    },
+    {
+      "key": "blog-assessment",
+      "kind": "skill",
+      "title": "blog-assessment",
+      "description": "Weekly assessment for a Context Blog tenant: read the stats the Blog MCP holds (traffic, AI-referral share, Search Console, indexing), run the agent-side AI-visibility probe with the host's keys (OpenRouter, optional Perplexity / SerpApi — by NAME, cost-capped), ingest the results, and post one report sub-issue under the tenant's Performance Report lane with citations found / missing and topic actions for the Topic Lane.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/blog-assessment/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/blog-assessment/SKILL.md",
+          "sha256": "0e2dc08839d6ce2a6a72b8d1e6e3412ce7424a3b7f53c299697dbd72d107c3bc",
+          "bytes": 9641
+        },
+        {
+          "path": "routines/chat-routines-section.md",
+          "src": "skills/blog-assessment/routines/chat-routines-section.md",
+          "sha256": "73632e6c4f13d2da23070b2d0f1f324b7abd380fbb3557945e90a9d0736e41d0",
+          "bytes": 2324
+        },
+        {
+          "path": "scripts/probe.mjs",
+          "src": "skills/blog-assessment/scripts/probe.mjs",
+          "sha256": "1cb31fc29d86ca9763c059b4f26b970b95617f9a07047f7c69f22a331b48a319",
+          "bytes": 11764
+        },
+        {
+          "path": "templates/weekly.md",
+          "src": "skills/blog-assessment/templates/weekly.md",
+          "sha256": "c1d53e673f14df0b62c655c8574cbe4954eef540ad1fcf533d8ca1ed4ca989b4",
+          "bytes": 2476
         }
       ]
     },
