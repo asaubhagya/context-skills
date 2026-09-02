@@ -21,6 +21,7 @@ every file against its sha256 before serving it.
 | [`daily-brief`](skills/daily-brief/SKILL.md) | skill | Daily heartbeat for any recurring agent workflow tracked in Context. | Context iOS MCP · Context Web MCP · Context Blog MCP |
 | [`rules-blog`](skills/rules-blog/SKILL.md) | rules | Rules for every Context Blog workflow, layered on `rules`. | Context Blog MCP |
 | [`blog-agent`](skills/blog-agent/SKILL.md) | skill | "Set up blog": interview the owner, chart a tenant epic, install the routines. Ships `templates/` and `routines/`. | Context Blog MCP |
+| [`blog-checker`](skills/blog-checker/SKILL.md) | skill | Independent quality gate between the maker and the human: MACHINE checks via the Blog MCP (`content_lint`, `preview_render`), JUDGEMENT checks + fact-check, verdict `pass · bounce · escalate` recorded on the Context issue (`check_record`); raises the `reviewRequest` only on pass. Ships `templates/`. | Context Blog MCP |
 | [`wayfinder`](skills/third-party/wayfinder/SKILL.md) | skill (third-party) | Plan a huge chunk of work as a shared map of decision tickets. | dependency of `setup-context` / `blog-agent` |
 | [`grill-me`](skills/third-party/grill-me/SKILL.md) | skill (third-party) | Grill the user relentlessly about a plan, decision, or idea. | dependency of `setup-context` / `blog-agent` |
 
