@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T18:39:51.475Z",
+  "generatedAt": "2026-09-02T19:14:15.779Z",
   "ref": "v3",
   "skills": [
     {
@@ -217,14 +217,20 @@
         {
           "path": "SKILL.md",
           "src": "skills/instagram-drafter/SKILL.md",
-          "sha256": "1eb8f8b9b03cfa2f15dc9f82114b8e098d24a3601e361de99c8ecb6cb23a1ba1",
-          "bytes": 9595
+          "sha256": "a8907797be6762843b621bf67cc749260f467350d639654607d412b768d27f00",
+          "bytes": 10096
+        },
+        {
+          "path": "scripts/attach-artifact.sh",
+          "src": "skills/instagram-drafter/scripts/attach-artifact.sh",
+          "sha256": "08d3bb875a996a9e46659c45c374039c4e2bb7e291fb4ec7666c65f94e62b99e",
+          "bytes": 2305
         },
         {
           "path": "scripts/render-cards.sh",
           "src": "skills/instagram-drafter/scripts/render-cards.sh",
-          "sha256": "916f3f8a2eb4df88332bbda1d13f7604eb762f221858b0ac2d8824b38f1e5b36",
-          "bytes": 2234
+          "sha256": "0a3a0abb6e75cf393ec1ae0a395aae82b003b58f379571d5c53299ae5a707c77",
+          "bytes": 3022
         },
         {
           "path": "templates/motifs.html",
@@ -257,8 +263,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/instagram-publisher/SKILL.md",
-          "sha256": "bb68b65e24aff2da6c6dc2dc6fc8e3f9b22ade0c03bd90f977cf89230eee9b0f",
-          "bytes": 8412
+          "sha256": "eb0a213cf06d18a33fc3826398c0e0cd4bc43792b9c43da3f0c8a8cb1d2ff7ae",
+          "bytes": 8431
         },
         {
           "path": "scripts/postiz.sh",

@@ -12,7 +12,7 @@ description: >-
 depends: [rules-blog, rules, blog-checker]
 license: MIT
 version: 1
-attach: [templates/paper-cards.html, templates/motifs.html, scripts/render-cards.sh]
+attach: [templates/paper-cards.html, templates/motifs.html, scripts/render-cards.sh, scripts/attach-artifact.sh]
 ---
 
 # Instagram drafter — the maker
@@ -128,10 +128,16 @@ attribute, never below 76).
 - `send_file {taskId, filename: "<TICKET>-caption.md", title: "<title> —
   caption", docKind: "deliverable", content: <caption + the slide copy as a
   numbered list + asset ids + post id>}`.
-- Every slide PNG: `send_file {taskId, filename: "<TICKET>-NN-<slug>.png",
-  title: "Slide NN — <headline>", docKind: "preview", base64}` (each PNG is
-  well under 5 MB; attach all, first slide first). On a host that cannot
-  send binaries, attach the asset `public_url`s in the deliverable instead.
+- Every slide PNG, first slide first, **without base64 through the model**:
+  Context `create_artifact_upload {filename: "<TICKET>-NN-<slug>.png", size,
+  sha256, contentType: "image/png"}` → `scripts/attach-artifact.sh <png>
+  <uploadUrl> <completeUrl> <issue id> <project> "Slide NN — <headline>"
+  tenant:<slug> channel:instagram <TICKET>` (PUTs the bytes and completes the
+  transfer with the host's Context Access Key by name — `CONTEXT_ACCESS_KEY`
+  env or the secret store's `CONTEXT_MCP_TOKEN`; prints the document id). The
+  session lives 15 minutes; create it right before the script. Script exit 3
+  (no key on this host) → `send_file {…, docKind: "preview", base64}` for the
+  **cover only** and the asset `public_url`s for the rest in the deliverable.
 - **Copy-only mode** (no renderer): the deliverable carries the caption and
   every slide's eyebrow / headline / sub / motif names; no upload, no
   `instagram_post_upsert`; say `copy-only: no renderer on this host` on the

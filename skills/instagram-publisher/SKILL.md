@@ -35,8 +35,8 @@ record, report.
    post `Publish skipped: POSTIZ_API_KEY not available on this host — owner
    self-publishes` on the issue once and stop. Never echo, log or store the
    value.
-4. **Channel** — `postiz.sh integrations` → the entry with `platform:
-   "instagram"` whose `name` matches the tenant's Instagram account in the
+4. **Channel** — `postiz.sh integrations` → the entry with `identifier:
+   "instagram"` (not `disabled`) whose `name` matches the tenant's Instagram account in the
    design tokens / epic `## Rules` (Meetly: the one named "Meetly …"). One
    match → its `id` for this run. Zero or several → post why on the issue
    and stop. Never hardcode an integration id in a skill, prompt or repo.
