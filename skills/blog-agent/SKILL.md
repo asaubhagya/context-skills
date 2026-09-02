@@ -7,9 +7,9 @@ description: >-
   publish issues, install the routines (daily brief first), raise one
   combined map + spec review. Blog · site · Instagram, once or recurring,
   Artifact · Review · Hosted.
-depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher]
+depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher]
 license: MIT
-version: 2
+version: 3
 attach: [templates/brand-guide.md, templates/audience.md, templates/design-tokens.json, templates/design-tokens.md, templates/decision-record.md, templates/brief.md, templates/lanes.md, routines/launchd.plist.template, routines/crontab.txt, routines/chat-routines.md]
 ---
 
@@ -180,8 +180,10 @@ Exact payload shapes are in `templates/lanes.md`; document templates in
    the host cannot schedule. Times: daily-brief 08:00 local · drafter
    nightly · publisher every 3 h · assessment weekly. The prompts name the
    skill each routine follows (`daily-brief`, `blog-drafter` +
-   `blog-checker`, `blog-publisher`); install those skills with this one
-   (they are in `depends`). Verify each install
+   `blog-checker`, `blog-publisher`; for an Instagram tenant also
+   `instagram-drafter` / `instagram-publisher`, run inside the same drafter
+   and publisher routines); install those skills with this one (they are
+   in `depends`). Verify each install
    (`launchctl list`, `crontab -l`, or the host's task list) and record the
    result — never claim an install you did not observe. On Artifact tier or
    "once", install nothing; say so.
@@ -202,7 +204,12 @@ Exact payload shapes are in `templates/lanes.md`; document templates in
 Approved map → the routines run the loop: `blog-drafter` takes the earliest
 `backlog` publish issue → maker draft → `blog-checker` (separate call) →
 attach draft + verdict + preview + models → `reviewRequest` → owner →
-`done` → `blog-publisher` at `due` → live URL on the issue. Every rule in
+`done` → `blog-publisher` at `due` → live URL on the issue. Instagram
+issues (`channel:instagram`) run the same chain through
+`instagram-drafter` (slides rendered from the paper-cards template,
+assets + `instagram_post_upsert`) and `instagram-publisher` (Postiz with
+`POSTIZ_API_KEY` by name, only when `done`, dedupe guard) — in the same
+two routines, after the blog pass. Every rule in
 `rules-blog` §4–5 applies. The driver session (you) only intervenes on
 `changes_requested`, on ideas graduating from the Idea Lane, and on
 `kind:refresh` proposals from the Performance Report.

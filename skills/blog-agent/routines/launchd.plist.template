@@ -9,8 +9,8 @@
 
   Schedules (see chat-routines.md for the prompt each routine runs; the skill named there carries the procedure):
     daily-brief      StartCalendarInterval Hour 8  Minute 0            (install FIRST · skill daily-brief)
-    blog-drafter     StartCalendarInterval Hour 2  Minute 0            (nightly · skill blog-drafter + blog-checker)
-    blog-publisher   StartInterval 10800                               (every 3 h · skill blog-publisher)
+    blog-drafter     StartCalendarInterval Hour 2  Minute 0            (nightly · skill blog-drafter + blog-checker; + instagram-drafter for Instagram tenants)
+    blog-publisher   StartInterval 10800                               (every 3 h · skill blog-publisher; + instagram-publisher for Instagram tenants)
     blog-assessment  StartCalendarInterval Weekday 1 Hour 9 Minute 0   (weekly, Monday · blog-agent / rules-blog)
 
   Recommended: point ProgramArguments at a small wrapper script in the repo

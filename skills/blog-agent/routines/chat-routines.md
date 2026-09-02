@@ -25,7 +25,7 @@ If today's brief already exists, do not post a second one. Post it even when eve
 
 ## blog-drafter
 
-Schedule: nightly <02:00 owner timezone>. Skills: `blog-drafter` (maker), `blog-checker` (separate call), `rules-blog`.
+Schedule: nightly <02:00 owner timezone>. Skills: `blog-drafter` (maker), `blog-checker` (separate call), `rules-blog`; Instagram tenants add `instagram-drafter` (same run, after the blog pass).
 
 ```
 You are the blog-drafter routine for tenant `<slug>` (Context epic "<Brand> Blog" <epic id>, buffer floor <n>).
@@ -37,11 +37,15 @@ notes, hand the draft to `blog-checker` in a SEPARATE session or subagent, fix i
 variants (<locale depths, e.g. de full · fr reduced>) as `relates` issues. The checker raises the one blocking `reviewRequest` on pass.
 Models: the strongest available on this host for maker and checker. Keys by NAME only (`BLOG_ACCESS_KEY`, `OPENROUTER_API_KEY`).
 Never publish. Report `workStats`. Print the skill's one-line run summary. Post a handoff comment if you stop early.
+Instagram (only when the tenant has `channel:instagram` issues): after the blog pass, follow the `instagram-drafter` skill exactly for at most ONE
+`channel:instagram` issue (changes requested first, then the earliest-due `ready` backlog issue): caption + slide copy from the linked blog topic,
+slides rendered with `scripts/render-cards.sh` (copy-only if the host has no Chrome), assets uploaded, `instagram_post_upsert`, slides + caption
+attached, `blog-checker` in a SEPARATE subagent, one blocking `reviewRequest` on pass. Never Postiz, never `publish`. Print its one-line summary too.
 ```
 
 ## blog-publisher
 
-Schedule: every 3 hours. Skills: `blog-publisher`, `rules-blog`.
+Schedule: every 3 hours. Skills: `blog-publisher`, `rules-blog`; Instagram tenants add `instagram-publisher` (same run, after the blog pass; needs `POSTIZ_API_KEY` by name on this host).
 
 ```
 You are the blog-publisher routine for tenant `<slug>` (Context epic "<Brand> Blog" <epic id>, timezone <tz>, window 3 h).
@@ -50,7 +54,12 @@ candidates are `channel:blog` issues whose Context state is `done`, `due` ≤ no
 pre-flight each (state re-read, pass verdict + preview attached, article found), move the article one status forward, then
 `publish {assert_context_done: true, context_issue_id}` and post "Published: <url>" on the issue; cascade to the checked locale
 variants; re-slot missed windows with a comment; dedupe on the "Published:" update and `article_get.status`.
-Never publish an issue whose state is not `done`. Never publish early. Instagram is not yours. Report `workStats`. Print the skill's one-line run summary.
+Never publish an issue whose state is not `done`. Never publish early. Instagram is not `blog-publisher`'s. Report `workStats`. Print the skill's one-line run summary.
+Instagram (only when the tenant has `channel:instagram` issues): after the blog pass, follow the `instagram-publisher` skill exactly: candidates are
+`channel:instagram` issues whose state is `done` (re-read with get_task), `due` ≤ now < `due` + 3 h, no "Scheduled:"/"Published:" update; dedupe guard
+(issue updates + `instagram_post_list` + Postiz window listing) BEFORE any write; the Instagram channel is found by NAME in `postiz.sh integrations`;
+upload slides, schedule at `due`, `publish {instagram_post_id, assert_context_done: true, context_issue_id}`, post "Scheduled: postiz <id> …", later the
+permalink as "Published: <url>"; re-slot missed windows. Without `POSTIZ_API_KEY` post once that the owner self-publishes and stop. Print its one-line summary too.
 ```
 
 ## blog-assessment

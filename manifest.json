@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T14:34:58.444Z",
+  "generatedAt": "2026-09-02T18:39:51.475Z",
   "ref": "v3",
   "skills": [
     {
@@ -7,7 +7,7 @@
       "kind": "skill",
       "title": "blog-agent",
       "description": "Set up blog\" for any agent connected to Context + the Context Blog MCP: interview the owner (grill-me / wayfinder), fetch the facts, chart a tenant epic with brand, audience and design documents, standing lanes and first publish issues, install the routines (daily brief first), raise one combined map + spec review. Blog · site · Instagram, once or recurring, Artifact · Review · Hosted.",
-      "version": 2,
+      "version": 3,
       "deps": [
         "rules-blog",
         "rules",
@@ -17,7 +17,9 @@
         "daily-brief",
         "blog-drafter",
         "blog-checker",
-        "blog-publisher"
+        "blog-publisher",
+        "instagram-drafter",
+        "instagram-publisher"
       ],
       "license": "MIT",
       "source_url": null,
@@ -26,26 +28,26 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-agent/SKILL.md",
-          "sha256": "0a359a06997690066e54fa6b564edc951b8bb1267a8b631bec3ed98b97e052cf",
-          "bytes": 13496
+          "sha256": "958275609c94187af30fce54a9160be471b79bc8c653b54c94a04d7a791fed47",
+          "bytes": 13984
         },
         {
           "path": "routines/chat-routines.md",
           "src": "skills/blog-agent/routines/chat-routines.md",
-          "sha256": "cc4bdd874715e93959cf13e06548ffd8fe8a9798c18b22556362bd8afed00a11",
-          "bytes": 4817
+          "sha256": "8e5ec04f2b84104855b2a9a77e248ce2f99f34f76cfbff51e35673b0f89a4a73",
+          "bytes": 6387
         },
         {
           "path": "routines/crontab.txt",
           "src": "skills/blog-agent/routines/crontab.txt",
-          "sha256": "9e2ab3aeba4046760527d1dae890a4aaef8bbea1a5b8a130e0ac6de3a0da28fa",
-          "bytes": 1643
+          "sha256": "e085edd6268ca6df4b67f78bb6b5d6e1cf407514df1c1403d3954f76f3d64eea",
+          "bytes": 1750
         },
         {
           "path": "routines/launchd.plist.template",
           "src": "skills/blog-agent/routines/launchd.plist.template",
-          "sha256": "39886a7f0c41795d6da5fe7dc953d69aeae474367b60a0f71161583bc72c2ff9",
-          "bytes": 2907
+          "sha256": "aac4f7714ae1134c8b0e36fd9c45e1c5bb9ab41c0c7cbd5acfef442e4a5c5b70",
+          "bytes": 2995
         },
         {
           "path": "templates/audience.md",
@@ -194,6 +196,75 @@
           "src": "skills/daily-brief/SKILL.md",
           "sha256": "c521df599c8830a05a75c8e7c09432838f31d246f51392152daca4d451b82bcb",
           "bytes": 3362
+        }
+      ]
+    },
+    {
+      "key": "instagram-drafter",
+      "kind": "skill",
+      "title": "instagram-drafter",
+      "description": "Maker for Context Blog Instagram carousels and posters: take the next `channel:instagram` publish issue of the tenant epic, write the caption and the slide copy from its linked blog topic in the tenant's voice, render the slides from the paper-cards template with headless Chrome, upload them as tenant assets, `instagram_post_upsert`, attach slides + caption + models to the Context issue, hand it to `blog-checker`, and leave one blocking reviewRequest. Degrades to copy-only when the host has no renderer. Never publishes, never schedules.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules",
+        "blog-checker"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/instagram-drafter/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/instagram-drafter/SKILL.md",
+          "sha256": "1eb8f8b9b03cfa2f15dc9f82114b8e098d24a3601e361de99c8ecb6cb23a1ba1",
+          "bytes": 9595
+        },
+        {
+          "path": "scripts/render-cards.sh",
+          "src": "skills/instagram-drafter/scripts/render-cards.sh",
+          "sha256": "916f3f8a2eb4df88332bbda1d13f7604eb762f221858b0ac2d8824b38f1e5b36",
+          "bytes": 2234
+        },
+        {
+          "path": "templates/motifs.html",
+          "src": "skills/instagram-drafter/templates/motifs.html",
+          "sha256": "9fe97d26cc166e06d0098013af7e461d691d97e49f4ffef2d566efd6da39e3c9",
+          "bytes": 9305
+        },
+        {
+          "path": "templates/paper-cards.html",
+          "src": "skills/instagram-drafter/templates/paper-cards.html",
+          "sha256": "eae685a3b27b353b906c1837f476607e14be50fff96d2af1434fec359079c564",
+          "bytes": 4899
+        }
+      ]
+    },
+    {
+      "key": "instagram-publisher",
+      "kind": "skill",
+      "title": "instagram-publisher",
+      "description": "Every 3 hours, post exactly the Instagram carousels the owner approved: Context issue `done`, `due` ≤ now < `due` + 3 h, no live link yet — upload the slides to Postiz with `POSTIZ_API_KEY` (by name, host only), schedule the post on the tenant's Instagram channel found by name, `publish` the instagram_post on the Blog MCP, and post the Postiz id, then the permalink, on the issue. Dedupe guard before any call; idempotent; refuses anything that is not `done`; degrades to owner self-publish without a key.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/instagram-publisher/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/instagram-publisher/SKILL.md",
+          "sha256": "bb68b65e24aff2da6c6dc2dc6fc8e3f9b22ade0c03bd90f977cf89230eee9b0f",
+          "bytes": 8412
+        },
+        {
+          "path": "scripts/postiz.sh",
+          "src": "skills/instagram-publisher/scripts/postiz.sh",
+          "sha256": "f5f32ab576cea66c9bdaefc942587844efee0b74cdd45fa3e703a4e3f2c7044b",
+          "bytes": 1970
         }
       ]
     },
