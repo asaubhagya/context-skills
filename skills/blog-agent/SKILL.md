@@ -9,9 +9,9 @@ description: >-
   standing issues, then install and verify the routines on this machine
   (daily brief first) and raise one combined map + spec review. Blog · site ·
   Instagram, once or recurring, Artifact · Review · Hosted.
-depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher, site-builder]
+depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher, site-builder, blog-assessment]
 license: MIT
-version: 5
+version: 6
 attach: [templates/brand-guide.md, templates/audience.md, templates/design-tokens.json, templates/design-tokens.md, templates/decision-record.md, templates/brief.md, templates/lanes.md, routines/launchd.plist.template, routines/crontab.txt, routines/chat-routines.md, routines/no-machine.md]
 ---
 
