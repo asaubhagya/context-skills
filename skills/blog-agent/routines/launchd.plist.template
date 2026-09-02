@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Context Blog routine — launchd template (macOS host, Claude Code / Codex).
+  One plist per routine. Replace every <…>. Install:
+    cp <this> ~/Library/LaunchAgents/me.onecontext.blog.<tenant>.<routine>.plist
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/me.onecontext.blog.<tenant>.<routine>.plist
+  Verify: launchctl list | grep me.onecontext.blog ; tail -f <log path>
+  Remove: launchctl bootout gui/$(id -u)/me.onecontext.blog.<tenant>.<routine>
+
+  Schedules (see chat-routines.md for the prompt each routine runs):
+    daily-brief      StartCalendarInterval Hour 8  Minute 0            (install FIRST)
+    blog-drafter     StartCalendarInterval Hour 2  Minute 0            (nightly)
+    blog-publisher   StartInterval 10800                               (every 3 h)
+    blog-assessment  StartCalendarInterval Weekday 1 Hour 9 Minute 0   (weekly, Monday)
+
+  Secrets: the program loads keys BY NAME from the host's secret store
+  (e.g. `vault get OPENROUTER_API_KEY`). Never write a key value into this file.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>me.onecontext.blog.<tenant>.<routine></string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <!-- Non-interactive run of the host agent with the routine prompt. Adjust for Codex: `codex exec "$(cat …)"`. -->
+    <string>cd <repo path> &amp;&amp; claude -p "$(cat .claude/skills/blog-agent/routines/chat-routines.md | sed -n '/^## <routine>/,/^## /p')" --model <strongest model id> --output-format text</string>
+  </array>
+
+  <!-- pick ONE of the two schedule forms -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer><8></integer>
+    <key>Minute</key><integer>0</integer>
+    <!-- <key>Weekday</key><integer>1</integer>   weekly only -->
+  </dict>
+  <!-- <key>StartInterval</key><integer>10800</integer>   every 3 h (publisher) -->
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>TZ</key><string><Asia/Singapore></string>
+    <key>CONTEXT_BLOG_TENANT</key><string><tenant slug></string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string><repo path>/.build/routines/<routine>.log</string>
+  <key>StandardErrorPath</key>
+  <string><repo path>/.build/routines/<routine>.err.log</string>
+
+  <key>RunAtLoad</key><false/>
+  <key>ExitTimeOut</key><integer>1500</integer>
+</dict>
+</plist>

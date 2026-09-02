@@ -1,0 +1,24 @@
+# Context Blog routines — cron lines (Linux host, or macOS if you prefer cron to launchd).
+# Install: crontab -e → paste, replace <…>. Order of installation: daily-brief FIRST.
+# Times are in the crontab's TZ; set CRON_TZ (Linux) or convert to the host's zone.
+# Keys are loaded BY NAME inside the run (e.g. `vault get OPENROUTER_API_KEY`); never put a value here.
+# Each line runs the host agent non-interactively with the routine's prompt from chat-routines.md.
+
+CRON_TZ=<Asia/Singapore>
+CONTEXT_BLOG_TENANT=<tenant slug>
+ROUTINES=<repo path>/.claude/skills/blog-agent/routines/chat-routines.md
+LOGS=<repo path>/.build/routines
+
+# 1. daily-brief — 08:00 local, every day (install first; a missing brief is the alert)
+0 8 * * *    cd <repo path> && claude -p "$(sed -n '/^## daily-brief/,/^## /p' $ROUTINES)" --model <model id> >> $LOGS/daily-brief.log 2>&1
+
+# 2. blog-drafter — nightly 02:00
+0 2 * * *    cd <repo path> && claude -p "$(sed -n '/^## blog-drafter/,/^## /p' $ROUTINES)" --model <model id> >> $LOGS/blog-drafter.log 2>&1
+
+# 3. blog-publisher — every 3 hours
+0 */3 * * *  cd <repo path> && claude -p "$(sed -n '/^## blog-publisher/,/^## /p' $ROUTINES)" --model <model id> >> $LOGS/blog-publisher.log 2>&1
+
+# 4. blog-assessment — weekly, Monday 09:00
+0 9 * * 1    cd <repo path> && claude -p "$(sed -n '/^## blog-assessment/,/^## /p' $ROUTINES)" --model <model id> >> $LOGS/blog-assessment.log 2>&1
+
+# Codex instead of Claude Code: replace `claude -p "…" --model <id>` with `codex exec "…" -m <id>`.

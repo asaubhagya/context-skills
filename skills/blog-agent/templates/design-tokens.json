@@ -1,0 +1,31 @@
+{
+  "$schema": "https://sites.onecontext.me/schemas/design-tokens-v1.json",
+  "tenant": "<slug>",
+  "source": { "fetchedFrom": "https://<site>", "fetchedAt": "<YYYY-MM-DD>", "method": "css + computed styles" },
+  "style": "<paper-sketch | clean | editorial | bold>",
+  "color": {
+    "background": "#<hex>",
+    "surface": "#<hex>",
+    "text": "#<hex>",
+    "muted": "#<hex>",
+    "accent": "#<hex>",
+    "accentText": "#<hex>",
+    "border": "#<hex>",
+    "link": "#<hex>"
+  },
+  "font": {
+    "heading": { "family": "<Space Grotesk>", "fallback": "system-ui, sans-serif", "weight": 600 },
+    "body": { "family": "<IBM Plex Sans>", "fallback": "system-ui, sans-serif", "weight": 400 },
+    "mono": { "family": "<IBM Plex Mono>", "fallback": "ui-monospace, monospace" },
+    "scale": { "base": "17px", "ratio": 1.2, "lineHeight": 1.6 }
+  },
+  "layout": { "contentWidth": "68ch", "radius": "6px", "spacingUnit": "8px" },
+  "logo": { "url": "https://<site>/<logo>.svg", "alt": "<Brand>", "monochrome": "#<hex>" },
+  "imagery": { "style": "<2D outline sketches, no stock photos>", "aspect": "16:9", "ogTemplate": "<paper-card>" },
+  "instagram": { "aspect": "4:5", "template": "<paper-card>", "captionMaxChars": 2200 },
+  "seo": {
+    "byline": { "type": "<Person | Organization>", "name": "<name>", "url": "https://<site>/about" },
+    "publisher": { "name": "<Brand>", "logo": "https://<site>/<logo>.png" },
+    "jsonLd": ["Article", "BreadcrumbList", "FAQPage?"]
+  }
+}

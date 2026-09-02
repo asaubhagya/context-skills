@@ -1,0 +1,226 @@
+{
+  "generatedAt": "2026-09-02T10:52:37.074Z",
+  "ref": "v1",
+  "skills": [
+    {
+      "key": "blog-agent",
+      "kind": "skill",
+      "title": "blog-agent",
+      "description": "Set up blog\" for any agent connected to Context + the Context Blog MCP: interview the owner (grill-me / wayfinder), fetch the facts, chart a tenant epic with brand, audience and design documents, standing lanes and first publish issues, install the routines (daily brief first), raise one combined map + spec review. Blog · site · Instagram, once or recurring, Artifact · Review · Hosted.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules",
+        "setup-context",
+        "wayfinder",
+        "grill-me",
+        "daily-brief"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/blog-agent/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/blog-agent/SKILL.md",
+          "sha256": "86350888d73318e18d0f9c1c96e4c448b760912705f4badb0d4d385b7be5a9c6",
+          "bytes": 13250
+        },
+        {
+          "path": "routines/chat-routines.md",
+          "src": "skills/blog-agent/routines/chat-routines.md",
+          "sha256": "a3ba9f2bfb4a824f6eb036fea53aa9eaa37f415e991baa8639d98894ef85a33c",
+          "bytes": 4954
+        },
+        {
+          "path": "routines/crontab.txt",
+          "src": "skills/blog-agent/routines/crontab.txt",
+          "sha256": "be881a75781aea91ae50ac0eeca539ebf296ab61fb2c5fa8961587ec2facad82",
+          "bytes": 1531
+        },
+        {
+          "path": "routines/launchd.plist.template",
+          "src": "skills/blog-agent/routines/launchd.plist.template",
+          "sha256": "79f73471513e90421f2461f24e744be239af87b2605feef57eee44384524a736",
+          "bytes": 2488
+        },
+        {
+          "path": "templates/audience.md",
+          "src": "skills/blog-agent/templates/audience.md",
+          "sha256": "c1e5718585df47be8141cfc251d8cfcd8cbe2f257aa49ddf949dd67f22e936b9",
+          "bytes": 1764
+        },
+        {
+          "path": "templates/brand-guide.md",
+          "src": "skills/blog-agent/templates/brand-guide.md",
+          "sha256": "2f25957d8ddb5197e77fce0bcd39c9c847c3c89ebc27ae57c915c52bdeda6f0d",
+          "bytes": 1773
+        },
+        {
+          "path": "templates/brief.md",
+          "src": "skills/blog-agent/templates/brief.md",
+          "sha256": "ac96207b57cd7daa18ebde8e73e87ab994c13d9b960fe41d1649984996ba1abb",
+          "bytes": 2344
+        },
+        {
+          "path": "templates/decision-record.md",
+          "src": "skills/blog-agent/templates/decision-record.md",
+          "sha256": "4b9715ea3d0d04085cd04ab092d4973af379bb99f935aaa72872f45f575c1b17",
+          "bytes": 2491
+        },
+        {
+          "path": "templates/design-tokens.json",
+          "src": "skills/blog-agent/templates/design-tokens.json",
+          "sha256": "653469bc09504f7f0763ee64ef32f99eb11f8c2b954d78216d3a1e53739f5e4d",
+          "bytes": 1471
+        },
+        {
+          "path": "templates/design-tokens.md",
+          "src": "skills/blog-agent/templates/design-tokens.md",
+          "sha256": "dca182c862f9fde706c23f7588527bd63e7120b547a750ebb35e1c4263ea8338",
+          "bytes": 1564
+        },
+        {
+          "path": "templates/lanes.md",
+          "src": "skills/blog-agent/templates/lanes.md",
+          "sha256": "8d86e86926317a042852bab3b82eabdcd8983ff8776e9179d771d0893f48bba4",
+          "bytes": 6390
+        }
+      ]
+    },
+    {
+      "key": "daily-brief",
+      "kind": "skill",
+      "title": "daily-brief",
+      "description": "Daily heartbeat for any recurring agent workflow tracked in Context: once a day, post one comment on the workflow's designated Daily Brief issue saying what published, what awaits approval, what failed and what is next. A missing brief is the outage alert.",
+      "version": 1,
+      "deps": [
+        "rules"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/daily-brief/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/daily-brief/SKILL.md",
+          "sha256": "b79f783d021a3c1f64f7b7e573a0bc45b3e74eb84d808a070ddf8ab1f8dbf823",
+          "bytes": 3180
+        }
+      ]
+    },
+    {
+      "key": "rules",
+      "kind": "rules",
+      "title": "rules",
+      "description": "The Context harness — the execution discipline any agent follows when a task needs a plan and runs through Context. Load first; every other Context skill inherits these rules.",
+      "version": 1,
+      "deps": [],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/rules/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/rules/SKILL.md",
+          "sha256": "7e07a5996dc619f9d5b8b1b78b0e880c120a63e7a96596aea851791658deaab3",
+          "bytes": 7098
+        },
+        {
+          "path": "agents-block.md",
+          "src": "skills/rules/agents-block.md",
+          "sha256": "165a7c947cf5912af1cbc12475fbcd53435f97d163ad3da65a95ec1d65556f3f",
+          "bytes": 991
+        },
+        {
+          "path": "spec-template.md",
+          "src": "skills/spec-template.md",
+          "sha256": "c884735a69b5ba3195281350f3d44c62af0a961e387a39985fdcb66e1545663e",
+          "bytes": 2147
+        }
+      ]
+    },
+    {
+      "key": "rules-blog",
+      "kind": "rules",
+      "title": "rules-blog",
+      "description": "Rules for every Context Blog workflow, layered on the Context harness: the three forks (what · how often · output tier), the label vocabulary, the checker and publish gates, key names only, daily brief first, and which server does what. Every blog, site and Instagram skill inherits this.",
+      "version": 1,
+      "deps": [
+        "rules"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/rules-blog/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/rules-blog/SKILL.md",
+          "sha256": "17c74bbaa60f7a8cb18964519fdbe0e7c6ff45241295e4f3d1c9d86243094ba2",
+          "bytes": 8890
+        }
+      ]
+    },
+    {
+      "key": "setup-context",
+      "kind": "skill",
+      "title": "setup-context",
+      "description": "Chart a piece of work as a Context map (an epic plus linked tickets) on Context, then work it to done with review gates. Use when the user asks to get started, to plan or track work in Context, or when a task needs a plan.",
+      "version": 1,
+      "deps": [
+        "rules",
+        "wayfinder",
+        "grill-me"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/setup-context/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/setup-context/SKILL.md",
+          "sha256": "bfb15a69b774ce0b92cded9e6b11ff2446d82b2b3237aef8f9373c1d545b5597",
+          "bytes": 22500
+        }
+      ]
+    },
+    {
+      "key": "grill-me",
+      "kind": "skill",
+      "title": "grill-me",
+      "description": "Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.",
+      "version": 1,
+      "deps": [],
+      "license": "MIT",
+      "source_url": "https://github.com/mattpocock/skills/blob/6654f6b60cd9d5be8b54c6fafe44346dabeb3b76/skills/productivity/grilling/SKILL.md",
+      "primary": "skills/third-party/grill-me/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/third-party/grill-me/SKILL.md",
+          "sha256": "3ed3d9da2ac5be259d922e4f64de31bba5037f82dbfdbb839f36f4ea9d531000",
+          "bytes": 4282
+        }
+      ]
+    },
+    {
+      "key": "wayfinder",
+      "kind": "skill",
+      "title": "wayfinder",
+      "description": "Plan a huge chunk of work (more than one agent session can hold) as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.",
+      "version": 1,
+      "deps": [],
+      "license": "MIT",
+      "source_url": "https://github.com/mattpocock/skills/blob/6654f6b60cd9d5be8b54c6fafe44346dabeb3b76/skills/engineering/wayfinder/SKILL.md",
+      "primary": "skills/third-party/wayfinder/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/third-party/wayfinder/SKILL.md",
+          "sha256": "e29b267e0913feb47fa29e3fb9dbee2853495818e0717e27a406f2015777556d",
+          "bytes": 13794
+        }
+      ]
+    }
+  ]
+}

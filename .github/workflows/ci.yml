@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  skills:
+    name: check-skills + manifest is committed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Version comes from the `packageManager` field in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Frontmatter sanity (name, description, version, depends + attach resolve, file sizes)
+        run: pnpm check-skills
+
+      # The MCPs read manifest.json straight from the CDN at a pinned tag, so
+      # the committed file must match the tree. Fails when someone edited a
+      # skill without running `pnpm build-manifest`.
+      - name: manifest.json matches the tree
+        run: pnpm check-manifest
+
+      - name: Typecheck scripts
+        run: pnpm exec tsc --noEmit

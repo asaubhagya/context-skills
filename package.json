@@ -1,0 +1,19 @@
+{
+  "name": "context-skills",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Source of truth for the skills served by the Context MCPs (iOS, Web, Blog) and the Skills hub at https://app.onecontext.me/skills.",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "check-skills": "tsx scripts/check-skills.ts",
+    "build-manifest": "tsx scripts/build-manifest.ts",
+    "check-manifest": "tsx scripts/build-manifest.ts --check"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@10.28.0"
+}
