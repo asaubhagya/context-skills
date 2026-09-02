@@ -8,7 +8,7 @@ description: >-
   rendered preview + models), and raise the reviewRequest only on pass.
 depends: [rules-blog, rules]
 license: MIT
-version: 2
+version: 3
 attach: [templates/verdict.md, templates/checklist.md]
 ---
 
@@ -28,12 +28,15 @@ piece in this session, stop and hand the check to a fresh session.
    latest `docKind: "deliverable"` / `"draft"`), or the `article_upsert` /
    `page_upsert` payload the maker attached. Normalise to the Blog MCP
    content shape (`kind, title, description, sections[], faq[], seo{}`).
-2. **The tenant** — from the issue's `tenant:` label: the epic's brand
-   persona (`docKind: "brand-guide"`: adjectives, anti-adjectives, banned
+2. **The tenant** — from the issue's `tenant:` label. The issue's `parent`
+   is its channel parent (`Blog` / `Instagram` / `Site`, `lane:<channel>`)
+   and that parent's `parent` is the tenant epic — `get_task` up the chain
+   — which carries the brand persona (`docKind: "brand-guide"`: adjectives, anti-adjectives, banned
    phrases, claims policy), audience & hubs (`docKind: "audience"`), design
    tokens (`docKind: "design-guide"`, the `.json`).
 3. **Rotation** — the last 5 published pieces: `list_tasks {kind: "issue",
-   parentId: <epic>, state: "done", label: "channel:blog"}` → their
+   parentId: <channel parent>, state: "done", includeClosed: true, label:
+   "channel:blog"}` → their
    `style` (from the description or the draft's front matter), most recent
    first.
 4. **The round** — Blog MCP `check_list {subject_ref: <issue id>}`: the

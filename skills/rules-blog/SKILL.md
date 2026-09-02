@@ -7,6 +7,7 @@ description: >-
   server does what. Every blog, site and Instagram skill inherits this.
 depends: [rules]
 license: MIT
+version: 2
 ---
 
 # Context Blog — rules
@@ -54,7 +55,9 @@ Codex for the full loop. Say what *this* host can do as a fact (§8).
 
 One Context issue per publish, one channel per issue. Native fields first:
 `due` = the publish time (`publishAt`, ISO 8601 with offset), `parentId` =
-the tenant epic, `issueType: "complex"`. Labels, exactly these keys:
+the tenant's **channel parent** issue (`Blog`, `Instagram`, `Site` — label
+`lane:<channel>`, itself a child of the tenant epic), `issueType:
+"complex"`. Labels, exactly these keys:
 
 | Label | Values | Required |
 |---|---|---|
@@ -63,13 +66,35 @@ the tenant epic, `issueType: "complex"`. Labels, exactly these keys:
 | `tenant:` | tenant slug, e.g. `meetly` | always |
 | `hub:` | hub slug from the audience doc, e.g. `private-transcription` | blog |
 | `kind:` | `new` · `refresh` | blog, site |
-| `lane:` | `idea` · `topic` · `audience` · `aeo-seo` · `performance` · `brief` | standing lane issues only |
+| `lane:` | `blog` · `instagram` · `site` · `backlog` · `brief` · `aeo-seo` · `performance` | channel parents and standing issues only |
+| `stage:` | `idea` · `topic` | Backlog children only |
 | `gate:` | `artifact` · `final` · `none` (harness) | always |
 | `brief:daily` | — | the Daily Brief issue only |
 
 A locale variant is its own issue, linked `relates` to the EN master and
 carrying the same `hub:`/`kind:` labels. Title format:
 `<Channel>: <title> (<locale>)`.
+
+### Hierarchy
+
+```
+<Brand> Blog (epic, tenant:<slug>)
+├── Blog / Instagram / Site   lane:<channel>  — every piece of that channel is a child
+├── Backlog                   lane:backlog    — stage:idea and stage:topic children; done stays
+├── Daily Brief · AEO/SEO Health · Performance Report   standing issues
+└── Map + spec review         gate:plan
+```
+
+`list_tasks {parentId}` returns **direct children only**, so pieces are
+looked up through their channel parent — `list_tasks {parentId: <Blog
+parent>, label: "channel:blog", …}` — never through the epic. Resolve the
+parent once per run with `list_tasks {kind: "issue", parentId: <epic>,
+label: "lane:<channel>"}` or read its id from the epic's `## Structure`;
+verify with `get_task` before writing under it. A piece's `parent` is its
+channel parent and the parent's `parent` is the epic that carries the brand
+documents. A Backlog child graduates by being marked done with a
+`Graduated → <ticket>` comment and a `relates` link to the new publish
+issue; it is never deleted or re-parented.
 
 ## 4. Checker gate — maker → `blog-checker` → human
 
@@ -163,7 +188,7 @@ payload you would have sent as a document on the issue, and continue.
 | Moment | Call |
 |---|---|
 | Session start | Context `usage_guide` · Blog `usage_guide` · Blog `get_capabilities` |
-| New piece | `save_work {kind: "issue", issueType: "complex", parentId: <epic>, title, labels: [channel, locale, tenant, hub, kind, gate], due}` |
+| New piece | `save_work {kind: "issue", issueType: "complex", parentId: <channel parent>, title, labels: [channel, locale, tenant, hub, kind, gate], due}` |
 | Checker done | `send_file` draft + verdict + preview → `post_task_update {state: "in_review", reviewRequest}` |
 | Approved | `publish {context_issue_id}` at `due` → `post_task_update {body: live URL}` → `complete_tasks` |
 | Daily | `daily-brief` on the `Daily Brief` issue |

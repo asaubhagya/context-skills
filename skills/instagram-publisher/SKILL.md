@@ -10,7 +10,7 @@ description: >-
   that is not `done`; degrades to owner self-publish without a key.
 depends: [rules-blog, rules]
 license: MIT
-version: 1
+version: 2
 attach: [scripts/postiz.sh]
 ---
 
@@ -27,25 +27,29 @@ record, report.
 
 1. **Tenant** — slug, epic id, timezone from the routine prompt (or
    `CONTEXT_BLOG_TENANT`). State the tenant before any write.
-2. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+2. **Parent** — the epic's `Instagram` parent (`list_tasks {kind: "issue",
+   parentId: <epic>, label: "lane:instagram"}` → `<instagram parent>`; the
+   routine prompt or the epic's `## Structure` may carry the id — confirm
+   with `get_task`). Every Instagram issue is its child (`rules-blog` §3).
+3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
    `get_capabilities`: `publish`, `instagram_post_list` in `tools[]` (else
    `rules-blog` §8).
-3. **Key** — `POSTIZ_API_KEY` by name, read inside `scripts/postiz.sh` (env
+4. **Key** — `POSTIZ_API_KEY` by name, read inside `scripts/postiz.sh` (env
    or the host's secret store). `postiz.sh integrations` exits 3 without it:
    post `Publish skipped: POSTIZ_API_KEY not available on this host — owner
    self-publishes` on the issue once and stop. Never echo, log or store the
    value.
-4. **Channel** — `postiz.sh integrations` → the entry with `identifier:
+5. **Channel** — `postiz.sh integrations` → the entry with `identifier:
    "instagram"` (not `disabled`) whose `name` matches the tenant's Instagram account in the
    design tokens / epic `## Rules` (Meetly: the one named "Meetly …"). One
    match → its `id` for this run. Zero or several → post why on the issue
    and stop. Never hardcode an integration id in a skill, prompt or repo.
-5. **Now** — the host clock in the tenant timezone. Window `[due, due + 3 h)`.
+6. **Now** — the host clock in the tenant timezone. Window `[due, due + 3 h)`.
 
 ## 1. Candidates
 
-`list_tasks {kind: "issue", parentId: <epic>, state: "done", includeClosed:
-true, label: "channel:instagram"}` — follow `nextCursor` — then `get_task`
+`list_tasks {kind: "issue", parentId: <instagram parent>, state: "done",
+includeClosed: true, label: "channel:instagram"}` — follow `nextCursor` — then `get_task`
 each (the list is a hint; the record is the truth). Sort by `dueAt`:
 
 | condition | action |
@@ -135,7 +139,7 @@ counts as the permalink.
 `now ≥ due + 3 h`, nothing scheduled, no `Missed window` comment: next free
 Instagram slot from the epic's `## Rules` / decision record (Meetly: Mon
 09:00 · Tue 07:00 · Thu 06:00 · Thu 21:00 Asia/Singapore) where no other
-`channel:instagram` issue is due → `save_work {id, due: <next slot>}` +
+`channel:instagram` child of `<instagram parent>` is due → `save_work {id, due: <next slot>}` +
 `post_task_update {body: "Missed window <old due>: re-slotted to <new due>
 — <reason if known>"}`. Never post late silently. An issue already carrying
 a `Missed window` comment with the current `due` is left alone.

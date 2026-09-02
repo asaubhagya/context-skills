@@ -11,7 +11,7 @@ description: >-
   publishes, never schedules.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 1
+version: 2
 attach: [templates/paper-cards.html, templates/motifs.html, scripts/render-cards.sh, scripts/attach-artifact.sh]
 ---
 
@@ -27,17 +27,22 @@ Nothing you do here reaches Instagram or Postiz.
 
 1. **Tenant** — slug, epic id, timezone from the routine prompt (or
    `CONTEXT_BLOG_TENANT`). State the tenant before any write.
-2. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+2. **Parent** — the epic's `Instagram` parent (`list_tasks {kind: "issue",
+   parentId: <epic>, label: "lane:instagram"}` → `<instagram parent>`; the
+   routine prompt or the epic's `## Structure` may carry the id — confirm
+   with `get_task`). Every Instagram issue is its child, never the epic's
+   (`rules-blog` §3 Hierarchy).
+3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
    `get_capabilities`: `instagram_post_upsert`, `asset_upload`,
    `asset_complete` must be in `tools[]` (else `rules-blog` §8: say which is
    missing, attach the payload you would have sent, stop).
-3. **Brand** — the epic's documents: brand persona (`brand-guide`: voice,
+4. **Brand** — the epic's documents: brand persona (`brand-guide`: voice,
    sample paragraph, banned phrases, claims policy — Free / Pro claims come
    only from *claims we make*), design tokens (`design-guide` `.json`: the
    `instagram` block gives size, footer, closing slide; `imagery` gives the
    sketch language), decision record (format: carousels vs poster, slides
    cap, image tooling).
-4. **Renderer** — `scripts/render-cards.sh` needs Chrome or Chromium
+5. **Renderer** — `scripts/render-cards.sh` needs Chrome or Chromium
    (`CHROME=<path>` to override). Run it with no arguments' worth of checking:
    `render-cards.sh` exits 3 when none is found → copy-only mode (§6).
    Higgsfield / Canva MCPs are used **only** when the issue description asks
@@ -51,8 +56,8 @@ In this order, first hit wins:
 1. Issues in `started` with `channel:instagram` whose latest activity is an
    owner comment after a `reviewRequest` — **changes requested** come
    first; revise with the same `instagram_post` id (§7).
-2. `list_tasks {kind: "issue", parentId: <epic>, label: "channel:instagram",
-   state: "backlog", ready: true}` → no `deliverable` document yet, earliest
+2. `list_tasks {kind: "issue", parentId: <instagram parent>, label:
+   "channel:instagram", state: "backlog", ready: true}` → no `deliverable` document yet, earliest
    `due` (the slot). At most **one new carousel per run**.
 3. Nothing → print `instagram-drafter: nothing to draft` and stop.
 

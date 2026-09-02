@@ -2,15 +2,15 @@
 name: blog-drafter
 description: >-
   Nightly maker for Context Blog: keep the tenant's draft buffer at or above
-  the floor, take the next hub-bound topic from the slotted publish issues or
-  the Topic Lane, research it with cited sources, draft through the Blog MCP
+  the floor, take the next hub-bound topic from the slotted publish issues
+  under the tenant's `Blog` parent or graduate one from the `Backlog`, research it with cited sources, draft through the Blog MCP
   `article_upsert` (lint-gated, fix and retry, two bounces then escalate),
   hand the draft to `blog-checker` in a separate call, spawn the locale
   variants as linked issues, and leave the publish issue carrying draft +
   verdict + preview + models behind one blocking reviewRequest. Never publishes.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 1
+version: 2
 attach: [templates/draft-notes.md]
 ---
 
@@ -28,18 +28,24 @@ publisher (`blog-publisher`) goes live.
 1. **Tenant** — the slug from the routine prompt (or `CONTEXT_BLOG_TENANT`),
    the tenant epic id, the buffer floor (`<n>`, default 3). State the tenant
    before any write.
-2. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+2. **Parents** — the epic's `Blog` parent (`list_tasks {kind: "issue",
+   parentId: <epic>, label: "lane:blog"}` → `<blog parent>`) and its
+   `Backlog` (`label: "lane:backlog"` → `<backlog>`); the routine prompt or
+   the epic's `## Structure` may carry the ids — confirm with `get_task`.
+   Every publish issue is a child of `<blog parent>`, never of the epic
+   (`rules-blog` §3 Hierarchy).
+3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
    `get_capabilities`: `article_upsert`, `content_lint`, `preview_render`,
    `check_record`, `check_list` must be in `tools[]` (else `rules-blog` §8:
    say which is missing, attach the payload you would have sent, stop).
-3. **Brand** — `get_task {id: <epic>}` → its documents → `get_document` of
+4. **Brand** — `get_task {id: <epic>}` → its documents → `get_document` of
    the brand persona (`brand-guide`: voice, sample paragraph, banned phrases,
    claims policy), audience & hubs (`audience`), design tokens
    (`design-guide`, the `.json`).
-4. **Platform** — Blog MCP `tenant_get {slug}` (locales, recurrence, hubs)
+5. **Platform** — Blog MCP `tenant_get {slug}` (locales, recurrence, hubs)
    and `topics_list {tenant_slug}`.
-5. **Rotation** — the last 5 published pieces (`list_tasks {kind: "issue",
-   parentId: <epic>, state: "done", includeClosed: true, label:
+6. **Rotation** — the last 5 published pieces (`list_tasks {kind: "issue",
+   parentId: <blog parent>, state: "done", includeClosed: true, label:
    "channel:blog"}` → their `style` from the draft front matter) →
    `recent_styles`.
 
@@ -57,21 +63,29 @@ publisher (`blog-publisher`) goes live.
   due within 7 days has no deliverable. Otherwise stop and print
   `drafter: buffer ok (<buffer>/<floor>)`.
 - **One EN piece per run**, plus its locale variants. Every fifth piece
-  (~20 %) is a refresh when the Topic Lane or the Performance Report holds
-  a `kind:refresh` proposal issue; otherwise new.
+  (~20 %) is a refresh when the Backlog or the Performance Report holds
+  a `kind:refresh` proposal; otherwise new.
 
 ## 2. Pick the issue — hub-bound
 
 In this order, first hit wins:
 
-1. `list_tasks {kind: "issue", parentId: <epic>, label: "channel:blog",
+1. `list_tasks {kind: "issue", parentId: <blog parent>, label: "channel:blog",
    state: "backlog", ready: true}` → `locale:en`, no documents attached,
    earliest `due`.
-2. Topic Lane: `topics_list` rows with `status: idea | researched` whose
-   `context_issue_id` is a `backlog`, unblocked issue; prefer the hub with
-   the fewest published pieces. Set `due` to the next free cadence slot
-   (`tenant_get.recurrence`, a slot is free when no other `channel:blog`
-   issue is due then) and say so on the issue.
+2. Backlog: `list_tasks {kind: "issue", parentId: <backlog>, label:
+   "stage:topic", state: "backlog"}` — researched topics, oldest first,
+   preferring the hub with the fewest published pieces (`stage:idea`
+   children only when no topic exists and the idea names a hub: research
+   it, relabel it `stage:topic`, then continue). Graduate it: create the
+   publish issue as a child of `<blog parent>` (`lanes.md` §4 shape, `due`
+   = the next free cadence slot from `tenant_get.recurrence` — free when no
+   other `channel:blog` issue is due then — `links: [{id: <backlog child>,
+   type: "relates"}]`), post `Graduated → <new ticket>` on the Backlog
+   child and mark it done (`complete_tasks` with `workStats`; it stays in
+   the Backlog as history), and `topics_upsert {items: [{id,
+   context_issue_id: <new issue>, status: "drafting"}]}` when the topic
+   exists on the Blog MCP. Say on the new issue where it came from.
 3. Nothing → stop and say so (`drafter: nothing to draft`).
 
 Then: the issue **must** carry `hub:<slug>` and the slug must exist in
@@ -177,9 +191,9 @@ After the EN master passes (state `in_review`), for every locale the tenant
 feeds (the persona's locale table: e.g. `de` full, `fr` reduced; frozen
 locales get nothing):
 
-1. Reuse the variant issue if `list_tasks {parentId: <epic>, label:
+1. Reuse the variant issue if `list_tasks {parentId: <blog parent>, label:
    "locale:<l>"}` shows one that `relates` to this master; else
-   `save_work {kind: "issue", issueType: "complex", parentId: <epic>, title:
+   `save_work {kind: "issue", issueType: "complex", parentId: <blog parent>, title:
    "Blog: <localised title> (<l>)", labels: ["channel:blog", "locale:<l>",
    "tenant:<slug>", "hub:<hub>", "kind:<kind>", "gate:artifact"], due:
    <the master's due>, links: [{id: <master>, type: "relates"}, {id:
@@ -217,6 +231,7 @@ work around it.
 
 Publish or set an article `approved` / `published` · check your own draft ·
 invent a number, quote, customer, meeting or study · draft outside a hub ·
+create a piece directly under the epic ·
 touch a blocked issue · raise a second `reviewRequest` · more than one EN
 piece per run · store or echo a key value (keys by name: `BLOG_ACCESS_KEY`,
 `OPENROUTER_API_KEY`).
