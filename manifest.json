@@ -1,20 +1,23 @@
 {
-  "generatedAt": "2026-09-02T11:47:47.454Z",
-  "ref": "v2",
+  "generatedAt": "2026-09-02T14:34:58.444Z",
+  "ref": "v3",
   "skills": [
     {
       "key": "blog-agent",
       "kind": "skill",
       "title": "blog-agent",
       "description": "Set up blog\" for any agent connected to Context + the Context Blog MCP: interview the owner (grill-me / wayfinder), fetch the facts, chart a tenant epic with brand, audience and design documents, standing lanes and first publish issues, install the routines (daily brief first), raise one combined map + spec review. Blog · site · Instagram, once or recurring, Artifact · Review · Hosted.",
-      "version": 1,
+      "version": 2,
       "deps": [
         "rules-blog",
         "rules",
         "setup-context",
         "wayfinder",
         "grill-me",
-        "daily-brief"
+        "daily-brief",
+        "blog-drafter",
+        "blog-checker",
+        "blog-publisher"
       ],
       "license": "MIT",
       "source_url": null,
@@ -23,26 +26,26 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-agent/SKILL.md",
-          "sha256": "86350888d73318e18d0f9c1c96e4c448b760912705f4badb0d4d385b7be5a9c6",
-          "bytes": 13250
+          "sha256": "0a359a06997690066e54fa6b564edc951b8bb1267a8b631bec3ed98b97e052cf",
+          "bytes": 13496
         },
         {
           "path": "routines/chat-routines.md",
           "src": "skills/blog-agent/routines/chat-routines.md",
-          "sha256": "a3ba9f2bfb4a824f6eb036fea53aa9eaa37f415e991baa8639d98894ef85a33c",
-          "bytes": 4954
+          "sha256": "cc4bdd874715e93959cf13e06548ffd8fe8a9798c18b22556362bd8afed00a11",
+          "bytes": 4817
         },
         {
           "path": "routines/crontab.txt",
           "src": "skills/blog-agent/routines/crontab.txt",
-          "sha256": "be881a75781aea91ae50ac0eeca539ebf296ab61fb2c5fa8961587ec2facad82",
-          "bytes": 1531
+          "sha256": "9e2ab3aeba4046760527d1dae890a4aaef8bbea1a5b8a130e0ac6de3a0da28fa",
+          "bytes": 1643
         },
         {
           "path": "routines/launchd.plist.template",
           "src": "skills/blog-agent/routines/launchd.plist.template",
-          "sha256": "79f73471513e90421f2461f24e744be239af87b2605feef57eee44384524a736",
-          "bytes": 2488
+          "sha256": "39886a7f0c41795d6da5fe7dc953d69aeae474367b60a0f71161583bc72c2ff9",
+          "bytes": 2907
         },
         {
           "path": "templates/audience.md",
@@ -93,7 +96,7 @@
       "kind": "skill",
       "title": "blog-checker",
       "description": "Independent quality gate between the maker and the human for Context Blog content: run the MACHINE checks through the Blog MCP (content_lint, preview_render), do the JUDGEMENT checks and the fact-check yourself, record a pass / bounce / escalate verdict on the Context issue (review doc + rendered preview + models), and raise the reviewRequest only on pass.",
-      "version": 1,
+      "version": 2,
       "deps": [
         "rules-blog",
         "rules"
@@ -105,8 +108,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-checker/SKILL.md",
-          "sha256": "1f4570ead522e2d17594f75de6b83297adceac659bb6a7ebcda4aaccb85ca1f9",
-          "bytes": 8674
+          "sha256": "b55f63a769f54af6da9f78d71fd1d9b9695ae4ab1adffac67ed6014393117138",
+          "bytes": 9072
         },
         {
           "path": "templates/checklist.md",
@@ -119,6 +122,57 @@
           "src": "skills/blog-checker/templates/verdict.md",
           "sha256": "051861f6cad58a2294b2e70a78deb9d1ba8820a34cbd64476488d60a8fb7d3af",
           "bytes": 2318
+        }
+      ]
+    },
+    {
+      "key": "blog-drafter",
+      "kind": "skill",
+      "title": "blog-drafter",
+      "description": "Nightly maker for Context Blog: keep the tenant's draft buffer at or above the floor, take the next hub-bound topic from the slotted publish issues or the Topic Lane, research it with cited sources, draft through the Blog MCP `article_upsert` (lint-gated, fix and retry, two bounces then escalate), hand the draft to `blog-checker` in a separate call, spawn the locale variants as linked issues, and leave the publish issue carrying draft + verdict + preview + models behind one blocking reviewRequest. Never publishes.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules",
+        "blog-checker"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/blog-drafter/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/blog-drafter/SKILL.md",
+          "sha256": "864c1511790f85c3508da89996691a0fd0ab74764ffacb302102e324b0c77a16",
+          "bytes": 11715
+        },
+        {
+          "path": "templates/draft-notes.md",
+          "src": "skills/blog-drafter/templates/draft-notes.md",
+          "sha256": "f3017c7f316d789f33172713f1e6a45bcc6d2adb0172580cb816e502feb89bde",
+          "bytes": 1697
+        }
+      ]
+    },
+    {
+      "key": "blog-publisher",
+      "kind": "skill",
+      "title": "blog-publisher",
+      "description": "Every 3 hours, publish exactly the Context Blog pieces the owner approved: Context issue `done`, `due` ≤ now < `due` + 3 h, no live link yet — through the Blog MCP (`article_set_status` forward, then `publish {assert_context_done: true, context_issue_id}`), post the live link on the issue, cascade to the checked locale variants, re-slot missed windows, and stay idempotent. Refuses anything that is not `done`.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/blog-publisher/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/blog-publisher/SKILL.md",
+          "sha256": "bbe6407d01c39252613ae249d7f615b465615fd1acb1599755a18476932764b2",
+          "bytes": 6498
         }
       ]
     },
@@ -138,8 +192,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/daily-brief/SKILL.md",
-          "sha256": "b79f783d021a3c1f64f7b7e573a0bc45b3e74eb84d808a070ddf8ab1f8dbf823",
-          "bytes": 3180
+          "sha256": "c521df599c8830a05a75c8e7c09432838f31d246f51392152daca4d451b82bcb",
+          "bytes": 3362
         }
       ]
     },

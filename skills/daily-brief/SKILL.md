@@ -39,7 +39,10 @@ no scheduler by design; the routine runs on the host that owns the workflow.
    - **Next** — what is scheduled in the next 24 h (drafts due, publish slots,
      reports), and the buffer left (drafts ready vs slots).
    - **Routine health** — each routine of this workflow: last run time,
-     ok/failed. Say plainly if you cannot observe one.
+     ok/failed. On a host with scheduled jobs read their logs (convention:
+     `<repo>/.build/routines/<routine>.log`, last `start` / `end rc=` lines
+     and the routine's one-line summary). Say plainly if you cannot observe
+     one.
 3. Post **one** comment on the Daily Brief issue with
    `post_task_update {id, body}` using the template below. If today's brief
    already exists (a comment from the last 20 h with the `Daily brief —` title),
