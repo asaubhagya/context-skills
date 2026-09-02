@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-02T10:52:37.074Z",
-  "ref": "v1",
+  "generatedAt": "2026-09-02T11:47:47.454Z",
+  "ref": "v2",
   "skills": [
     {
       "key": "blog-agent",
@@ -85,6 +85,40 @@
           "src": "skills/blog-agent/templates/lanes.md",
           "sha256": "8d86e86926317a042852bab3b82eabdcd8983ff8776e9179d771d0893f48bba4",
           "bytes": 6390
+        }
+      ]
+    },
+    {
+      "key": "blog-checker",
+      "kind": "skill",
+      "title": "blog-checker",
+      "description": "Independent quality gate between the maker and the human for Context Blog content: run the MACHINE checks through the Blog MCP (content_lint, preview_render), do the JUDGEMENT checks and the fact-check yourself, record a pass / bounce / escalate verdict on the Context issue (review doc + rendered preview + models), and raise the reviewRequest only on pass.",
+      "version": 1,
+      "deps": [
+        "rules-blog",
+        "rules"
+      ],
+      "license": "MIT",
+      "source_url": null,
+      "primary": "skills/blog-checker/SKILL.md",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "src": "skills/blog-checker/SKILL.md",
+          "sha256": "1f4570ead522e2d17594f75de6b83297adceac659bb6a7ebcda4aaccb85ca1f9",
+          "bytes": 8674
+        },
+        {
+          "path": "templates/checklist.md",
+          "src": "skills/blog-checker/templates/checklist.md",
+          "sha256": "df62c00d83a08297ad18c9153d8d93c1e5e4c295d7e9fbb0db2dffa0c2d0cc5a",
+          "bytes": 2924
+        },
+        {
+          "path": "templates/verdict.md",
+          "src": "skills/blog-checker/templates/verdict.md",
+          "sha256": "051861f6cad58a2294b2e70a78deb9d1ba8820a34cbd64476488d60a8fb7d3af",
+          "bytes": 2318
         }
       ]
     },
