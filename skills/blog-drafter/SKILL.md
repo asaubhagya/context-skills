@@ -10,7 +10,7 @@ description: >-
   verdict + preview + models behind one blocking reviewRequest. Never publishes.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 4
+version: 5
 attach: [templates/draft-notes.md]
 ---
 
@@ -146,6 +146,14 @@ is small; do not add a beat merely to satisfy the outline:
 6. **What next:** state current availability and one concrete action. Do not
    recap the article.
 
+For the Context Blog launch post, keep the product frame exact: **blog
+automation with AEO and GEO built in**. Show how an agent writes, a separate
+checker reviews, a person approves, the platform publishes the discovery
+signals, and visibility evidence improves the next article. A topic or search
+query may be an input to that automation; do not turn “start with an audience
+question” or “answer first” into the product thesis. Those are editorial
+techniques, not what Context Blog is.
+
 This arc is derived from a first-party review of OpenAI and Anthropic product
 writing: strong launches reveal the product immediately, explain it through
 observable work, keep proof local to claims, and end once access and the next
@@ -227,9 +235,10 @@ case-study`, not the last piece's, ≤ 2 of the last 5), `hub_slug`, `tags`
 
 What the lint and the checker will hold you to:
 
-- **Answer first** — `seo.answer` ≤ 60 words answers the target query; the
-  opening section is the product and outcome, or a scene that reveals both
-  immediately—never a definition or industry preamble.
+- **Product first** — `seo.answer` still gives search systems a ≤ 60-word
+  direct summary, while the opening names the product and its concrete outcome
+  immediately—never a definition or industry preamble. Do not present the
+  direct-answer field as the product workflow or governing idea.
 - **Every H2** is followed by a 40–75-word paragraph a citing engine can
   lift whole. Comparison · listicle · how-to carry a table or list.
 - **FAQ** 3–5 questions, each answer 80–150 words.

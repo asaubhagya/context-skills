@@ -179,3 +179,26 @@ No separate runtime dependency on the third-party skill was added. Version 4
 adapts the small set of editorial principles needed by this workflow and adds
 the product-specific safeguard the generic pass lacked. The independent
 checker and human approval gate remain unchanged.
+
+## Version 5: correct the product frame
+
+### RED
+
+The first version 4 article satisfied both rubrics but used “one audience
+question stays attached to the work” as its governing idea. The workflow was
+concrete, yet the framing changed the product: Context Blog is AEO/GEO-first
+blog automation, not an audience-question product. The draft also elevated
+“answer first,” an article-level optimization technique, into the launch
+narrative.
+
+### GREEN rule
+
+For Context Blog's own launch post, the skill now fixes the product frame in
+one sentence: an agent writes, an independent checker reviews, a person
+approves, the platform publishes the discovery layer, and visibility evidence
+improves the next article. Topics and direct answers remain valid inputs and
+editorial techniques, but neither may become the product thesis.
+
+The regression passes when the opening identifies AEO/GEO-first blog
+automation, the article explains the concrete loop, and no heading or repeated
+claim frames Context Blog as an “audience question” or “answer first” product.
