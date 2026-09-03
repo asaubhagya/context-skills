@@ -10,7 +10,7 @@ description: >-
   verdict + preview + models behind one blocking reviewRequest. Never publishes.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 2
+version: 3
 attach: [templates/draft-notes.md]
 ---
 
@@ -111,9 +111,83 @@ topic came from the lane.
   never make* enters a draft.
 - Write `templates/draft-notes.md`: sources, statistics, the original
   artifact and why it is honest, style chosen vs `recent_styles`, models.
+- The notes are an evidence inventory, not the article outline. A draft is
+  not obliged to display every useful source or statistic. Choose only the
+  proof that advances the article's governing idea; keep the rest in notes
+  for the checker, FAQ, or a later piece.
 - No source reachable → no draft. Say so on the issue and stop.
 
 ## 4. Draft — the Blog MCP shape
+
+### Shape the story before writing sections
+
+Write these two lines in the draft notes before prose:
+
+1. **Spine:** `<reader's present problem> → <what this product changes> →
+   <the outcome the reader can now reach>`.
+2. **Through-line:** one real, verified case—or one clearly labeled,
+   realistic example—that makes the spine observable from beginning to end.
+
+Every section must move that same spine forward. If a section introduces a
+second thesis, remove it or make it another article.
+
+For a product launch, use this six-beat arc. Compress beats when the release
+is small; do not add a beat merely to satisfy the outline:
+
+1. **What changed:** name the product, its reader, and the useful outcome in
+   the first 70 words.
+2. **Why now:** one short section names the broken workflow or constraint.
+3. **See it work:** walk the through-line through the product before listing
+   capabilities.
+4. **How it works:** explain only the mechanisms the reader needs to believe
+   the example.
+5. **Why trust it:** put proof and the relevant limitation beside the claim
+   they qualify.
+6. **What next:** state current availability and one concrete action. Do not
+   recap the article.
+
+This arc is derived from a first-party review of OpenAI and Anthropic product
+writing: strong launches reveal the product immediately, explain it through
+observable work, keep proof local to claims, and end once access and the next
+step are clear. It is an editorial model, not a request to imitate either
+company's phrases.
+
+### Prose and evidence contract
+
+- **Show one journey, not the org chart.** The main example should encounter
+  research, drafting, checking, approval, publishing and measurement in the
+  order a reader would. A later compact list may label those capabilities;
+  it cannot be the article's narrative.
+- **Use short visual units.** Paragraphs are normally one to three sentences.
+  Give each paragraph one job. Vary sentence length, but split a sentence
+  carrying more than one claim and its caveat.
+- **Write actions and outputs.** Prefer `Context Blog checks the cited URL
+  before asking for approval` to `citation integrity is handled through
+  guardrails`. Define an abstract term on first use with a subject, action,
+  and visible result.
+- **Headings show progression.** A reader scanning only H2s should see the
+  argument advance. Use literal, reader-facing language; avoid a sequence of
+  feature buckets or repeated rhetorical questions.
+- **Evidence is load-bearing.** Default to one anchor finding and, only when
+  it changes the conclusion, one supporting finding. Two required numeric
+  facts may live in the same compact proof passage. Do not create a
+  `What the research says` section unless the research itself is the news.
+  Put detailed methodology in draft notes, an appendix, or the FAQ.
+- **Caveats calibrate once.** State the limitation beside the affected claim
+  in one direct sentence. Do not repeat the full methodology or apologize for
+  using the evidence.
+- **Explain the product before the category.** SEO, AEO, GEO, architecture,
+  and schema vocabulary follow the reader-visible outcome; they never form a
+  glossary in the opening.
+- **Close on motion.** The final paragraph returns to the spine with a new
+  consequence, then gives one operational CTA. Generic `learn more`,
+  `subscribe`, or `start your journey` endings fail this contract.
+
+Before lint, run a cut pass. Remove market throat-clearing, repeated versions
+of the thesis, feature lists already demonstrated by the through-line,
+methodology that does not change interpretation, and sentences that merely
+announce importance. The target is not a word count; it is the shortest
+article that makes the product, its proof, and its limits clear.
 
 Draft straight into the `article_upsert` shape: `slug` (lower-case,
 query-shaped), `locale`, `translation_group` (= the EN slug), `title`,
@@ -127,7 +201,8 @@ case-study`, not the last piece's, ≤ 2 of the last 5), `hub_slug`, `tags`
 What the lint and the checker will hold you to:
 
 - **Answer first** — `seo.answer` ≤ 60 words answers the target query; the
-  opening section is the scene or the answer, never a definition.
+  opening section is the product and outcome, or a scene that reveals both
+  immediately—never a definition or industry preamble.
 - **Every H2** is followed by a 40–75-word paragraph a citing engine can
   lift whole. Comparison · listicle · how-to carry a table or list.
 - **FAQ** 3–5 questions, each answer 80–150 words.
@@ -139,6 +214,10 @@ What the lint and the checker will hold you to:
 - **Voice** — the persona's adjectives, none of the anti-adjectives, the
   sample paragraph as the calibration; no banned phrase; first-person
   singular only for what the byline actually said.
+- **Narrative** — the spine is stated once, the through-line makes the product
+  observable, evidence supports rather than interrupts it, and the ending
+  creates one next action. If the article still reads as a tour of features
+  or research findings, reshape it before calling the lint.
 - The byline, `Article` / `Person` / `Organization` JSON-LD and design
   tokens come from the tenant's brand on the platform — do not hand-write
   them into sections.
