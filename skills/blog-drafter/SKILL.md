@@ -10,7 +10,7 @@ description: >-
   verdict + preview + models behind one blocking reviewRequest. Never publishes.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 3
+version: 4
 attach: [templates/draft-notes.md]
 ---
 
@@ -189,6 +189,33 @@ methodology that does not change interpretation, and sentences that merely
 announce importance. The target is not a word count; it is the shortest
 article that makes the product, its proof, and its limits clear.
 
+Then run a **No AI Slop pass** as a restrained copy edit. Use the portability
+test: if a sentence could move unchanged into a launch for an unrelated
+product, rewrite it with the actual subject, action, output or constraint, or
+delete it. Cut throat-clearing, false binary setups, faux quotations, summary
+recaps, dramatic fragments, decorative em dashes, inflated transitions and
+sentences that interpret the previous sentence instead of adding information.
+Prefer plain verbs and concrete nouns. Do not flatten a distinctive sentence
+merely because it is longer or stylistic.
+
+This pass has a **specificity floor**. It may not remove the details a reader
+needs to answer all five questions below:
+
+1. What does the product do from input to outcome?
+2. Which steps are automated, which are independently checked, and which need
+   a person?
+3. What does the published result contain or emit?
+4. What guardrail stops a bad or unsupported result?
+5. What evidence is measured, and how does it change the next action?
+
+For every important capability, keep at least one subject → action → visible
+result sentence. A feature may be compressed after the through-line has shown
+it, but never replaced by category language such as `visibility system`,
+`content infrastructure` or `intelligent workflow`. If the edited draft leaves
+the philosophy clearer than the product, restore the concrete mechanism or a
+worked example before linting. No AI Slop is an editing pass, not permission to
+abstract away the product.
+
 Draft straight into the `article_upsert` shape: `slug` (lower-case,
 query-shaped), `locale`, `translation_group` (= the EN slug), `title`,
 `description`, `sections[]` (`heading` 2/3 · `paragraph` · `list` · `quote`
@@ -218,6 +245,10 @@ What the lint and the checker will hold you to:
   observable, evidence supports rather than interrupts it, and the ending
   creates one next action. If the article still reads as a tour of features
   or research findings, reshape it before calling the lint.
+- **Specificity** — after the No AI Slop pass, a reader can still identify the
+  product's input, sequence, automated and human decisions, published outputs,
+  stopping guardrail, measurement states and next action. A polished draft
+  that cannot answer these questions fails.
 - The byline, `Article` / `Person` / `Organization` JSON-LD and design
   tokens come from the tenant's brand on the platform — do not hand-write
   them into sections.

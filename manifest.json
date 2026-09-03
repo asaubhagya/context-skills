@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-03T12:39:00.449Z",
-  "ref": "v7",
+  "generatedAt": "2026-09-03T13:39:59.410Z",
+  "ref": "v8",
   "skills": [
     {
       "key": "blog-agent",
@@ -180,7 +180,7 @@
       "kind": "skill",
       "title": "blog-drafter",
       "description": "Nightly maker for Context Blog: keep the tenant's draft buffer at or above the floor, take the next hub-bound topic from the slotted publish issues under the tenant's `Blog` parent or graduate one from the `Backlog`, research it with cited sources, draft through the Blog MCP `article_upsert` (lint-gated, fix and retry, two bounces then escalate), hand the draft to `blog-checker` in a separate call, spawn the locale variants as linked issues, and leave the publish issue carrying draft + verdict + preview + models behind one blocking reviewRequest. Never publishes.",
-      "version": 3,
+      "version": 4,
       "deps": [
         "rules-blog",
         "rules",
@@ -193,8 +193,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/blog-drafter/SKILL.md",
-          "sha256": "7efb1b163ec7f4fe02d7ab9fb3adf5926afceb82d4ea0708aef20e3833dd3657",
-          "bytes": 17211
+          "sha256": "c3053cb70b46df1bf71a8fcb1895adcc4ec5fb6aed18c9ec4adfe9fb49644f15",
+          "bytes": 19003
         },
         {
           "path": "templates/draft-notes.md",
