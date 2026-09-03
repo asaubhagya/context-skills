@@ -105,3 +105,77 @@ the smallest observed intervention that consistently corrected the RED
 failure: it specifies a positive story shape, evidence budget and cut pass,
 while leaving factual checking and publication authority in their existing
 skills.
+
+## Version 4: No AI Slop without loss of product detail
+
+### RED
+
+A later edit of the launch post applied the No AI Slop heuristics successfully
+at sentence level: it removed filler, inflated transitions, recap language,
+binary slogans and decorative em dashes. Machine lint passed with no warnings.
+The result still failed editorially. It had compressed away enough of the
+workflow, publication outputs, guardrails and measurement states that the
+reader could no longer explain what Context Blog did or how it worked.
+
+This exposed a missing constraint in version 3: the cut pass protected the
+narrative spine, but did not define a minimum level of product specificity.
+A generic anti-slop pass could therefore mistake useful mechanism detail for a
+feature list and replace it with broad category language.
+
+### GREEN hypothesis
+
+Version 4 keeps the existing narrative controls and adds two small rules:
+
+1. Apply No AI Slop as a restrained final copy edit using a portability test.
+2. Enforce a specificity floor after the edit: the article must still expose
+   the input-to-outcome path, automated/checker/human roles, published outputs,
+   stopping guardrail, measurement states and next action.
+
+The acceptance test is behavioral. A draft fails even when every sentence is
+clean if the product can only be described with abstractions such as
+“visibility system” or “content infrastructure.”
+
+### Guided-sample rubric
+
+In addition to the version 3 rubric, each fresh-context sample must:
+
+- retain one subject → action → visible result sentence for each important
+  capability;
+- name the independent check and human approval boundary;
+- name at least three concrete discovery outputs on the published page;
+- preserve distinct measurement states instead of collapsing them into one
+  score;
+- state what stops the workflow when a source or check fails;
+- pass the No AI Slop portability test without replacing mechanisms with
+  category language.
+
+Five fresh-context guided samples are required before version 4 is deployed.
+Their results are recorded after the implementation trial.
+
+### GREEN results
+
+Five fresh-context guided samples received the same launch brief after reading
+`blog-drafter` version 4. All five passed both the version 3 narrative rubric
+and the version 4 specificity rubric.
+
+| Guided sample | Through-line | v3 | v4 | Detail that survived the No AI Slop pass |
+| --- | --- | --- | --- | --- |
+| 1 | LumenFleet's empty-mile question | 7/7 | 6/6 | Source stop, separate checker, human approval, hosted URL, sitemap, canonical metadata, structured data and distinct measurement inputs |
+| 2 | Acorn Cloud's audit-history question | 7/7 | 6/6 | Exact claim failure, checker bounce, approval boundary, canonical URL, JSON-LD, sitemap, RSS, social image and five citation states |
+| 3 | LumenFleet's idle-time methodology | 7/7 | 6/6 | Unreachable benchmark stop, rendered preview, owner approval, readable HTML, metadata, structured data and per-engine results |
+| 4 | The real Context Blog issue path | 7/7 | 6/6 | Issue artifacts, no-source stop, pass/bounce/escalate, blocking review, canonical page, feeds, IndexNow and separate analytics inputs |
+| 5 | Ledgerly's pricing comparison | 7/7 | 6/6 | Source fields, failed-comparison stop, independent verification, founder approval, crawlable outputs and search/referral/citation states |
+
+Across 5/5 samples, the portability edit removed generic launch language
+without removing the product's actors, transitions, stop conditions, emitted
+artifacts or measurement states. Each sample remained shorter than a full
+feature inventory while a reader could still reconstruct the input-to-outcome
+workflow. This is the desired balance: narrative controls determine the order;
+the specificity floor protects the mechanisms that make the narrative true.
+
+### REFACTOR check
+
+No separate runtime dependency on the third-party skill was added. Version 4
+adapts the small set of editorial principles needed by this workflow and adds
+the product-specific safeguard the generic pass lacked. The independent
+checker and human approval gate remain unchanged.
