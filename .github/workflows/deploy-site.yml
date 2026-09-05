@@ -1,0 +1,47 @@
+name: Deploy agents.onecontext.me
+
+# main = beta channel, tags v* = latest. Either event rebuilds the whole site
+# from git history (all tags + main) and deploys it as production.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # build-site reads every tag
+          ref: main               # beta = main; tags are read from history
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm build-site
+
+      - name: Deploy to Vercel (production)
+        run: npx vercel@latest deploy site --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Summary
+        run: |
+          echo "### agents.onecontext.me" >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import json; c=json.load(open('site/channels.json'))
+          print(f"- latest: `{c['latest']}`  beta: `{c['beta']}`")
+          print("- skills:", ", ".join(f"{k} v{v['latest']}" for k,v in c['skills'].items() if v['latest']))
+          EOF
