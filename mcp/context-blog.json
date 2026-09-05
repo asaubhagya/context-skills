@@ -1,0 +1,840 @@
+{
+  "schema": "context-mcp-catalog/1",
+  "server": {
+    "key": "context-blog",
+    "name": "Context Blog",
+    "endpoint": "https://blog.onecontext.me/api/mcp",
+    "purpose": "The publishing engine for Context: agents draft, lint and publish blog posts, site pages and Instagram carousels on the user's own domain, with a person approving every piece before it goes live. Also drives the AEO/GEO loop — tracking AI-referral traffic, Search Console queries and an AI-visibility probe so the agent can see and improve how often assistants cite the site.",
+    "auth": {
+      "type": "oauth2",
+      "signIn": "Google",
+      "scopes": [
+        "blog",
+        "openid",
+        "email"
+      ]
+    },
+    "contractVersion": "blog-1.3.0",
+    "startingPrompt": "Call the Context Blog tool `setup` with workflow 'blog' and follow its nextStep.",
+    "generatedAt": "2026-09-05T12:08:18.769Z",
+    "sourceRepo": "asaubhagya/context-blog",
+    "sourcePath": "lib/mcp/server.ts",
+    "sourceCommit": "4d020cf"
+  },
+  "connect": {
+    "claude-ai": "Settings → Connectors → Add custom connector → name Context Blog, URL https://blog.onecontext.me/api/mcp",
+    "chatgpt": "Settings → Connectors → Add → URL https://blog.onecontext.me/api/mcp",
+    "claude-code": "claude mcp add --transport http context-blog https://blog.onecontext.me/api/mcp",
+    "cursor": "Add an HTTP MCP server with URL https://blog.onecontext.me/api/mcp"
+  },
+  "skills": [
+    {
+      "key": "rules",
+      "role": "base",
+      "description": "Operating rules every Context-connected agent follows: sources of truth, work units, credentials by key name, verification before completion."
+    },
+    {
+      "key": "setup-context",
+      "role": "base",
+      "description": "Connect this harness to the Context MCP and verify the connection before any other Context or Context Blog work."
+    },
+    {
+      "key": "grill-me",
+      "role": "base",
+      "description": "Interview protocol that stress-tests a plan or brief with numbered questions and a recommendation per question until nothing is assumed."
+    },
+    {
+      "key": "wayfinder",
+      "role": "base",
+      "description": "Chart a piece of work as a Context epic plus gated issues after a grilling interview, then work the issues one at a time."
+    },
+    {
+      "key": "daily-brief",
+      "role": "base",
+      "description": "Format and rules for the once-a-day headless brief a routine posts to the tenant's Context brief issue."
+    },
+    {
+      "key": "rules-blog",
+      "role": "base",
+      "description": "Rules for every Context Blog workflow: approvals in Context, one tenant at a time, key names only, no publishing without an approval reference."
+    },
+    {
+      "key": "blog-agent",
+      "role": "workflow",
+      "description": "Draft, review and publish one blog post for a Context Blog tenant, tracked as one Context issue with an approval gate before publishing."
+    },
+    {
+      "key": "site-builder",
+      "role": "workflow",
+      "description": "STUB — build or update a tenant site (pages, navigation, theme) through Context Blog with approval gates in Context. Full protocol lands with the site content tools."
+    },
+    {
+      "key": "instagram-drafter",
+      "role": "workflow",
+      "description": "STUB — draft Instagram captions and carousel copy for a tenant, attached to a Context issue for approval. Full protocol lands with the Instagram tools."
+    }
+  ],
+  "toolGroups": [
+    {
+      "key": "skills-setup",
+      "title": "Skills & setup",
+      "access": "all",
+      "tools": [
+        {
+          "name": "usage_guide",
+          "title": "Usage guide",
+          "description": "Read this first — what Context Blog is, how it relates to the Context MCP (approvals live there), tools, tiers and rules.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": []
+        },
+        {
+          "name": "get_capabilities",
+          "title": "Get capabilities",
+          "description": "Machine-readable Context Blog contract: version, tools, workflows, harnesses, auth methods and limits.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": []
+        },
+        {
+          "name": "list_skill_catalog",
+          "title": "List skill catalog",
+          "description": "Active skills on the shared skill channel (key, kind, version, name, description, depends, url).",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": []
+        },
+        {
+          "name": "get_skill",
+          "title": "Get skill",
+          "description": "One skill revision (active by default) with its SKILL.md content, extra files and provenance.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "key",
+            "version"
+          ]
+        },
+        {
+          "name": "setup",
+          "title": "Setup",
+          "description": "CALL THIS FIRST when starting Context Blog work in a repo or chat. Resolves the workflow's skill (blog-agent / site-builder / instagram-drafter) plus `rules-blog` and dependencies; harness skills (rules, setup-context, wayfinder, grill-me, daily-brief) are included unless listed in `installedSkills`. Returns `mode:\"files\"` (paths per harness + an AGENTS.md block) or `mode:\"chat\"` (public skill links + inline protocol). Idempotent, no side effects.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "harness",
+            "canWriteFiles",
+            "workflow",
+            "installedSkills"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "checker",
+      "title": "Checker",
+      "access": "all",
+      "tools": [
+        {
+          "name": "preview_render",
+          "title": "Render preview",
+          "description": "Server-side render of a draft article or page into one self-contained HTML page with the tenant's design tokens as CSS variables. Stores it for 7 days and returns a signed, expiring URL (GET /preview/<id>?sig=…) plus the HTML — attach the HTML to the Context issue as docKind \"preview\". Caller must be a member of tenant_slug (a tenant with no members yet accepts any signed-in caller).",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "kind",
+            "title",
+            "description",
+            "sections",
+            "faq",
+            "seo",
+            "design_tokens"
+          ]
+        },
+        {
+          "name": "content_lint",
+          "title": "Lint content",
+          "description": "The MACHINE half of the blog-checker playbook, no side effects: answer-first ≤ 60 words, each H2 followed by a 40–75-word paragraph, table/list for comparison·listicle·how-to, FAQ 3–5 × 80–150 words, inline HTML allowlist (em/strong/a), ≥ 2 outbound citations, ≥ 2 numeric statistics, ≥ 1 original artifact, hub assigned, localised slug/title/description vs master, style rotation vs recent_styles, banned phrases, first-person density. Returns warnings [{code, message, path?, severity}] and stats {words, h2s, citations, numbers, faq, artifacts, urls}. severity \"error\" = playbook rule violated.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "kind",
+            "title",
+            "description",
+            "sections",
+            "faq",
+            "seo",
+            "design_tokens",
+            "style",
+            "hub",
+            "locale",
+            "master",
+            "recent_styles",
+            "brand"
+          ]
+        },
+        {
+          "name": "check_record",
+          "title": "Record checker verdict",
+          "description": "Append one blog-checker verdict for a draft: tenant_slug, subject_kind (article | page | instagram), subject_ref (the Context issue id, or a draft id before one exists), round (1 = first check), verdict (pass | bounce | escalate), findings (the verdict document's checks, as JSON) and models ({maker, checker}). Returns check_id. Approvals still live in Context — this is the audit trail on the publishing side. Caller must be a member of tenant_slug.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "subject_kind",
+            "subject_ref",
+            "round",
+            "verdict",
+            "findings",
+            "models"
+          ]
+        },
+        {
+          "name": "check_list",
+          "title": "List checker verdicts",
+          "description": "Every recorded blog-checker verdict for a subject_ref (Context issue id or draft id), oldest round first — use it to know the current round before bouncing again (bounce ≤ 2 rounds, then escalate). Only rows for tenants the caller is a member of are returned.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "subject_ref"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tenant-brand",
+      "title": "Tenant & brand",
+      "access": "all",
+      "tools": [
+        {
+          "name": "tenant_create",
+          "title": "Create tenant",
+          "description": "Create a tenant (a site such as getmeetly.ai/blog). The creator becomes its owner member (blog.tenant_members); membership already granted for the slug is honoured. tier: artifact (drafts only) | review (checker gate) | hosted (renderer + domains + IndexNow on publish; analytics ids via tenant_update { tracking }, see tracking_setup_status). Returns the tenant.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "slug",
+            "name",
+            "tier",
+            "products",
+            "recurrence",
+            "locales",
+            "default_locale",
+            "timezone",
+            "mount_path",
+            "primary_hostname",
+            "context_epic_id"
+          ]
+        },
+        {
+          "name": "tenant_get",
+          "title": "Get tenant",
+          "description": "Tenant settings plus brand profile, audiences, hubs, domains and content counts. Caller must be a member.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "slug"
+          ]
+        },
+        {
+          "name": "tenant_update",
+          "title": "Update tenant",
+          "description": "Patch tenant settings (name, tier, products, recurrence, locales, default_locale, timezone, mount_path, primary_hostname, context_epic_id, context_epic_surface: phone | web — where the epic was created, so the settings page leads with context://tasks/<epic> or the web URL). Omitted fields keep their value; pass null to clear primary_hostname / context_epic_id. `tracking` (E8) patches blog.tracking_config — the one source of truth for analytics: umami_website_id (the renderer injects the Umami script when UMAMI_SCRIPT_URL is set on the host), ga4_measurement_id (BYO, consent-gated), gsc_property, bing_site_url, indexnow_enabled, brand_aliases / owned_domains (probe detection), probe_markets. Ids only — API keys stay on the host by NAME.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "slug",
+            "name",
+            "tier",
+            "products",
+            "recurrence",
+            "locales",
+            "default_locale",
+            "timezone",
+            "mount_path",
+            "primary_hostname",
+            "context_epic_id",
+            "context_epic_surface",
+            "tracking"
+          ]
+        },
+        {
+          "name": "brand_upsert",
+          "title": "Upsert brand profile",
+          "description": "Replace the tenant's brand profile: voice (persona, banned_phrases[], …), byline (author name/url), design_tokens (blog-agent/templates/design-tokens.json shape — used by previews and the renderer), optional organization_ld / software_application_ld (JSON-LD). Bumps revision and keeps the previous state in blog.brand_profile_revisions.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "voice",
+            "byline",
+            "design_tokens",
+            "organization_ld",
+            "software_application_ld"
+          ]
+        },
+        {
+          "name": "audiences_upsert",
+          "title": "Upsert audiences",
+          "description": "Upsert audience segments by key (name, description, pains[], queries[]). Existing keys are replaced; others untouched.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "items"
+          ]
+        },
+        {
+          "name": "hubs_upsert",
+          "title": "Upsert hubs",
+          "description": "Upsert topic hubs by slug (title, description, pillar_article_id). Every article must belong to a hub (the lint's hub_missing rule).",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "items"
+          ]
+        },
+        {
+          "name": "topics_upsert",
+          "title": "Upsert topics",
+          "description": "Create or update topics (the research backlog): hub_slug, title, target_query, fanout_queries[], status (idea | researched | drafting | published | retired), context_issue_id, source. Pass id to update.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "items"
+          ]
+        },
+        {
+          "name": "topics_list",
+          "title": "List topics",
+          "description": "Topics of a tenant, newest first, optionally filtered by status.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "status"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "content",
+      "title": "Content (articles/pages)",
+      "access": "all",
+      "tools": [
+        {
+          "name": "article_upsert",
+          "title": "Upsert article",
+          "description": "Create or update an article draft. Same body as content_lint / preview_render. Runs the playbook lint: severity-error findings REJECT the call (invalid_argument, details.warnings) unless dry_run; warnings are always returned. Unique per (tenant, locale, slug); pass id to update (status is kept). translation_group ties locale variants together (the default-locale row is the master used for the localisation check). context_issue_id is the Context issue's uuid. Returns { id, status, warnings[], preview_url, url }.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "slug",
+            "locale",
+            "translation_group",
+            "title",
+            "description",
+            "sections",
+            "faq",
+            "seo",
+            "style",
+            "hub_slug",
+            "topic_id",
+            "hero_asset_id",
+            "faq_title",
+            "tags",
+            "category",
+            "internal_links",
+            "publish_at",
+            "context_issue_id",
+            "dry_run"
+          ]
+        },
+        {
+          "name": "article_get",
+          "title": "Get article",
+          "description": "One article by id, or by slug + locale. Full body.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "slug",
+            "locale"
+          ]
+        },
+        {
+          "name": "article_list",
+          "title": "List articles",
+          "description": "Articles of a tenant, newest first, without bodies. Filters: status, locale, hub_slug. Pagination: limit (default 20, max 100) and the opaque cursor from next_cursor.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "status",
+            "locale",
+            "hub_slug",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "article_set_status",
+          "title": "Set article status",
+          "description": "Move an article one step forward: draft → in_review → approved → published → retired (any other jump is `conflict`). Reaching published requires the article's context_issue_id AND assert_context_done: true — your assertion that the Context issue carries the owner's approval; it is recorded on blog.publish_events. Prefer `publish` for the final step.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "status",
+            "assert_context_done"
+          ]
+        },
+        {
+          "name": "page_upsert",
+          "title": "Upsert page",
+          "description": "Create or update a site page (about, pricing, landing). Same body as content_lint with kind page: the article-only rules (answer-first, FAQ shape, hub, citations, statistics, artifact) do not apply; HTML allowlist and banned phrases do. Severity-error findings reject unless dry_run. Unique per (tenant, locale, slug). Returns { id, status, warnings[], preview_url, url }.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "slug",
+            "locale",
+            "title",
+            "description",
+            "sections",
+            "faq",
+            "seo",
+            "design_overrides",
+            "context_issue_id",
+            "dry_run"
+          ]
+        },
+        {
+          "name": "page_get",
+          "title": "Get page",
+          "description": "One page by id, or by slug + locale. Full body.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "slug",
+            "locale"
+          ]
+        },
+        {
+          "name": "page_list",
+          "title": "List pages",
+          "description": "Pages of a tenant, newest first, without bodies. Filters: status, locale. Paginated like article_list.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "status",
+            "locale",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "page_set_status",
+          "title": "Set page status",
+          "description": "Move a page one step forward (draft → in_review → approved → published → retired). published requires context_issue_id on the page and assert_context_done: true, recorded on blog.publish_events.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "status",
+            "assert_context_done"
+          ]
+        },
+        {
+          "name": "publish",
+          "title": "Publish",
+          "description": "Publish exactly one of article_id | page_id | instagram_post_id. Requires the row to be approved (→ action publish) or already published (→ refresh), context_issue_id (must match the row's when set) and assert_context_done: true — your assertion that the Context issue carries the owner's approval, recorded as asserted_done_by on blog.publish_events. Sets published + published_at, purges the renderer's cache, pings IndexNow for hosted tenants with a primary_hostname (INDEXNOW_KEY on the host; the outcome is in `indexnow` and never fails the publish) and returns { url, published_at, action, publish_event_id, indexnow }.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "article_id",
+            "page_id",
+            "instagram_post_id",
+            "assert_context_done",
+            "context_issue_id"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "assets",
+      "title": "Assets",
+      "access": "all",
+      "tools": [
+        {
+          "name": "asset_upload",
+          "title": "Request asset upload",
+          "description": "Reserve an asset row and get a signed PUT URL into the Supabase Storage bucket blog-assets (valid 2 h). content_type ∈ image/jpeg | image/png | image/webp | image/gif | image/avif | image/svg+xml | video/mp4; size ≤ 26214400 bytes; sha256 of the file. PUT the bytes to upload.url with upload.headers, then call asset_complete. Returns { asset_id, storage_path, public_url, upload }.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "filename",
+            "size",
+            "sha256",
+            "content_type",
+            "kind"
+          ]
+        },
+        {
+          "name": "asset_complete",
+          "title": "Complete asset upload",
+          "description": "Mark an uploaded asset ready and record width / height / alt. Returns the asset with its public_url — use asset_id as hero_asset_id or an Instagram slide.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "asset_id",
+            "width",
+            "height",
+            "alt"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "instagram",
+      "title": "Instagram",
+      "access": "all",
+      "tools": [
+        {
+          "name": "instagram_post_upsert",
+          "title": "Upsert Instagram post",
+          "description": "Create or update an Instagram carousel draft: caption (≤ 2200 chars), slides (asset ids of this tenant, 1–10, in order), publish_at, context_issue_id. Pass id to update (status kept). Scheduling through Postiz is a later slice; publish marks it published and records the event.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "caption",
+            "slides",
+            "publish_at",
+            "context_issue_id"
+          ]
+        },
+        {
+          "name": "instagram_post_get",
+          "title": "Get Instagram post",
+          "description": "One Instagram post by id: caption, slides, status, context_issue_id, Postiz id and permalink once posted.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id"
+          ]
+        },
+        {
+          "name": "instagram_post_list",
+          "title": "List Instagram posts",
+          "description": "Instagram posts of a tenant, newest first. Filter: status. Paginated like article_list.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "status",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "instagram_post_set_status",
+          "title": "Set Instagram post status",
+          "description": "Move an Instagram post one step forward: draft → in_review → approved → published → retired (any other jump is `conflict`). Reaching published requires the post's context_issue_id AND assert_context_done: true — recorded on blog.publish_events with channel instagram. Prefer `publish` for the final step; it needs approved first, and this is how a draft gets there.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "id",
+            "status",
+            "assert_context_done"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "domain",
+      "title": "Domain",
+      "access": "all",
+      "tools": [
+        {
+          "name": "domain_connect",
+          "title": "Connect domain",
+          "description": "Record a hostname for the tenant and return the DNS / proxy instructions plus copy-paste snippets (vercel.json rewrites as getmeetly.ai uses them, next.config.js rewrites(), nginx location; the DNS record for cname). The same form lives on the tenant's Domain card at /tenants/<slug>. mode: cname (DNS → Vercel), proxy (the tenant's existing site reverse-proxies mount_path to the platform), platform (<slug>.<platform host>). With VERCEL_DOMAINS_ENABLED=true the hostname is also attached to the Vercel project (default off; the operator does it in the dashboard). Nothing is verified here — call domain_status.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "hostname",
+            "mode"
+          ]
+        },
+        {
+          "name": "domain_status",
+          "title": "Domain status",
+          "description": "Verify a connected hostname and store the result. proxy: GET https://<hostname><mount_path>/_health (5 s) — verified when the platform's JSON says tenant = this slug; the probe ({ ok, url, http_status, tenant, error, checked_at }) is returned and kept as probe_status. cname / platform: the Vercel Domains API decides when VERCEL_DOMAINS_ENABLED=true, otherwise the same probe. Same check as the Verify button on /tenants/<slug>.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "hostname"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "analytics",
+      "title": "Analytics",
+      "access": "all",
+      "tools": [
+        {
+          "name": "stats_summary",
+          "title": "Stats summary",
+          "description": "How the blog is doing over a period (7d | 28d | 90d, default 28d, ending yesterday; or from/to): totals (pageviews, visitors, visits, bounces, time), the previous period for comparison, channel split with the AI-referral share and per-engine visitors, Search Console clicks/impressions/position when ingested, AI-visibility cited rate when a probe ran, top 5 posts. Every source that is not wired is listed in not_configured by NAME — numbers are never invented.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "period",
+            "from",
+            "to",
+            "compare_previous"
+          ]
+        },
+        {
+          "name": "top_posts",
+          "title": "Top posts",
+          "description": "Posts ranked by pageviews over the period (default 28d), joined to the article (title, url, locale) with AI-referral pageviews and Search Console clicks per post. Paths that are not a published article (hub, old URLs) are listed with article_id null.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "period",
+            "from",
+            "to",
+            "limit"
+          ]
+        },
+        {
+          "name": "post_stats",
+          "title": "Post stats",
+          "description": "One article over the period (by article_id, or slug + locale): daily pageviews, AI-referral pageviews per engine, Search Console totals + top queries for its URL, and the probe results that cited it. Sources not ingested come back null / empty, never estimated.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "article_id",
+            "slug",
+            "locale",
+            "period",
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "ai_referrals",
+          "title": "AI referrals",
+          "description": "Visitors and pageviews that arrived from AI assistants (chatgpt, perplexity, gemini, claude, copilot, grok, meta, you, google_aio) over the period: per engine, per day, and the landing pages. Referrer-based, so an under-count by design — pair with visibility_report.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "period",
+            "from",
+            "to",
+            "engine"
+          ]
+        },
+        {
+          "name": "search_queries",
+          "title": "Search queries",
+          "description": "Search Console query × page rows over the period (ingested nightly when GSC_SERVICE_ACCOUNT_JSON and tracking.gsc_property are set): clicks, impressions, CTR, position, striking_distance (position 5–20 — a refresh candidate). Filters: min_impressions, page_url, striking_distance_only. Empty with a reason when Search Console is not wired.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "period",
+            "from",
+            "to",
+            "source",
+            "min_impressions",
+            "page_url",
+            "striking_distance_only",
+            "limit"
+          ]
+        },
+        {
+          "name": "visibility_report",
+          "title": "AI-visibility report",
+          "description": "Per query × engine: the latest probe status in the period (cited | mentioned | absent | error | no_ai_answer), citation rank and URL, and the status in the previous period (trend). Plus cited rate per engine, overall, share of voice (most-cited domains, owned flagged) and the recent runs. Filters: engine, topic. Empty with a note when no run was ingested — the probe is agent-side (blog-assessment skill).",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "period",
+            "from",
+            "to",
+            "engine",
+            "topic"
+          ]
+        },
+        {
+          "name": "visibility_queries_set",
+          "title": "Set visibility queries",
+          "description": "Upsert the tenant's target queries for the AI-visibility probe (≈ 30; the blog-assessment skill probes the active ones weekly): query, topic, priority (1 = money query probed daily, 3 = weekly), article_id (the post that should be cited), active. replace: true deactivates every query not in items. Returns the full active list.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "items",
+            "replace"
+          ]
+        },
+        {
+          "name": "visibility_results_ingest",
+          "title": "Ingest visibility probe results",
+          "description": "Store one agent-side probe run (the blog-assessment skill: ~30 queries × engines, the owner's OPENROUTER_API_KEY etc. stay on the host). Pass run { trigger, engines, cost_usd, started_at?, finished_at?, status?, notes? } and results [{ query, engine, model_slug?, market?, sample_no?, status?, answer_text?, citations [{ url, title?, rank? }], cost_usd?, raw_response?, probed_at? }]. The server decides cited (an owned domain among the citations: tracking.owned_domains + primary_hostname + connected domains) / mentioned (a brand alias in the answer) / absent unless status is error | no_ai_answer, maps cited URLs to articles, and creates unknown queries as active. Returns run_id and counts.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "run",
+            "results"
+          ]
+        },
+        {
+          "name": "indexing_status",
+          "title": "Indexing status",
+          "description": "IndexNow submissions (publish pings to api.indexnow.org — 200/202 = accepted) and the recent publish events for the tenant, optionally for one URL. Says by NAME what IndexNow still needs when it is not wired (INDEXNOW_KEY, primary_hostname, tracking.indexnow_enabled).",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug",
+            "url",
+            "limit"
+          ]
+        },
+        {
+          "name": "tracking_setup_status",
+          "title": "Tracking setup status",
+          "description": "What is configured for this tenant's analytics and what is missing, by NAME: Umami (script slot + API for ingestion), GA4 (BYO, consent-gated), Search Console (property + service account), Bing, IndexNow, the probe query list, the nightly cron. Plus the latest ingested day per source. Never a value, only names and booleans.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [],
+          "inputParams": [
+            "tenant_slug"
+          ]
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "total": 44,
+    "shared": 44,
+    "paired": 0
+  }
+}

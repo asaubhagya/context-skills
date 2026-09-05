@@ -1,0 +1,1070 @@
+{
+  "schema": "context-mcp-catalog/1",
+  "server": {
+    "key": "context",
+    "name": "Context",
+    "endpoint": "https://mcp.onecontext.me/mcp",
+    "purpose": "Context is the shared workspace for your goals and how agents execute them across every host you use. The Shared Space works the moment you sign in with Google; pairing your iPhone in the Context app unlocks Private Spaces and the Personal domains — memories, logs, people, health, calendar and skills — that live only on your phone.",
+    "auth": {
+      "type": "oauth2",
+      "scopes": [
+        "context:shared",
+        "context:private"
+      ],
+      "signIn": "Google",
+      "stepUp": "Pair your iPhone in the Context app, then Reconnect the connector"
+    },
+    "contractVersion": "3.0.0",
+    "startingPrompt": "Nomi, get me started",
+    "generatedAt": "2026-09-05T12:08:23.183Z",
+    "sourceRepo": "asaubhagya/meetly-macos",
+    "sourcePath": "supabase/functions/mcp/tools_v3.ts",
+    "sourceCommit": "2e441f24"
+  },
+  "connect": {
+    "claude-ai": "Settings → Connectors → Add custom connector → name Context, URL https://mcp.onecontext.me/mcp → Connect",
+    "chatgpt": "Settings → Connectors → Add → URL https://mcp.onecontext.me/mcp",
+    "claude-code": "claude mcp add --transport http context https://mcp.onecontext.me/mcp",
+    "cursor": "Add an HTTP MCP server with URL https://mcp.onecontext.me/mcp"
+  },
+  "skills": [
+    {
+      "key": "context",
+      "role": "base",
+      "description": "The interface — how you talk to Context: primitives, vocabulary, and when to call which tool."
+    },
+    {
+      "key": "rules",
+      "role": "harness",
+      "description": "Execution discipline — how a work unit runs end to end, from plan through verification to handoff."
+    },
+    {
+      "key": "setup-context",
+      "role": "harness",
+      "description": "Chart a map — turns a goal into an Epic, its Issues and a spec before any work starts."
+    },
+    {
+      "key": "daily-brief",
+      "role": "harness",
+      "description": "Daily heartbeat — a recurring digest of what changed and what needs the user's attention."
+    },
+    {
+      "key": "wayfinder",
+      "role": "third-party",
+      "description": "Planning method (third-party) — structures how a hard decision or plan gets explored."
+    },
+    {
+      "key": "grill-me",
+      "role": "third-party",
+      "description": "Planning method (third-party) — stress-tests a plan or idea by grilling it round by round."
+    }
+  ],
+  "toolGroups": [
+    {
+      "key": "start",
+      "title": "Start",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "start_context",
+          "title": "Start a Context session",
+          "description": "Use this when you need to orient yourself in Context before doing anything else — at the top of a session, whenever you are unsure which tool fits, or when the user greets Nomi or says \"Nomi, get me started\". Read-only: it reports the signed-in account, whether an iPhone is paired, which Spaces and modules you can reach, the guide and `context` skill Resources (with version and sha256), an install plan for this host, and a `nextAction` (`continue | pair_phone | install_skill | update_skill | human_upload`). It never installs anything itself and never asks you to hand-edit your repository's agent config. Its `spaces` tell you what a Space argument may name next; `pair_phone` means the private half is unavailable until the user pairs.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "host",
+            "environment",
+            "install_scope",
+            "installed_skill_version",
+            "installed_skill_sha256"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "discovery",
+      "title": "Discovery",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "search_context",
+          "title": "Search across Context",
+          "description": "Use this when you need to find something by words rather than by id — an Epic, Issue, Artifact or memory whose id you do not have. Read-only and bounded: every response reports coverage and truncation, so it never implies exhaustive recall. Scope with `space` (omit to search every Space you hold; private Spaces need a paired iPhone) and narrow with `kinds`. Feed the returned ids into `get_epic`, `get_issue`, `get_artifact` or `get_memory`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "query",
+            "space",
+            "kinds",
+            "limit",
+            "cursor"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "space",
+      "title": "Space",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "list_spaces",
+          "title": "List the account's Spaces",
+          "description": "Use this when you need to know which Spaces exist before naming one in a `space` argument. Read-only. Always returns the Shared Space; private Spaces (`personal`, `work`, named) appear only once an iPhone is paired. Each row carries `{id, name, privacy}` — the exact shape every other result echoes back as `space`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": []
+        }
+      ]
+    },
+    {
+      "key": "epic",
+      "title": "Epic",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "list_epics",
+          "title": "List Epics",
+          "description": "Use this when you need to survey the goals in flight rather than open one specific Epic. Read-only, most recently updated first. Pass `space` to scope (omit to union every Space you hold; private Spaces need a paired iPhone). Returns summary rows with derived status — call `get_epic` for one hydrated Epic, or `list_issues {parent_id}` for its children.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "space",
+            "labels",
+            "include_closed",
+            "updated_after",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "get_epic",
+          "title": "Get one Epic",
+          "description": "Use this when you need to see one goal in full — its blueprint, derived status, child Issues, Artifacts and recent activity in a single read. Read-only. The Epic's Space governs access; a private Epic needs a paired iPhone. Use its `issues[]` to pick work up with `claim_issue`, or its `artifacts[]` with `get_artifact`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "epic_id"
+          ]
+        },
+        {
+          "name": "create_epic",
+          "title": "Create an Epic",
+          "description": "Use this when you need to open a new goal in a Space, optionally seeding its first Issues in the same call. Writes: it creates one Epic (and any `issues[]` under it) and is visible to the user immediately. `space` is required — `shared` is the only destination until an iPhone is paired. Returns the new `epic_id` for `create_issues`, `attach_artifact` and `request_review`.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "space",
+            "title",
+            "goal",
+            "labels",
+            "issues",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "update_epic",
+          "title": "Update an Epic",
+          "description": "Use this when you need to change one Epic's title, goal, labels or Space — never its status, which is derived from its Issues. Writes in place. The Epic's current Space governs access; moving it to a private Space needs a paired iPhone. Use `update_issues` for anything about the work itself.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "epic_id",
+            "title",
+            "goal",
+            "labels",
+            "space",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "delete_epic",
+          "title": "Delete an Epic",
+          "description": "Use this when you need to remove an Epic that should not exist at all — this is also how you retire work that would otherwise be `canceled`, which v3 does not expose as a state. Destructive and irreversible: it cascades to the Epic's Issues, and the response reports the cascade counts. Requires delete permission on this key; confirm with the user first. Prefer `update_epic` or `complete_issues` whenever the work merely ended.",
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "epic_id",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "issue",
+      "title": "Issue",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "list_issues",
+          "title": "List Issues",
+          "description": "Use this when you need to see the queue rather than one Issue — what is open, what is yours, what sits under an Epic. Read-only, most recently updated first; closed Issues are excluded unless `include_closed`. Filter by `parent_id` (Epic or parent Issue), `state`, `assignee`, `labels` or `space`; private Spaces need a paired iPhone. Feed ids into `get_issue`, `claim_issue` or `update_issues`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "space",
+            "parent_id",
+            "state",
+            "assignee",
+            "labels",
+            "include_closed",
+            "updated_after",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "get_issue",
+          "title": "Get one Issue",
+          "description": "Use this when you need to read one Issue in full before acting on it — acceptance criteria, state, `blocked_by` edges, child Issues, Artifacts, comments and delivery/claim state in a single read. Read-only. Its Space governs access. Read `delivery.version` here before `claim_issue` or `verify_issue`, and its criteria before `update_issues`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "issue_id"
+          ]
+        },
+        {
+          "name": "create_issues",
+          "title": "Create Issues",
+          "description": "Use this when you need to add one or more units of work under an Epic or under another Issue — decomposition in v3 is always child Issues, never a checklist. Writes 1–25 Issues in one call under `parent_id`; each lands in the parent's Space, so a private parent needs a paired iPhone. Returns the new issue ids for `update_issues`, `claim_issue` and `attach_artifact`.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "parent_id",
+            "issues",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "update_issues",
+          "title": "Update Issues",
+          "description": "Use this when you need to edit, re-state, re-parent or re-block existing Issues — including moving one to `in_progress` or `in_review`. Writes 1–25 Issues in one call; each item names its own `issue_id`, so a batch may touch several Epics. `done` is a human-accepted outcome: prefer `claim_issue` plus `complete_issues` over writing `state: \"done\"` directly. Pass `expected_version` (from `get_issue`) to fail loudly on a stale edit.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "issues",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "complete_issues",
+          "title": "Complete Issues",
+          "description": "Use this when you need to move Issues to `done` because the work is finished and accepted. Writes 1–20 Issues at once; Epic status stays derived, so there is no Epic equivalent. Report truthful `work_stats` — the server rejects the batch when a tracked Issue is missing one, and an agent self-verification alone never satisfies the human acceptance gate. When acceptance is still pending, use `claim_issue` and `request_review` instead.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "issue_ids",
+            "work_stats",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "delete_issues",
+          "title": "Delete Issues",
+          "description": "Use this when you need to remove Issues that should not exist at all — including work that would otherwise be `canceled`, which v3 does not expose. Destructive and irreversible: it cascades to child Issues and the response reports the cascade counts. Requires delete permission on this key; confirm with the user first. Use `complete_issues` for work that actually finished.",
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "issue_ids",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "conversation",
+      "title": "Conversation",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "post_comment",
+          "title": "Comment on an Epic, Issue or Artifact",
+          "description": "Use this when you need to say something on the record — progress narration, an answer to the user's review comment, or a note anchored to a passage of an Artifact. Writes a visible comment and notifies the user; it changes no state and opens no gate (use `request_review` for that). The target's Space governs access. Pass `anchor` only for Artifacts, quoting the passage verbatim so the app can highlight it.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "target",
+            "body",
+            "anchor",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "review",
+      "title": "Review",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "request_review",
+          "title": "Request a human review",
+          "description": "Use this when you need to get a person to decide something before work continues — an Epic's plan, an Issue's outcome, or an Artifact's content. Writes: it opens a human gate in the user's \"Needs You\" tray. Never mark a gate satisfied yourself and never assume approval; poll `get_changes` for the decision. Set `blocking: true` when downstream work must wait.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "target",
+            "reason",
+            "blocking",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "claim_issue",
+          "title": "Claim Issue completion",
+          "description": "Use this when you need to put on the record, with evidence, that an Issue's acceptance criteria are met (ADR-0008). Writes a claim; it does NOT mark the Issue done — a human accepts it. Read `get_issue`'s delivery `version` first and pass it as `expected_version`; a stale value is rejected. Retry with the same `request_id` to replay rather than duplicate. Follow with `verify_issue` and `request_review`.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "issue_id",
+            "request_id",
+            "expected_version",
+            "summary",
+            "evidence"
+          ]
+        },
+        {
+          "name": "verify_issue",
+          "title": "Record Issue verification",
+          "description": "Use this when you need to record how you actually checked a claim — the method, the per-criterion results and the evidence. Writes a verification against one claim. An agent self-check never implies independent acceptance — a human must still accept, so set `independence` truthfully. Read the claim id and delivery `version` from `get_issue` first.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "issue_id",
+            "request_id",
+            "expected_version",
+            "claim_id",
+            "method",
+            "outcome",
+            "independence",
+            "results",
+            "evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "artifact",
+      "title": "Artifact",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "list_artifacts",
+          "title": "List Artifacts",
+          "description": "Use this when you need to find the reviewable documents attached to a Space or to one Epic or Issue. Read-only, metadata only — no bodies, so it stays cheap. Scope with `space` or `target`; private Spaces need a paired iPhone. Feed ids into `get_artifact` for content or a resource link.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "space",
+            "target",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "get_artifact",
+          "title": "Get one Artifact",
+          "description": "Use this when you need to read one Artifact — its metadata, its content or a resource link to it, its revision list and its comment threads. Read-only. Its Space governs access. Pass `revision_id` to read a specific immutable revision instead of the head — it never silently substitutes the head. Set `include_content: false` to keep a large document out of your context and take the resource link instead; answer the comments you read here with `post_comment`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "artifact_id",
+            "revision_id",
+            "include_content"
+          ]
+        },
+        {
+          "name": "attach_artifact",
+          "title": "Attach an Artifact",
+          "description": "Use this when you need to attach a reviewable document to a piece of work — a spec, a decision record, a report, a file. Writes: for text you authored, pass `content` and it is stored inline in one call; for binary or large files, pass `filename`/`size`/`sha256` and it returns an upload plan (`upload_url`, `complete_url`, chunk size, limits) for you to follow. The target's Space governs access; `shared` is the only destination until an iPhone is paired. The new `artifact_id` is what `get_artifact`, `revise_artifact` and `post_comment` take next.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "target",
+            "title",
+            "content",
+            "mime",
+            "base64",
+            "filename",
+            "size",
+            "sha256",
+            "space",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "revise_artifact",
+          "title": "Revise an Artifact",
+          "description": "Use this when you need to change an Artifact's content — v3 appends an immutable revision and advances the head rather than overwriting, so the old text stays citable. Writes. `expected_revision_id` is mandatory optimistic concurrency: a stale head is rejected with the actual head and nothing is written. Use `update_artifact` for metadata only, and `post_comment` to answer review threads.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "artifact_id",
+            "expected_revision_id",
+            "content",
+            "base64",
+            "mime",
+            "change_summary",
+            "revision_id",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "update_artifact",
+          "title": "Update Artifact metadata",
+          "description": "Use this when you need to change only an Artifact's title, labels, kind or Space, leaving its content exactly as it is. Writes metadata in place — no new revision, so nothing citable moves. Use `revise_artifact` for content.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "artifact_id",
+            "title",
+            "labels",
+            "kind",
+            "space",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "delete_artifacts",
+          "title": "Delete Artifacts",
+          "description": "Use this when you need to remove Artifacts from the account entirely. Destructive and irreversible — revisions and comment threads go with them, and the response reports the cascade counts. Requires delete permission on this key; confirm with the user first. Prefer `update_artifact` or a new revision when the document merely became obsolete.",
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "artifact_ids",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "get_artifact_transfer",
+          "title": "Inspect an Artifact upload",
+          "description": "Use this when you need to check whether an `attach_artifact` upload plan you followed actually completed. Read-only; it reports status, size, digest and expiry for an opaque handle you own, and never exposes storage keys. When it reports completion the Artifact is readable with `get_artifact`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "transfer_id"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "changes",
+      "title": "Changes",
+      "access": "shared",
+      "tools": [
+        {
+          "name": "get_changes",
+          "title": "Read what changed",
+          "description": "Use this when you need to know what happened while you were working — review decisions, comments, and operations the user's phone applied. Read-only, cursor-based with a bounded wait: `wait_ms` blocks until something arrives (25 s ceiling) instead of you polling in a loop. Persist `next_cursor` only after processing the page; replay from the previous cursor after a crash. This is how you wait for a `request_review` decision — never assume approval.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "cursor",
+            "wait_ms",
+            "limit"
+          ]
+        },
+        {
+          "name": "list_mutation_receipts",
+          "title": "List mutation receipts",
+          "description": "Use this when you need to know whether a queued write actually reached the user's device, instead of assuming that acceptance meant application. Read-only. Pass `ids` for specific receipts, or `updated_after`/`states` to sweep what changed. Anything still `accepted`/`delivered` has not been applied yet — reconcile before telling the user it landed.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "ids",
+            "updated_after",
+            "states",
+            "limit"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "space_paired",
+      "title": "Space",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "create_space",
+          "title": "Create a private Space",
+          "description": "Use this when you need to give work its own container because it genuinely does not belong in `shared`, `personal` or `work`. Writes a new private Space on the paired iPhone, so it requires pairing — there is exactly one Shared Space and it is never created this way. Its id/name is what every other tool's `space` argument takes next.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "name",
+            "key",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "delete_space",
+          "title": "Delete a private Space",
+          "description": "Use this when you need to remove an empty private Space. Destructive: refused for the built-in `personal`/`work` Spaces and for any Space that still holds Epics, Issues or Artifacts — move or delete those first. Requires pairing and delete permission; the Shared Space can never be deleted.",
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "space",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "memories",
+      "title": "Memories",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "list_memories",
+          "title": "List memories",
+          "description": "Use this when you need to read what the user captured on their phone, most recent first — the raw material behind briefings and coaching. Read-only and requires a paired iPhone. Metadata only unless you ask for full text; scope with `space` and narrow by time. Call `get_memory` for one memory's full text and extractions.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "space",
+            "query",
+            "include_text",
+            "from",
+            "to",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "get_memory",
+          "title": "Get one memory",
+          "description": "Use this when you need to read one memory in full — raw text, the AI-enhanced version, extracted logs and people links, and a deep link that opens it on the phone. Read-only and requires a paired iPhone. Find ids with `list_memories` or `search_context`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "memory_id"
+          ]
+        },
+        {
+          "name": "save_memories",
+          "title": "Save memories and facts",
+          "description": "Use this when you need to persist something the user told you beyond this session — a memory entry, or an atomic durable fact (a preference, a decision, biographical detail). Writes 1–20 private notes and/or facts into the user's own Context app: it never messages anyone, publishes anything, or deletes data, and the user can undo every one. Requires a paired iPhone and a `space`. Only save what you actually heard.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "memories",
+            "facts",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "delete_memories",
+          "title": "Delete memories",
+          "description": "Use this when you need to remove whole memories from the user's phone — their extracted logs and todos go with them. Destructive and irreversible on the device; requires pairing and delete permission, so confirm with the user first. Deleting is not the way to correct a fact: use `save_memories` for that.",
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "memory_ids",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "logs",
+      "title": "Logs",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "list_logs",
+          "title": "List logged items",
+          "description": "Use this when you need to read the user's atomic logged events — meals, workouts, expenses, or health readings (blood pressure, body metrics, HealthKit-mirrored items) — one row per event. Read-only, requires a paired iPhone. `kind: \"health\"` covers the voice-logged and HealthKit-mirrored fitness items; for the raw HealthKit firehose use `query_health_samples`. No roll-ups: you compute the totals. Row ids feed `delete_logs`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "kind",
+            "space",
+            "from",
+            "to",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "log_meal",
+          "title": "Send a meal plan",
+          "description": "Use this when you need to give the user a meal to eat — meal prep, a restaurant order, a macro-targeted suggestion. Writes one planned meal to the paired iPhone and push-notifies it; completing it auto-logs the items to the calorie tracker and Apple Health, so per-item `kcal` must be your best estimate and macros matter. Requires pairing. Read it back later with `list_logs {kind: \"meal\"}`.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "title",
+            "items",
+            "due_at",
+            "notes",
+            "space",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "log_workout",
+          "title": "Send a workout plan",
+          "description": "Use this when you need to give the user exercise to do. Writes one workout plan to the paired iPhone and push-notifies it; it renders as a guided session and finishing it logs the completed exercises to the fitness tracker. Requires pairing. Give every exercise as much structure as you know — sets, reps, weight, kcal, a form cue, a specific tutorial link. Read it back with `list_logs {kind: \"workout\"}`.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "title",
+            "exercises",
+            "due_at",
+            "notes",
+            "space",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "delete_logs",
+          "title": "Delete logged items",
+          "description": "Use this when you need to remove logged rows that are wrong — a mis-transcribed meal, a duplicated expense. Destructive: requires pairing and delete permission. Address rows exactly as `list_logs` returned them; omit `item_id` to delete a whole log group. Deleting a group's last item removes the group.",
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "logs",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "people",
+      "title": "People",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "list_people",
+          "title": "List people",
+          "description": "Use this when you need to read the roster the user opted to share — names, aliases, organizations. Read-only, requires a paired iPhone. Address books get large: pass `fields` for whole-roster scans (duplicate hunting) so full profiles do not flood your context, and page with `limit`/`cursor`. Call `get_person` for one full profile.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "query",
+            "fields",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "get_person",
+          "title": "Get one person",
+          "description": "Use this when you need to read everything Context knows about one person — the profile the user synced, and optionally the memories linked to them. Read-only, requires a paired iPhone; suggested-but-unconfirmed links are excluded. Set `include_memories: true` for the relationship history behind a briefing.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "person_id",
+            "include_memories",
+            "memories_limit"
+          ]
+        },
+        {
+          "name": "create_people",
+          "title": "Create person profiles",
+          "description": "Use this when you need to create a profile for someone the user talks about who has none. Writes 1–20 app-created profiles to the paired iPhone (not linked to system Contacts), so it requires pairing. Check `list_people` first — creating a profile that duplicates a contact is worse than none; `merge_people` is the fix when it happens.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "people",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "update_people",
+          "title": "Update people",
+          "description": "Use this when you need to record something you learned about people the user already has profiles for — contact-card fields, or `remembered_facts` for what the user TOLD you. Writes 1–20 profiles on the paired iPhone; requires pairing. Your writes are stamped with your caller identity and capped at externally-asserted confidence: they can fill a gap but never overwrite what the user stated themselves. Only save what you actually heard.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "people",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "delete_people",
+          "title": "Delete person profiles",
+          "description": "Use this when you need to remove app-created or junk profiles that should not exist at all — and ONLY those. Destructive: requires pairing and delete permission, and it is usually the WRONG tool for duplicates — a profile backed by an iOS contact is re-created on the next import, so deletion does not stick. Use `merge_people` for duplicates. The user's own \"Me\" profile can never be deleted.",
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "person_ids",
+            "dedupe_key"
+          ]
+        },
+        {
+          "name": "merge_people",
+          "title": "Merge duplicate people",
+          "description": "Use this when you need to fold several profiles of the same real person into one — this is the durable fix for duplicate contacts, unlike deletion. Writes: phone numbers, emails, facts and links are unioned into the survivor you pick, and the user can undo it in the app. Requires pairing and write (not delete) permission. Find the clusters yourself from `list_people`, and confirm anything you are unsure about with the user first.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "merges",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "health",
+      "title": "Health",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "query_health_samples",
+          "title": "Query HealthKit samples",
+          "description": "Use this when you need to read raw HealthKit rows the user opted into agent collection — steps, heart rate, sleep, HRV, glucose. Read-only, requires a paired iPhone. Omit `type` and it returns the available types with their sample counts, so this is also the discovery call; then pass one `type` plus a range of at most 31 days. For totals and averages use `summarize_health` instead of pulling every row.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "type",
+            "from",
+            "to",
+            "source",
+            "unit_policy",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "summarize_health",
+          "title": "Summarize health samples",
+          "description": "Use this when you need to answer a question about a trend or a total rather than individual readings — daily steps, weekly sleep, monthly weight. Read-only, requires a paired iPhone. Aggregates one type into timezone-aware buckets with units, counts, coverage and partial markers; hourly ranges cap at 31 days, others at 366. Raw rows stay available through `query_health_samples` for verification.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "type",
+            "from",
+            "to",
+            "bucket",
+            "timezone",
+            "statistic",
+            "source",
+            "limit",
+            "cursor"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "calendar",
+      "title": "Calendar",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "list_calendar_events",
+          "title": "List calendar events",
+          "description": "Use this when you need to read the user's schedule — what a day held, who was in a meeting, what is coming up. Read-only, requires a paired iPhone; covers the synced window (roughly the past 60 days and next 30), Apple and Google de-duplicated. Cheap, like `list_issues`: call it liberally. Each row links the memories, Artifacts, Issues and people attached to that event.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "from",
+            "to",
+            "attendee",
+            "person_id",
+            "query",
+            "include_cancelled",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "get_calendar_event",
+          "title": "Get one calendar event",
+          "description": "Use this when you need to read one meeting in full — attendees and which resolve to people, organizer, location, join link, and the memories, Artifacts and Issues attached to it. Read-only, requires a paired iPhone. Find ids with `list_calendar_events`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "event_id"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "skills",
+      "title": "Skills",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "list_skills",
+          "title": "List the user's stored skills",
+          "description": "Use this when you need to find the playbooks the user or an agent stored on the phone — how THIS user wants a recurring job done. Read-only, requires a paired iPhone. These are the user's own skill documents, not the published Context skill that `start_context` reports. Call `get_skill` for the full markdown.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "space",
+            "limit",
+            "cursor"
+          ]
+        },
+        {
+          "name": "get_skill",
+          "title": "Get one stored skill",
+          "description": "Use this when you need to read the full markdown of a stored skill that covers the job you are about to do. Read-only, requires a paired iPhone; content is inlined up to 256 KB. Follow it as instructions from the user, and record any improvement back with `save_skill`.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "skill_id"
+          ]
+        },
+        {
+          "name": "save_skill",
+          "title": "Save a stored skill",
+          "description": "Use this when you need to keep a playbook for next time — omit `skill_id` to add a new skill, pass it to overwrite an existing one. Writes to the paired iPhone, so it requires pairing; there is no version history, the content you send becomes the skill. `space` is required when adding. Read it back with `get_skill`.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "skill_id",
+            "title",
+            "markdown",
+            "description",
+            "space",
+            "dedupe_key"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "content",
+      "title": "Content",
+      "access": "paired",
+      "tools": [
+        {
+          "name": "request_content",
+          "title": "Request private content from the phone",
+          "description": "Use this when you need to fetch device-held content that routine sync deliberately does not carry — a document body, a contact field, a health sample. Writes a durable, metadata-addressed request; the phone fulfils it only for an already-authorized collection, and an offline phone leaves it pending rather than failing. Requires pairing. Poll `get_content_request` for the download URL.",
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "resource_kind",
+            "resource_id",
+            "selector",
+            "content_version"
+          ]
+        },
+        {
+          "name": "get_content_request",
+          "title": "Inspect a content request",
+          "description": "Use this when you need to know whether the phone has answered a `request_content` you are waiting on. Read-only, requires a paired iPhone. Reports queued, delivered, ready, failed or expired; ready content is available through an authorized URL for fifteen minutes. `queued` means the phone has not been reachable yet — do not tell the user it failed.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:private"
+          ],
+          "inputParams": [
+            "request_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "total": 52,
+    "shared": 27,
+    "paired": 25
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-05T12:08:13.032Z",
-  "ref": "v10",
+  "generatedAt": "2026-09-05T12:10:41.064Z",
+  "ref": "v11",
   "skills": [
     {
       "key": "blog-agent",
@@ -519,5 +519,30 @@
       ]
     }
   ],
-  "mcp": []
+  "mcp": [
+    {
+      "key": "context-blog",
+      "path": "mcp/context-blog.json",
+      "sha256": "54e05e00d83cdcb8c33a5ee5d5948b2e215515d1cf96efb02707a9eabcaaac18",
+      "bytes": 35082,
+      "server": {
+        "name": "Context Blog",
+        "endpoint": "https://blog.onecontext.me/api/mcp",
+        "contractVersion": "blog-1.3.0"
+      },
+      "toolCount": 44
+    },
+    {
+      "key": "context",
+      "path": "mcp/context.json",
+      "sha256": "69b6c7612310eca39308d954f492a17ba98419fd7c168c38784802ec53354c91",
+      "bytes": 45436,
+      "server": {
+        "name": "Context",
+        "endpoint": "https://mcp.onecontext.me/mcp",
+        "contractVersion": "3.0.0"
+      },
+      "toolCount": 52
+    }
+  ]
 }
