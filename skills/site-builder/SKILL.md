@@ -10,14 +10,16 @@ description: >-
   approved it there. Never publishes unapproved; never a second CTA.
 depends: [rules-blog, rules, blog-checker, grill-me]
 license: MIT
-version: 1
+version: 2
 attach: [templates/page-brief.md]
 ---
 
 # Site builder — one page, one gate
 
-`setup {workflow: "site"}` lands here. You build **one page** (a landing
-page, a pricing or about page) for **one tenant**, once. There is no
+A site-only owner is routed here by `start_context` (its `nextAction` points
+at this skill when the tenant's products are `[site]`). You build **one
+page** (a landing page, a pricing or about page) for **one tenant**, once.
+There is no
 routine, no buffer and no cadence: interview → brief → draft → lint →
 preview → checker → owner → publish. `rules` and `rules-blog` apply in
 full; `blog-checker` judges the draft in a separate call; the owner
@@ -32,7 +34,7 @@ ticket — and you say which.
 
 ## Before the first message
 
-1. Context `usage_guide`; Blog `usage_guide` + `get_capabilities` —
+1. Context `start_context`; Blog MCP `usage_guide` + `get_capabilities` —
    `page_upsert`, `preview_render`, `check_record`, `publish` must be in
    `tools[]` (else `rules-blog` §8: say which is missing, attach the payload
    you would have sent, stop before that step).
@@ -80,12 +82,12 @@ brief is the Round's exit. It is attached to the issue as `docKind: "brief"`.
 
 ## The Context issue
 
-One page = one Context issue, `issueType: "complex"`, title `Site:
-<title> (<locale>)`, labels `channel:site` `locale:<l>` `tenant:<slug>`
-`kind:new` `gate:artifact`, `parentId` = the `Site` parent when it exists.
-Create it **before** `page_upsert` — the Blog MCP requires
-`context_issue_id` on every page. Acceptance criteria: lint clean · preview
-attached · checker verdict recorded · owner approval · live URL.
+One page = one Context issue, title `Site: <title> (<locale>)`, labels
+`channel:site` `locale:<l>` `tenant:<slug>` `kind:new` `gate:artifact`,
+`parent_id` = the `Site` parent when it exists. Create it **before**
+`page_upsert` — the Blog MCP requires `context_issue_id` on every page.
+Acceptance criteria (`acceptance_criteria`): lint clean · preview attached ·
+checker verdict recorded · owner approval · live URL.
 
 ## Draft — the Blog MCP page shape
 
@@ -113,18 +115,19 @@ one.
 
 1. `page_upsert {…, dry_run: true}`. Fix every `severity: "error"` at its
    `path`; judge the warnings. **Two bounces at most** (three attempts); a
-   third rejection → `post_task_update {body: "ESCALATE: page_upsert
-   rejected 3× — <codes>"}`, leave the issue `started`, stop.
+   third rejection → `post_comment {parent_id: <issue>, body: "ESCALATE:
+   page_upsert rejected 3× — <codes>"}`, leave the issue `in_progress`, stop.
 2. The real `page_upsert`. Keep `id`, `preview_url`, `url`; every later
    revision passes the same `id`.
 3. `preview_render {tenant_slug, kind: "page", title, description,
-   sections, seo, design_tokens}` → `send_file {taskId, filename:
-   "preview-r<n>.html", title: "Rendered preview, round <n>", docKind:
-   "preview", content: <html>}`. Open the HTML: the tenant's fonts,
-   background and accent must be the CSS variables you see.
-4. Attach the draft: `send_file {taskId, filename: "<slug>.<locale>.md",
-   title: "<title> (<locale>)", docKind: "deliverable", content: <markdown
-   rendering with front matter: page id, slug, locale, url, preview_url>}`.
+   sections, seo, design_tokens}` → `attach_artifact {parent_id: <issue>,
+   filename: "preview-r<n>.html", title: "Rendered preview, round <n>",
+   docKind: "preview", content: <html>}`. Open the HTML: the tenant's
+   fonts, background and accent must be the CSS variables you see.
+4. Attach the draft: `attach_artifact {parent_id: <issue>, filename:
+   "<slug>.<locale>.md", title: "<title> (<locale>)", docKind:
+   "deliverable", content: <markdown rendering with front matter: page id,
+   slug, locale, url, preview_url>}`.
 5. One machine-readable line on the issue:
    `blog-page: <id> · slug <slug> · locale <locale> · preview <preview_url> · url <url>`
 
@@ -137,11 +140,11 @@ traces every product claim to the brief, judges voice, claims policy and
 structure (H2s as a table of contents, **one** CTA), and returns a
 `pass · bounce · escalate` verdict. Then, on the issue:
 
-- `send_file {taskId, filename: "checker-verdict-r<n>.md", docKind:
-  "review"}` · `check_record {tenant_slug, subject_kind: "page",
+- `attach_artifact {parent_id: <issue>, filename: "checker-verdict-r<n>.md",
+  docKind: "review"}` · `check_record {tenant_slug, subject_kind: "page",
   subject_ref: <issue id>, round, verdict, findings, models}` ·
-  `post_task_update` with verdict, preview URL, `check_id`, maker and
-  checker models.
+  `post_comment` with verdict, preview URL, `check_id`, maker and checker
+  models.
 - **bounce** → fix each finding at its `path`, re-upsert with the same
   `id`, re-render, hand over as round + 1. **escalate** → stop; the owner
   decides.
@@ -150,21 +153,21 @@ structure (H2s as a table of contents, **one** CTA), and returns a
 ## The gate — owner approves in Context
 
 ```
-post_task_update {id: <issue>, state: "in_review",
-  body: "Checker passed (round <n>) — draft, verdict, preview and models attached",
-  reviewRequest: {blocking: true, reason: "<title> · site/<locale> · <words> words · preview <url> · will publish at <url> · maker <model> · checker <model>"}}
+update_issues {ids: [<issue>], state: "in_review"}
+post_comment {parent_id: <issue>, body: "Checker passed (round <n>) — draft, verdict, preview and models attached"}
+request_review {parent_id: <issue>, reason: "<title> · site/<locale> · <words> words · preview <url> · will publish at <url> · maker <model> · checker <model>"}
 ```
 
 When the page is one slice of a larger map (a launch), the map's owner may
 raise the gate on the parent ticket instead — then you attach everything
-and say on the issue that the gate is raised there. Wait on `get_events
+and say on the issue that the gate is raised there. Wait on `get_changes
 {cursor, waitMs: 25000}`; never assume approval.
 
 ## Publish — after `done`, never before
 
 `page_set_status {id, status: "approved"}` → `publish {tenant_slug,
 page_id, context_issue_id, assert_context_done: true}` → `url` on the
-issue → `complete_tasks` with `workStats`. Then verify: `curl -sI <url>`
+issue → `complete_issues` with `workStats`. Then verify: `curl -sI <url>`
 is 200 and the HTML carries the title. A hosted root that shows "Nothing
 published yet." is the hub view, not a failure — say where the page lives.
 `domain_connect` / `domain_status` for a custom hostname follow

@@ -1,6 +1,6 @@
 # Page brief — <title>
 
-<!-- send_file {filename: "page-brief.md", title: "Page brief", docKind: "brief", taskId: <page issue id>, content: <this file, filled>} -->
+<!-- attach_artifact {filename: "page-brief.md", title: "Page brief", docKind: "brief", parent_id: <page issue id>, content: <this file, filled>} -->
 
 **Tenant:** `<slug>` · **Page:** `<page slug>` · **Locale:** `<en>` · **Will live at:** <https://host/mount/slug> · **Date:** <YYYY-MM-DD> · **Owner's go:** yes (interview round <n>)
 

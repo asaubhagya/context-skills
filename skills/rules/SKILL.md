@@ -4,7 +4,7 @@ description: >-
   The Context harness — the execution discipline any agent follows when a task
   needs a plan and runs through Context. Load first; every other Context skill
   inherits these rules.
-depends: []
+depends: [context]
 license: MIT
 attach: [agents-block.md, ../spec-template.md]
 ---
@@ -14,7 +14,10 @@ attach: [agents-block.md, ../spec-template.md]
 These rules govern how you work when a task runs through Context (the tracker
 for agent work: agents write over MCP, a human reviews and approves in the
 Context app or Context Web). They are host-neutral: the same rules apply in
-Claude Code, Codex, Cursor, ChatGPT, claude.ai or any other MCP client.
+Claude Code, Codex, Cursor, ChatGPT, claude.ai or any other MCP client. This
+skill assumes you already know the `context` skill's vocabulary and tool
+surface (Epic/Issue/Artifact, `request_review`/`claim_issue`/`verify_issue`,
+Shared vs Private) — load `context` first if you have not.
 
 The harness is **not** the Context app agent (on Context Web that agent is
 called Nomi, and it also handles health, personal space, memories and people).
@@ -23,8 +26,9 @@ When the app agent is asked to do such a task, it hands over to these rules.
 
 ## 0. Before any write
 
-1. Call `usage_guide` once per session before the first write. It is the
-   contract for the tools you are about to use; do not work from memory.
+1. Call `start_context` once per session before the first write, if you
+   have not already — it reports account, pairing, Space state and the
+   next action. Do not work from memory of a prior session's state.
 2. Report `caller {agent, model}` on every call where the schema asks for it,
    and `workStats` on every update that completes a unit of work (harness,
    model, role, thinking, tokens, cost, duration, skills, tools). Trace what
@@ -53,34 +57,35 @@ commit recorded in their headers). Do not paraphrase them into a wrapper.
 
 ## 2. One Context map, one combined gate
 
-The **Context map** is the wayfinder map in Context terms: one epic whose
-children are the tickets, joined by native `blocks`/`blockedBy` links — the
-dependency graph. It **is** the plan.
+The **Context map** is the wayfinder map in Context terms: one Epic whose
+children are the Issues, joined by `blocked_by` edges — the dependency
+graph. It **is** the plan.
 
-- Exactly one map per effort. Chart it with `save_work {kind: "epic"}` and
-  `save_work {kind: "issue", parentId}` per ticket; wire links after ids exist.
+- Exactly one map per effort. Chart it with `create_epic` (optionally with
+  the first Issues inline) and `create_issues {parent_id}` per ticket; wire
+  `blocked_by` after ids exist.
 - Write the **spec** alongside the map (for code work, follow
-  `spec-template.md`). Attach it to the epic with `send_file`.
-- Raise **one** `reviewRequest` for the map **and** the spec together, on the
-  ticket that carries the plan gate. The owner approves both in one decision.
-  Do not batch other decisions into it and do not raise it twice.
+  `spec-template.md`). Attach it to the Epic with `attach_artifact`.
+- Raise **one** `request_review` for the map **and** the spec together, on
+  the Issue that carries the plan gate. The owner approves both in one
+  decision. Do not batch other decisions into it and do not raise it twice.
 - The map marks, per ticket, which further gate applies
   (`gate:artifact | final | none`) and which execution mode is expected.
-- Wait for the decision with `get_events {cursor, waitMs: 25000}` (fall back
-  to bounded `get_task` polling); never assume approval.
+- Wait for the decision with `get_changes {cursor, waitMs: 25000}` (fall
+  back to bounded `get_issue` polling); never assume approval.
 
 ## 3. Execute ticket by ticket
 
 Two execution modes; the executor chooses:
 
 - **Parallel** — one session reads the dependency graph, takes the ready
-  tickets (`list_tasks {kind: "issue", ready: true, parentId}`), and spins one
-  subagent per ticket, each in its own task-owned worktree. The primary
-  session owns integration and verification.
+  Issues (`list_issues {parent_id, ready: true}`), and spins one subagent
+  per Issue, each in its own task-owned worktree. The primary session owns
+  integration and verification.
 - **Single** — one agent, one ticket, start to finish.
 
-Either way, claim before working (`save_work {id, assignee, state:
-"started"}`), and every ticket produces three documents attached to it:
+Either way, claim before working (`update_issues {ids, assignee, state:
+"in_progress"}`), and every ticket produces three documents attached to it:
 
 1. **Mini-spec** — what exactly is being built, decisions taken, deviations
    from the approved spec and why.
@@ -88,6 +93,10 @@ Either way, claim before working (`save_work {id, assignee, state:
    build/tests/checks the change affects and report actual results; never
    claim a result you did not observe.
 3. **Release doc** — what to deploy, in which order, and how to roll back.
+
+When a ticket claims completion, use `claim_issue` with real evidence, then
+get it independently checked with `verify_issue` from a **different**
+principal — a claim is not a check (`context` skill, reviews).
 
 The map's **overall release doc** links every per-ticket release doc and
 summarises the whole run. Deliverables are attached (`docKind:
@@ -112,17 +121,17 @@ runbook (release, rollback, traffic spikes, alerting). A section may read
 
 Any workflow that runs on a schedule installs the `daily-brief` skill and its
 routine **before** any other routine: one comment per day on a designated
-issue — what published, what awaits approval, what failed, what is next. A
+Issue — what published, what awaits approval, what failed, what is next. A
 missing brief is the outage alert. There is no server-side fallback by design.
 
 ## 7. Handoff before stopping
 
 Before any interruption, milestone or hand-over to another agent, post one
-comment on the ticket: goal · repo · worktree + branch · done · key files ·
-decisions and why · verification run · remaining · blockers · next action.
-Address it to "the next agent", never to a specific harness. Resuming means:
-read the handoff → open the worktree → `git status` → reconcile (Git wins) →
-re-run verification → continue.
+comment (`post_comment`) on the ticket: goal · repo · worktree + branch · done
+· key files · decisions and why · verification run · remaining · blockers ·
+next action. Address it to "the next agent", never to a specific harness.
+Resuming means: read the handoff → open the worktree → `git status` →
+reconcile (Git wins) → re-run verification → continue.
 
 ## 8. Safety and scope
 
@@ -130,18 +139,18 @@ re-run verification → continue.
   data or regulated records; ask for a redacted brief instead.
 - Stay inside the task's worktree and the repos the ticket names.
 - Do not push, merge, deploy or apply migrations unless the ticket says so.
-- If a server rule rejects a write (epic limits, orphan issue, gate needs an
-  attached document), read the error — it names the rule and the fix.
+- If a server rule rejects a write (Epic limits, orphan Issue, gate needs an
+  attached Artifact), read the error — it names the rule and the fix.
 
 ## Quick reference
 
 | Moment | Call |
 |---|---|
-| Session start | `usage_guide` |
+| Session start | `start_context` |
 | Brainstorm | load `grill-me`, then `wayfinder` |
-| Chart | `save_work` epic → issues → links; `send_file` spec |
-| Gate | one `post_task_update {state: "in_review", reviewRequest}` for map + spec |
-| Wait | `get_events {cursor, waitMs: 25000}` |
-| Work | `save_work {assignee, state: "started"}` → `post_task_update` → attach mini-spec, acceptance tests, release doc |
-| Close | `complete_tasks {tasks: [{id, workStats}]}` |
+| Chart | `create_epic` → `create_issues` → `update_issues {blocked_by}`; `attach_artifact` spec |
+| Gate | one `request_review` for map + spec |
+| Wait | `get_changes {cursor, waitMs: 25000}` |
+| Work | `update_issues {assignee, state: "in_progress"}` → `post_comment` → attach mini-spec, acceptance tests, release doc |
+| Complete | `claim_issue` (evidence) → `verify_issue` (different principal) → `complete_issues` |
 | Stop | handoff comment on the ticket |

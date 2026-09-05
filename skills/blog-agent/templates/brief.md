@@ -1,7 +1,7 @@
 # Context brief — <Brand> Blog
 
 <!-- Show this to the owner before storing. Then:
-     send_file {filename: "context-brief.md", title: "Context brief", docKind: "brief", taskId: <tenant epic id>, content: <this file, filled>} -->
+     attach_artifact {filename: "context-brief.md", title: "Context brief", docKind: "brief", parent_id: <tenant epic id>, content: <this file, filled>} -->
 
 **Tenant:** `<slug>` · **Site:** <https://…> · **Date:** <YYYY-MM-DD> · **Host:** <claude-code | chatgpt | claude-ai | codex>
 
@@ -35,8 +35,8 @@
 - Keys by name only: <OPENROUTER_API_KEY, POSTIZ_API_KEY, BLOG_ACCESS_KEY> kept in <KeyVault / host secret store>
 
 ## Review gates
-- Map + spec: one combined `reviewRequest` (this epic)
-- Each publish: `gate:artifact` — checker verdict + rendered preview + models on the issue before `reviewRequest`
+- Map + spec: one combined `request_review` (this epic)
+- Each publish: `gate:artifact` — checker verdict + rendered preview + models on the issue before `request_review`
 - <Anything else the owner asked for>
 
 ## Routines (this host)

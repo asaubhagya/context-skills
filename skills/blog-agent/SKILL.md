@@ -11,7 +11,7 @@ description: >-
   Instagram, once or recurring, Artifact · Review · Hosted.
 depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher, site-builder, blog-assessment]
 license: MIT
-version: 6
+version: 7
 attach: [templates/brand-guide.md, templates/audience.md, templates/design-tokens.json, templates/design-tokens.md, templates/decision-record.md, templates/brief.md, templates/lanes.md, routines/launchd.plist.template, routines/crontab.txt, routines/chat-routines.md, routines/no-machine.md]
 ---
 
@@ -21,8 +21,9 @@ This skill is a **thin wrapper**. It fixes the goal, the opening, the shape
 of the interview tree, the artifact templates, the chart step and the
 routines. Everything about *how to interview* is `grill-me`; everything
 about *how to chart a map* is `wayfinder` + `setup-context`; everything
-about *how to behave in Context* is `rules` + `rules-blog`. Load all of
-them before you start; do not re-implement them here.
+about *how to behave in Context* is `rules` + `rules-blog` (which build on
+`context`). Load all of them before you start; do not re-implement them
+here.
 
 ## Goal
 
@@ -38,7 +39,7 @@ publish issues with `due` slots under their channel parent; on the Hosted
 tier the tenant registered on the Blog MCP; the routines installed **and
 verified** on this host (daily brief first); a `## Runs` block on the epic
 that the daily brief keeps current; a handoff comment; and **one** combined
-map + spec `reviewRequest` waiting for the owner. Nothing is published.
+map + spec `request_review` waiting for the owner. Nothing is published.
 
 When the epic already exists, the session says so, reuses it, offers a
 `redo` of the interview (updated brand guides, issues kept) and runs the
@@ -46,7 +47,7 @@ routines step again — see **Existing epic**.
 
 ## Before the first message
 
-1. Context MCP `usage_guide`; Blog MCP `usage_guide` and `get_capabilities`
+1. Context `start_context`; Blog MCP `usage_guide` and `get_capabilities`
    (record `tools[]` and `skillChannel` — facts for Round 1 and the chart).
 2. Note what this host is (`claude-code`, `codex`, `chatgpt`, `claude-ai`,
    …) and, from `rules-blog` §8, what it can and cannot do. That is stated,
@@ -54,9 +55,9 @@ routines step again — see **Existing epic**.
 3. **Existing-epic check — always, before any question.** Derive the slug
    from the brand or site the owner named (`getmeetly.ai` → `meetly`; ask
    for the brand in one line if nothing was named). Then
-   `list_tasks {kind: "epic", label: "tenant:<slug>"}` and, when the Blog
-   MCP has it, `tenant_get {slug}`. Either one found → the **Existing
-   epic** path below. Nothing → the fixed opening.
+   `list_epics {label: "tenant:<slug>"}` and, when the Blog MCP has it,
+   `tenant_get {slug}`. Either one found → the **Existing epic** path below.
+   Nothing → the fixed opening.
 
 ## Fixed opening
 
@@ -102,13 +103,15 @@ capability line and the Blog MCP `tools[]` you found.
 
 ### Fact-finding — you, not the owner
 After Round 1 answers and before Round 2, fetch (browser, fetch tool, or a
-research subagent) and summarise in ≤ 10 lines with sources:
-- the site's palette, fonts, logo, layout → draft `design-tokens.json`;
-- 3–5 owner pieces → voice notes and a candidate sample paragraph;
-- competitors' formats (post length, hubs, comparison pages, IG cadence);
-- what the host can install (launchd/cron/scheduled prompts) — verified.
-If you cannot browse, say so in one line and ask only for the pastes you
-truly need.
+research subagent) and summarise in ≤ 10 lines with sources: how practitioners
+do this job now; 2–3 candidate skills; competitors' formats (post length,
+hubs, comparison pages, IG cadence); what the host can install (launchd/cron/
+scheduled prompts) — verified. If you cannot browse, say so in one line and
+ask only for the pastes you truly need.
+
+Fetch every skill you intend to recommend now (see `setup-context`
+Conventions) and read it, so you can say what it does in one line; you
+store it at chart time.
 
 ### Round 2 — brand ambassador
 Voice adjectives and anti-adjectives (propose from the writing) · stance on
@@ -122,8 +125,8 @@ Persona tiers (compulsory tier first) · 4–6 hubs with a pillar each ·
 first 10 topics (hub, persona, target query, kind) · ~30 target queries
 (mark answer-engine phrasing) · cadence per channel · slots · timezone.
 Sites: page goal, sections, CTA — the one-round interview in `site-builder`;
-a site-only owner (`setup {workflow: "site"}`) goes straight there and
-skips the blog rounds.
+a site-only owner goes straight there (call `start_context`, follow its
+`nextAction`) and skips the blog rounds.
 
 ### Round 4 — operations
 Channels confirmed · routines this host installs (daily brief **first**,
@@ -157,16 +160,16 @@ founder as author (`Person`), Meetly as publisher (`Organization`).
 Exact payload shapes are in `templates/lanes.md`; document templates in
 `templates/`. Order matters; ids from step 1 feed everything after.
 
-1. **Tenant epic** — `save_work {kind: "epic", project: "work", title:
-   "<Brand> Blog", description: <Goal · Done when · Milestones · Structure ·
-   Rules · Runs>, labels: ["tenant:<slug>", "wayfinder:map"]}`. The
-   description is capped at 2048 characters: link documents, never paste
-   them, and leave room for the `## Runs` block (`lanes.md` §6).
+1. **Tenant epic** — `create_epic {title: "<Brand> Blog", description:
+   <Goal · Done when · Milestones · Structure · Rules · Runs>, labels:
+   ["tenant:<slug>", "wayfinder:map"]}` in the Shared Space. The description
+   is capped at 2048 characters: link documents, never paste them, and
+   leave room for the `## Runs` block (`lanes.md` §6).
 2. **Documents on the epic**, each shown to the owner first, each
-   `send_file {…, taskId: <epic>}`: Brand persona (`docKind: "brand-guide"`,
-   `templates/brand-guide.md`) · Audience & hubs (`audience`,
-   `templates/audience.md`) · Design tokens (`design-guide`, both
-   `templates/design-tokens.md` and `.json`) · Decision record
+   `attach_artifact {parent_id: <epic>, …}`: Brand persona (`docKind:
+   "brand-guide"`, `templates/brand-guide.md`) · Audience & hubs
+   (`audience`, `templates/audience.md`) · Design tokens (`design-guide`,
+   both `templates/design-tokens.md` and `.json`) · Decision record
    (`decisions`, `templates/decision-record.md`) · Context brief (`brief`,
    `templates/brief.md`). Store every skill the owner accepted as
    `docKind: "skill"` per `setup-context`.
@@ -174,25 +177,27 @@ Exact payload shapes are in `templates/lanes.md`; document templates in
    order, `Daily Brief` first: `Daily Brief` · one parent per channel the
    owner chose — `Blog` (`lane:blog`), `Instagram` (`lane:instagram`),
    `Site` (`lane:site`) · `Backlog` (`lane:backlog`) · `AEO/SEO Health` ·
-   `Performance Report`. Six for a blog + Instagram tenant. Labels and
-   descriptions in `lanes.md` §2. Then write the ids of the Daily Brief
-   issue and of every parent into the epic's `## Structure` — the routines
-   read them from there.
+   `Performance Report`. Six for a blog + Instagram tenant, via `create_issues
+   {parent_id: <epic>, issues: [...]}`. Labels and descriptions in
+   `lanes.md` §2. Then write the ids of the Daily Brief issue and of every
+   parent into the epic's `## Structure` — the routines read them from
+   there.
 4. **Map + spec review ticket** — `gate:plan`, child of the epic, assigned
    to you.
 5. **First publish issues** — one per piece × channel × locale from the first
    10 topics and the slots, each a **child of its channel parent**
-   (`parentId: <Blog parent>` for `channel:blog`, `<Instagram parent>` for
+   (`parent_id: <Blog parent>` for `channel:blog`, `<Instagram parent>` for
    `channel:instagram`, `<Site parent>` for `channel:site`), labels
    `channel:` `locale:` `tenant:` `hub:` `kind:` `gate:artifact`, `due` =
-   the slot (ISO 8601 with offset), acceptance criteria from `lanes.md`.
+   the slot (ISO 8601 with offset), `acceptance_criteria` from `lanes.md`.
    Locale variants `relates` to the EN master. Chart only the first cycle
    (≤ 2 weeks). The remaining topics become **Backlog children**
    (`stage:topic`, `lanes.md` §4b); loose ideas from the interview become
    `stage:idea` children. Nothing content-shaped is a direct child of the
    epic.
-6. **Links, second pass** — every publish issue `blockedBy` the review
-   ticket; locale variants `blockedBy` their EN master.
+6. **Links, second pass** — every publish issue `blocked_by` the review
+   ticket (`update_issues {ids: [...], blocked_by: [<review ticket>]}`);
+   locale variants `blocked_by` their EN master.
 7. **Hosted tier — Blog MCP.** Check `get_capabilities.tools` first. If
    present, call in this order and post each result on the epic:
    `tenant_create {slug, name, site_url, context_epic_id}` →
@@ -242,14 +247,15 @@ Exact payload shapes are in `templates/lanes.md`; document templates in
 9. **Handoff comment** on the review ticket (rules §7): goal · tenant ·
    host · done · documents · decisions · routines installed and verified ·
    remaining · next action — addressed to "the next agent".
-10. **One combined gate** — `post_task_update {id: <review ticket>, state:
-    "in_review", body: "Map and spec charted — please review both",
-    reviewRequest: {blocking: true, reason: "<goal> · done when: <…> · 4
-    milestones · <n> tickets · <n> decisions · skills stored: <…> ·
-    tools/models: <…> · est. <cost/time>"}}`. Hand the owner the epic URL
-    (`https://app.onecontext.me/e/<id>`) and wait on `get_events {cursor,
-    waitMs: 25000}` (bounded `get_task` polling on hosts that cannot hold
-    the poll). Never a second `reviewRequest` for the spec alone.
+10. **One combined gate** — `update_issues {ids: [<review ticket>], state:
+    "in_review"}`, `post_comment {parent_id: <review ticket>, body: "Map and
+    spec charted — please review both"}`, then `request_review {parent_id:
+    <review ticket>, reason: "<goal> · done when: <…> · 4 milestones · <n>
+    tickets · <n> decisions · skills stored: <…> · tools/models: <…> · est.
+    <cost/time>"}`. Hand the owner the epic URL
+    (`https://app.onecontext.me/e/<id>`) and wait on `get_changes {cursor,
+    waitMs: 25000}` (bounded `get_issue` polling on hosts that cannot hold
+    the poll). Never a second `request_review` for the spec alone.
 
 ## Existing epic — reuse · redo · routines
 
@@ -259,9 +265,9 @@ issue for a tenant.
 
 1. **Say so.** First line, verbatim in shape: `Epic <title> (<ticket>)
    exists — using it.` Then ≤ 6 lines of what it holds, from reads only:
-   documents (`get_task {id: <epic>}` → `documents[]`, with dates); each
-   channel parent with open / in review / done counts (`list_tasks
-   {parentId: <parent>, includeClosed: true}`); Backlog size (open / done);
+   documents (`get_epic {id: <epic>}` → `artifacts[]`, with dates); each
+   channel parent with open / in review / done counts (`list_issues
+   {parent_id: <parent>, includeClosed: true}`); Backlog size (open / done);
    the `## Runs` block's `routines:` line, or "no Runs block yet"; tenant
    state on the Blog MCP (`tenant_get`: locales, recurrence, domain).
 2. **Offer, then wait:** `redo` — re-run the interview and update the
@@ -271,30 +277,31 @@ issue for a tenant.
    voice"): treat it as a partial `redo` limited to that branch of the tree.
 3. **`redo`.** Run Rounds 1–4 with every current answer pre-filled as the
    `➡️` recommendation, taken from the decision record and the documents
-   (`get_document`), so the owner changes what they want and confirms the
+   (`get_artifact`), so the owner changes what they want and confirms the
    rest in one word. Then, in this order:
    - **Documents** — for every document whose content changed,
-     `send_file {taskId: <epic>, …}` with the same `docKind` and title: a
-     new document version attached to the epic (brand persona, audience &
-     hubs, design tokens `.md` + `.json`, brief); the **decision record
-     always**, with the new rows `from: user` and the replaced rows marked
-     superseded.
+     `revise_artifact {id, …}` (or `attach_artifact` if it doesn't exist
+     yet) with the same `docKind` and title: a new revision attached to the
+     epic (brand persona, audience & hubs, design tokens `.md` + `.json`,
+     brief); the **decision record always**, with the new rows `from: user`
+     and the replaced rows marked superseded.
    - **Blog MCP** (Hosted) — `brand_upsert {tenant, persona, design_tokens,
      byline}` (the server bumps the brand revision; say the new revision on
      the epic); `hubs_upsert` / `topics_upsert` only when hubs or topics
      changed.
-   - **Epic** — `save_work {id: <epic>, description}` for the `## Rules`
+   - **Epic** — `update_epic {id: <epic>, description}` for the `## Rules`
      lines that changed (cadence, locales, voice, claims, skills); never
      touch the `## Runs` block, which belongs to the daily brief.
    - **Issues** — keep every existing issue and its state. Create only what
-     `list_tasks {parentId, label}` shows missing: a channel parent for a
+     `list_issues {parent_id, label}` shows missing: a channel parent for a
      channel the owner added, publish issues for new slots (under the
      parent), Backlog children for new topics. Re-slot (`due`) only when
      the owner changed the cadence, with a comment on each moved issue.
      Never delete, never re-parent, never a second gate on a piece.
-   - **Gate** — the existing Map + spec review ticket gets one
-     `post_task_update {state: "in_review", reviewRequest}` only if a
-     document or the map changed; otherwise say "nothing to review".
+   - **Gate** — the existing Map + spec review ticket gets
+     `update_issues {ids: [<ticket>], state: "in_review"}` +
+     `request_review` only if a document or the map changed; otherwise say
+     "nothing to review".
 4. **Routines step** — chart step 8, in full, every time (first setup and
    redo alike): detect, print the filled templates, install or re-verify,
    record.
@@ -303,10 +310,10 @@ issue for a tenant.
 ## After approval — the loop
 
 Approved map → the routines run the loop: `blog-drafter` takes the earliest
-`backlog` publish issue under the `Blog` parent (or graduates the oldest
+`open` publish issue under the `Blog` parent (or graduates the oldest
 researched topic from the `Backlog` into a new publish issue under `Blog`)
 → maker draft → `blog-checker` (separate call) → attach draft + verdict +
-preview + models → `reviewRequest` → owner → `done` → `blog-publisher` at
+preview + models → `request_review` → owner → `done` → `blog-publisher` at
 `due` → live URL on the issue. Instagram issues (children of the
 `Instagram` parent, `channel:instagram`) run the same chain through
 `instagram-drafter` (slides rendered from the paper-cards template,

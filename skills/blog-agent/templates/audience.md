@@ -1,6 +1,6 @@
 # Audience & hubs — <Brand>
 
-<!-- send_file {filename: "audience-hubs.md", title: "Audience & hubs", docKind: "audience", taskId: <tenant epic id>, content: <this file, filled>} -->
+<!-- attach_artifact {filename: "audience-hubs.md", title: "Audience & hubs", docKind: "audience", parent_id: <tenant epic id>, content: <this file, filled>} -->
 
 **Tenant:** `<slug>` · **Date:** <YYYY-MM-DD> · **Approved by owner:** yes (Round 3)
 

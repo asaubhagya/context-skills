@@ -7,10 +7,10 @@ description: >-
   `article_upsert` (lint-gated, fix and retry, two bounces then escalate),
   hand the draft to `blog-checker` in a separate call, spawn the locale
   variants as linked issues, and leave the publish issue carrying draft +
-  verdict + preview + models behind one blocking reviewRequest. Never publishes.
+  verdict + preview + models behind one blocking request_review. Never publishes.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 5
+version: 6
 attach: [templates/draft-notes.md]
 ---
 
@@ -28,24 +28,24 @@ publisher (`blog-publisher`) goes live.
 1. **Tenant** — the slug from the routine prompt (or `CONTEXT_BLOG_TENANT`),
    the tenant epic id, the buffer floor (`<n>`, default 3). State the tenant
    before any write.
-2. **Parents** — the epic's `Blog` parent (`list_tasks {kind: "issue",
-   parentId: <epic>, label: "lane:blog"}` → `<blog parent>`) and its
-   `Backlog` (`label: "lane:backlog"` → `<backlog>`); the routine prompt or
-   the epic's `## Structure` may carry the ids — confirm with `get_task`.
-   Every publish issue is a child of `<blog parent>`, never of the epic
+2. **Parents** — the epic's `Blog` parent (`list_issues {parent_id: <epic>,
+   label: "lane:blog"}` → `<blog parent>`) and its `Backlog` (`label:
+   "lane:backlog"` → `<backlog>`); the routine prompt or the epic's
+   `## Structure` may carry the ids — confirm with `get_issue`. Every
+   publish issue is a child of `<blog parent>`, never of the epic
    (`rules-blog` §3 Hierarchy).
-3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+3. **Session start** — Context `start_context`; Blog MCP `usage_guide` +
    `get_capabilities`: `article_upsert`, `content_lint`, `preview_render`,
    `check_record`, `check_list` must be in `tools[]` (else `rules-blog` §8:
    say which is missing, attach the payload you would have sent, stop).
-4. **Brand** — `get_task {id: <epic>}` → its documents → `get_document` of
+4. **Brand** — `get_epic {id: <epic>}` → its artifacts → `get_artifact` of
    the brand persona (`brand-guide`: voice, sample paragraph, banned phrases,
    claims policy), audience & hubs (`audience`), design tokens
    (`design-guide`, the `.json`).
 5. **Platform** — Blog MCP `tenant_get {slug}` (locales, recurrence, hubs)
    and `topics_list {tenant_slug}`.
-6. **Rotation** — the last 5 published pieces (`list_tasks {kind: "issue",
-   parentId: <blog parent>, state: "done", includeClosed: true, label:
+6. **Rotation** — the last 5 published pieces (`list_issues {parent_id:
+   <blog parent>, state: "done", includeClosed: true, label:
    "channel:blog"}` → their `style` from the draft front matter) →
    `recent_styles`.
 
@@ -55,8 +55,8 @@ publisher (`blog-publisher`) goes live.
   `deliverable` document and are not live yet (`in_review`, or `done` with
   no `Published:` update). **Slots** = publish issues with `due` in the next
   7 days.
-- **Priority 0 — changes requested.** Issues in `started` whose latest
-  activity is an owner comment after a `reviewRequest` come first: revise
+- **Priority 0 — changes requested.** Issues in `in_progress` whose latest
+  activity is an owner comment after a `request_review` come first: revise
   per the comment (§5–§7 with the same article `id`), re-localise the
   variants after the revision passes, and count that as tonight's work.
 - **Draft** when the buffer is below the floor, or when any slotted issue
@@ -70,31 +70,32 @@ publisher (`blog-publisher`) goes live.
 
 In this order, first hit wins:
 
-1. `list_tasks {kind: "issue", parentId: <blog parent>, label: "channel:blog",
-   state: "backlog", ready: true}` → `locale:en`, no documents attached,
-   earliest `due`.
-2. Backlog: `list_tasks {kind: "issue", parentId: <backlog>, label:
-   "stage:topic", state: "backlog"}` — researched topics, oldest first,
-   preferring the hub with the fewest published pieces (`stage:idea`
-   children only when no topic exists and the idea names a hub: research
-   it, relabel it `stage:topic`, then continue). Graduate it: create the
-   publish issue as a child of `<blog parent>` (`lanes.md` §4 shape, `due`
-   = the next free cadence slot from `tenant_get.recurrence` — free when no
-   other `channel:blog` issue is due then — `links: [{id: <backlog child>,
-   type: "relates"}]`), post `Graduated → <new ticket>` on the Backlog
-   child and mark it done (`complete_tasks` with `workStats`; it stays in
-   the Backlog as history), and `topics_upsert {items: [{id,
-   context_issue_id: <new issue>, status: "drafting"}]}` when the topic
-   exists on the Blog MCP. Say on the new issue where it came from.
+1. `list_issues {parent_id: <blog parent>, label: "channel:blog", state:
+   "open", ready: true}` → `locale:en`, no artifacts attached, earliest
+   `due`.
+2. Backlog: `list_issues {parent_id: <backlog>, label: "stage:topic",
+   state: "open"}` — researched topics, oldest first, preferring the hub
+   with the fewest published pieces (`stage:idea` children only when no
+   topic exists and the idea names a hub: research it, relabel it
+   `stage:topic`, then continue). Graduate it: create the publish issue as
+   a child of `<blog parent>` (`create_issues {parent_id: <blog parent>}`,
+   `lanes.md` §4 shape, `due` = the next free cadence slot from
+   `tenant_get.recurrence` — free when no other `channel:blog` issue is due
+   then — labeled `relates:<backlog child>`), post `Graduated → <new
+   ticket>` on the Backlog child and mark it done (`complete_issues` with
+   `workStats`; it stays in the Backlog as history), and `topics_upsert
+   {items: [{id, context_issue_id: <new issue>, status: "drafting"}]}` when
+   the topic exists on the Blog MCP. Say on the new issue where it came
+   from.
 3. Nothing → stop and say so (`drafter: nothing to draft`).
 
 Then: the issue **must** carry `hub:<slug>` and the slug must exist in
 `tenant_get.hubs`. If missing, take it from the topic's hub or the Audience
-& hubs mapping, add the label with `save_work`, and note it. Never draft
+& hubs mapping, add the label with `update_issues`, and note it. Never draft
 outside a hub. Never touch an issue that is `ready: false` — say what blocks
-it. Claim: `save_work {id, assignee: "<your agent label>", state:
-"started"}`; `topics_upsert {items: [{id, status: "drafting"}]}` when the
-topic came from the lane.
+it. Claim: `update_issues {ids: [id], assignee: "<your agent label>",
+state: "in_progress"}`; `topics_upsert {items: [{id, status: "drafting"}]}`
+when the topic came from the lane.
 
 ## 3. Research — sources first
 
@@ -270,8 +271,9 @@ What the lint and the checker will hold you to:
 2. `article_upsert {…, dry_run: true}`, then the real call. On
    `invalid_argument` read `details.warnings`, fix the named `path`s, retry.
    **Two bounces at most** (three attempts). A third rejection →
-   `post_task_update {body: "ESCALATE: article_upsert rejected 3× — <codes>"}`,
-   leave the issue `started`, and stop this piece.
+   `post_comment {parent_id: <issue>, body: "ESCALATE: article_upsert
+   rejected 3× — <codes>"}`, leave the issue `in_progress`, and stop this
+   piece.
 3. Keep `id`, `preview_url`, `url` from the result; every later revision
    passes the same `id`.
 4. Post one machine-readable line on the issue — the checker and the
@@ -280,22 +282,23 @@ What the lint and the checker will hold you to:
 
 ## 6. Attach the draft
 
-- `send_file {taskId: <issue>, filename: "<slug>.<locale>.md", title:
-  "<title> (<locale>)", docKind: "deliverable", content: <markdown rendering
-  of the draft with front matter: article id, slug, locale, hub, style,
-  publish_at, translation_group>}`.
-- `send_file {taskId, filename: "draft-notes-<locale>-r<n>.md", title:
-  "Draft notes, round <n>", docKind: "notes", content: <templates/draft-notes.md filled>}`.
+- `attach_artifact {parent_id: <issue>, filename: "<slug>.<locale>.md",
+  title: "<title> (<locale>)", docKind: "deliverable", content: <markdown
+  rendering of the draft with front matter: article id, slug, locale, hub,
+  style, publish_at, translation_group>}`.
+- `attach_artifact {parent_id: <issue>, filename:
+  "draft-notes-<locale>-r<n>.md", title: "Draft notes, round <n>", docKind:
+  "notes", content: <templates/draft-notes.md filled>}`.
 
 ## 7. Hand to the checker — a separate call
 
 Start a **fresh session or subagent** whose only inputs are the tenant, the
 issue id and "follow `blog-checker`" (on Claude Code an `Agent` subagent or
 a second `claude -p`; never this context). Then read the outcome from the
-issue (`get_task`):
+issue (`get_issue`):
 
 - **pass** — the checker attached the verdict and preview, recorded the
-  check, and raised the `reviewRequest` (state `in_review`). If the state or
+  check, and raised `request_review` (state `in_review`). If the state or
   request is missing, raise it **once** yourself with the checker's reason
   format. Then `article_set_status {id, status: "in_review"}`.
 - **bounce** — fix each finding at its `path`, re-run §5 with the same `id`,
@@ -310,22 +313,21 @@ After the EN master passes (state `in_review`), for every locale the tenant
 feeds (the persona's locale table: e.g. `de` full, `fr` reduced; frozen
 locales get nothing):
 
-1. Reuse the variant issue if `list_tasks {parentId: <blog parent>, label:
-   "locale:<l>"}` shows one that `relates` to this master; else
-   `save_work {kind: "issue", issueType: "complex", parentId: <blog parent>, title:
-   "Blog: <localised title> (<l>)", labels: ["channel:blog", "locale:<l>",
-   "tenant:<slug>", "hub:<hub>", "kind:<kind>", "gate:artifact"], due:
-   <the master's due>, links: [{id: <master>, type: "relates"}, {id:
-   <master>, type: "blockedBy"}], description: "Cascade: publish after EN
-   master <ticket> is done. Depth: full | reduced. Approval cascades from
-   EN (rules-blog §5)."}`.
+1. Reuse the variant issue if `list_issues {parent_id: <blog parent>,
+   label: "locale:<l>"}` shows one that `relates` to this master; else
+   `create_issues {parent_id: <blog parent>, issues: [{title: "Blog:
+   <localised title> (<l>)", labels: ["channel:blog", "locale:<l>",
+   "tenant:<slug>", "hub:<hub>", "kind:<kind>", "gate:artifact", "relates:
+   <master>"], due: <the master's due>, blocked_by: [<master>],
+   description: "Cascade: publish after EN master <ticket> is done. Depth:
+   full | reduced. Approval cascades from EN (rules-blog §5)."}]}`.
 2. Draft it as **localisation, not translation**: examples, currency, units,
    idiom and the App Store storefront link for that market; own `slug`,
    `title`, `description`; same `translation_group`. *Full* = every section;
    *reduced* = title, description, `seo.answer`, the H2s with their lead
    paragraphs, the FAQ. Same model as the master.
 3. §5 with `master` in the lint context, §6, then §7 — the checker moves a
-   cascade variant to `in_review` without a `reviewRequest`;
+   cascade variant to `in_review` without a `request_review`;
    `article_set_status in_review`.
 
 ## 9. After the owner asks for changes
@@ -338,7 +340,7 @@ work around it.
 
 ## 10. Report and stop
 
-- `post_task_update {id: <issue>, body: "Drafted <round> — article <id> ·
+- `post_comment {parent_id: <issue>, body: "Drafted <round> — article <id> ·
   preview <url> · check <check_id> · maker <model> · checker <model> ·
   variants: <tickets or none>", workStats}` (`role: "maker"`).
 - Print one line for the routine log, which the daily brief reads:
@@ -351,6 +353,6 @@ work around it.
 Publish or set an article `approved` / `published` · check your own draft ·
 invent a number, quote, customer, meeting or study · draft outside a hub ·
 create a piece directly under the epic ·
-touch a blocked issue · raise a second `reviewRequest` · more than one EN
+touch a blocked issue · raise a second `request_review` · more than one EN
 piece per run · store or echo a key value (keys by name: `BLOG_ACCESS_KEY`,
 `OPENROUTER_API_KEY`).

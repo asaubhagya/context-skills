@@ -1,6 +1,6 @@
 # Brand persona — <Brand>
 
-<!-- send_file {filename: "brand-persona.md", title: "Brand persona", docKind: "brand-guide", taskId: <tenant epic id>, content: <this file, filled>} -->
+<!-- attach_artifact {filename: "brand-persona.md", title: "Brand persona", docKind: "brand-guide", parent_id: <tenant epic id>, content: <this file, filled>} -->
 
 **Tenant:** `<slug>` · **Site:** <https://…> · **Date:** <YYYY-MM-DD> · **Approved by owner:** yes (Round 2)
 

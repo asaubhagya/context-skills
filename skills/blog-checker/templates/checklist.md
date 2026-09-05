@@ -7,7 +7,7 @@ JUDGEMENT (you). `F` = fact-check (fetch). Nothing is "probably fine".
 ## Before the checks
 
 - [ ] I did not draft this piece in this session (else hand off).
-- [ ] Context `usage_guide`; Blog `usage_guide` + `get_capabilities` — `content_lint`, `preview_render`, `check_record` present?
+- [ ] Context `start_context`; Blog MCP `usage_guide` + `get_capabilities` — `content_lint`, `preview_render`, `check_record` present?
 - [ ] Draft fetched from the issue (latest `deliverable` / `draft`) or the upsert payload; normalised to `kind, title, description, sections, faq, seo`.
 - [ ] Brand persona, audience & hubs, `design-tokens.json` fetched from the tenant epic.
 - [ ] Last 5 published styles listed; `check_list {subject_ref}` read → this round = prior + 1.
@@ -48,6 +48,6 @@ JUDGEMENT (you). `F` = fact-check (fetch). Nothing is "probably fine".
 - [ ] pass: no M error · every J pass/n-a · every F verified
 - [ ] bounce: round ≤ 2; findings listed with `path` and the change required
 - [ ] escalate: round would be 3 · claims/safety/legal · unverifiable fact
-- [ ] `send_file` verdict (`docKind: "review"`) · `preview_render` → `send_file` HTML (`docKind: "preview"`) · `check_record` → `check_id`
-- [ ] `post_task_update` with verdict line, preview URL, check_id, maker + checker models, `workStats`
-- [ ] pass only: `post_task_update {state: "in_review", reviewRequest: {blocking: true, reason}}` — once
+- [ ] `attach_artifact` verdict (`docKind: "review"`) · `preview_render` → `attach_artifact` HTML (`docKind: "preview"`) · `check_record` → `check_id`
+- [ ] `post_comment` with verdict line, preview URL, check_id, maker + checker models, `workStats`
+- [ ] pass only: `update_issues {state: "in_review"}` → `request_review {reason}` — once

@@ -7,9 +7,9 @@ description: >-
   rebuild the epic's `## Runs` block (schedule · next slots · routine health
   · last 7 briefs) so the owner sees it on the epic. A missing brief is the
   outage alert.
-depends: [rules]
+depends: [context, rules]
 license: MIT
-version: 2
+version: 3
 ---
 
 # Daily brief
@@ -29,23 +29,23 @@ no scheduler by design; the routine runs on the host that owns the workflow.
 - The workflow's **channel parents**, when it has them (issues labelled
   `lane:<channel>` under the epic — `Blog`, `Instagram`, `Site` — whose
   children are the pieces) and its `Backlog` (`lane:backlog`). Resolve them
-  with `list_tasks {kind: "issue", parentId: <epic>, label: "lane:<x>"}` or
-  read the ids from the epic's `## Structure`. `list_tasks {parentId}`
-  returns direct children only: the pieces are visible through their
-  parent, never through the epic.
+  with `list_issues {parent_id: <epic>, label: "lane:<x>"}` or read the ids
+  from the epic's `## Structure`. `list_issues {parent_id}` returns direct
+  children only: the pieces are visible through their parent, never through
+  the epic.
 - The time and timezone the owner chose (default 08:00 in their timezone).
 - Optionally, any other MCP the workflow uses (read-only calls only).
 
 ## Once per day
 
-1. `usage_guide` if this is a fresh session.
+1. `start_context` if this is a fresh session.
 2. Gather, read-only, for the last 24 h and the next 24 h — over the pieces
-   (`list_tasks {parentId: <channel parent>, includeClosed: true}` for each
+   (`list_issues {parent_id: <channel parent>, includeClosed: true}` for each
    parent, follow `nextCursor`; the epic's direct children when the workflow
    has no parents):
    - **Published** — pieces that moved to `done` and carry a live link
      (`Published:` update) or deliverable.
-   - **Awaiting approval** — issues `in_review` with an open `reviewRequest`,
+   - **Awaiting approval** — issues `in_review` with an open `request_review`,
      oldest first, with how long they have waited.
    - **Failed / skipped** — routine runs that errored, publish windows
      missed, checker bounces or escalations; anything you had to skip.
@@ -58,11 +58,11 @@ no scheduler by design; the routine runs on the host that owns the workflow.
      and the routine's one-line summary). Say plainly if you cannot observe
      one.
 3. Post **one** comment on the Daily Brief issue with
-   `post_task_update {id, body}` using the template below. If today's brief
-   already exists (a comment from the last 20 h with the `Daily brief —` title),
-   do not post a second one; append only if something failed since.
+   `post_comment {parent_id: id, body}` using the template below. If today's
+   brief already exists (a comment from the last 20 h with the `Daily brief —`
+   title), do not post a second one; append only if something failed since.
 4. If anything failed or a publish window was missed, also raise it on the
-   affected issue (`post_task_update`) so it is visible where the work is.
+   affected issue (`post_comment`) so it is visible where the work is.
 5. Report `workStats` on the update.
 6. Rebuild the epic's `## Runs` block (next section) — also on days when
    today's brief already existed.
@@ -85,9 +85,9 @@ Keep it under 20 lines. Names, not bare ids. No credential values, ever.
 
 The epic description ends with a `## Runs` block: the routine schedule, the
 next three slots, routine health and the last seven briefs as one-liners.
-After the comment, `get_task {id: <epic>}` → `description`, keep everything
+After the comment, `get_epic {id: <epic>}` → `description`, keep everything
 **above** `## Runs` byte for byte, rebuild the block from today's data
-(never append to the old one), `save_work {id: <epic>, description}`.
+(never append to the old one), `update_epic {id: <epic>, description}`.
 Append the block if the epic has none yet.
 
 ```
@@ -111,7 +111,7 @@ briefs:
   second `next` entries, until it fits. Never cut above `## Runs`; if the
   text above the block alone leaves fewer than ~400 characters, write
   `schedule` and `routines` only and say so in the comment.
-- Nobody else writes this block. If the save is refused, say so in the
+- Nobody else writes this block. If the write is refused, say so in the
   comment — the comment is the record, the block is the view.
 
 ## Rules that bite here

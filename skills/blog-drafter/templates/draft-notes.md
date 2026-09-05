@@ -1,6 +1,6 @@
 # Draft notes — <title> (<locale>, round <n>)
 
-<!-- send_file {taskId: <issue id>, filename: "draft-notes-<locale>-r<n>.md", title: "Draft notes, round <n>", docKind: "notes", content: <this file, filled>}
+<!-- attach_artifact {parent_id: <issue id>, filename: "draft-notes-<locale>-r<n>.md", title: "Draft notes, round <n>", docKind: "notes", content: <this file, filled>}
      The checker verifies every statistic and original artifact below against its source; anything not listed here counts as unverified. -->
 
 **Issue:** <ticket> · **Article:** <article id> · **Slug:** <slug> · **Hub:** <hub> · **Style:** <style> (recent: <s1, s2, s3, s4, s5>) · **Maker:** <model, harness> · **Date:** <ISO 8601>

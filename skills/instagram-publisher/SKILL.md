@@ -10,7 +10,7 @@ description: >-
   that is not `done`; degrades to owner self-publish without a key.
 depends: [rules-blog, rules]
 license: MIT
-version: 2
+version: 3
 attach: [scripts/postiz.sh]
 ---
 
@@ -19,7 +19,7 @@ attach: [scripts/postiz.sh]
 You run inside the tenant's 3-hourly publisher routine (after the blog
 pass), one tenant per run, and you are the only skill that talks to Postiz.
 Approval truth is Context: an issue is postable **only** when its state is
-`done` — the owner approved it through the checker's `reviewRequest` — and
+`done` — the owner approved it through the checker's `request_review` — and
 its slot has arrived. You make no content decisions; you verify, post,
 record, report.
 
@@ -27,11 +27,11 @@ record, report.
 
 1. **Tenant** — slug, epic id, timezone from the routine prompt (or
    `CONTEXT_BLOG_TENANT`). State the tenant before any write.
-2. **Parent** — the epic's `Instagram` parent (`list_tasks {kind: "issue",
-   parentId: <epic>, label: "lane:instagram"}` → `<instagram parent>`; the
-   routine prompt or the epic's `## Structure` may carry the id — confirm
-   with `get_task`). Every Instagram issue is its child (`rules-blog` §3).
-3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+2. **Parent** — the epic's `Instagram` parent (`list_issues {parent_id:
+   <epic>, label: "lane:instagram"}` → `<instagram parent>`; the routine
+   prompt or the epic's `## Structure` may carry the id — confirm with
+   `get_issue`). Every Instagram issue is its child (`rules-blog` §3).
+3. **Session start** — Context `start_context`; Blog MCP `usage_guide` +
    `get_capabilities`: `publish`, `instagram_post_list` in `tools[]` (else
    `rules-blog` §8).
 4. **Key** — `POSTIZ_API_KEY` by name, read inside `scripts/postiz.sh` (env
@@ -48,8 +48,8 @@ record, report.
 
 ## 1. Candidates
 
-`list_tasks {kind: "issue", parentId: <instagram parent>, state: "done",
-includeClosed: true, label: "channel:instagram"}` — follow `nextCursor` — then `get_task`
+`list_issues {parent_id: <instagram parent>, state: "done", includeClosed:
+true, label: "channel:instagram"}` — follow `nextCursor` — then `get_issue`
 each (the list is a hint; the record is the truth). Sort by `dueAt`:
 
 | condition | action |
@@ -66,10 +66,10 @@ Blog and site issues belong to `blog-publisher`; this skill touches
 ## 2. Post one issue
 
 Pre-flight — every line must hold, otherwise skip and post why on the
-issue **once** (`post_task_update`, never repeated on later runs):
+issue **once** (`post_comment`, never repeated on later runs):
 
-1. `get_task` now shows `state.category: "done"`. Not `in_review`, not
-   `started`, never the list's word for it.
+1. `get_issue` now shows `state.category: "done"`. Not `in_review`, not
+   `in_progress`, never the list's word for it.
 2. The latest `docKind: "review"` document is a **pass** verdict and the
    slide previews (`docKind: "preview"`) or the asset ids are on the issue.
 3. The post id: the `instagram-post: <id>` line the drafter posted; if
@@ -107,14 +107,14 @@ Post:
    contract, post `Publish record pending: <code> — <message>` on the issue
    and still keep the Postiz schedule (the owner approved; the audit row
    waits for the server slice); never retry more than once per run.
-4. Record once: `post_task_update {id, body: "Scheduled: postiz <post id>
-   at <date> · instagram_post <id> · publish_event <id or pending>",
-   workStats}` (`role: "publisher"`).
+4. Record once: `post_comment {parent_id: id, body: "Scheduled: postiz
+   <post id> at <date> · instagram_post <id> · publish_event <id or
+   pending>", workStats}` (`role: "publisher"`).
 
-Errors: `postiz.sh` non-zero → `post_task_update {body: "Publish failed:
-postiz <command> — <http status / message>"}`, no retry this run, next
-issue. Never leave a half-scheduled post silent: if `schedule` failed after
-uploads, say so; uploads are harmless. The daily brief reports it.
+Errors: `postiz.sh` non-zero → `post_comment {parent_id: id, body: "Publish
+failed: postiz <command> — <http status / message>"}`, no retry this run,
+next issue. Never leave a half-scheduled post silent: if `schedule` failed
+after uploads, say so; uploads are harmless. The daily brief reports it.
 
 ## 3. Owner adds music
 
@@ -128,8 +128,8 @@ permalink when the owner pastes it.
 
 For issues with `Scheduled:` and no `Published:`: `postiz.sh posts <due −
 1 h> <due + 1 h>` → the post with that id. State `PUBLISHED` with a
-`releaseURL` → `post_task_update {body: "Published: <releaseURL> at
-<publishDate> · postiz <id>"}`. State `ERROR` → `Publish failed: postiz
+`releaseURL` → `post_comment {parent_id: id, body: "Published: <releaseURL>
+at <publishDate> · postiz <id>"}`. State `ERROR` → `Publish failed: postiz
 reported <error>` once; the owner decides. Anything else → wait for the
 next run. A comment from the owner containing an `instagram.com/p/` URL
 counts as the permalink.
@@ -139,10 +139,11 @@ counts as the permalink.
 `now ≥ due + 3 h`, nothing scheduled, no `Missed window` comment: next free
 Instagram slot from the epic's `## Rules` / decision record (Meetly: Mon
 09:00 · Tue 07:00 · Thu 06:00 · Thu 21:00 Asia/Singapore) where no other
-`channel:instagram` child of `<instagram parent>` is due → `save_work {id, due: <next slot>}` +
-`post_task_update {body: "Missed window <old due>: re-slotted to <new due>
-— <reason if known>"}`. Never post late silently. An issue already carrying
-a `Missed window` comment with the current `due` is left alone.
+`channel:instagram` child of `<instagram parent>` is due →
+`update_issues {ids: [id], due: <next slot>}` + `post_comment {parent_id:
+id, body: "Missed window <old due>: re-slotted to <new due> — <reason if
+known>"}`. Never post late silently. An issue already carrying a `Missed
+window` comment with the current `due` is left alone.
 
 ## 6. Idempotency
 

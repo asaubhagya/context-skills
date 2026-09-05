@@ -5,10 +5,10 @@ description: >-
   content: run the MACHINE checks through the Blog MCP (content_lint,
   preview_render), do the JUDGEMENT checks and the fact-check yourself, record
   a pass / bounce / escalate verdict on the Context issue (review doc +
-  rendered preview + models), and raise the reviewRequest only on pass.
+  rendered preview + models), and raise the request_review only on pass.
 depends: [rules-blog, rules]
 license: MIT
-version: 3
+version: 4
 attach: [templates/verdict.md, templates/checklist.md]
 ---
 
@@ -23,25 +23,25 @@ piece in this session, stop and hand the check to a fresh session.
 
 ## Inputs — fetch, never ask
 
-1. **The draft** — either a Context document on the issue
-   (`get_task {id}` → `list_documents {taskId}` → `get_document {id}` of the
-   latest `docKind: "deliverable"` / `"draft"`), or the `article_upsert` /
+1. **The draft** — either a Context Artifact on the issue
+   (`get_issue {id}` → `list_artifacts {parent_id}` → `get_artifact {id}` of
+   the latest `docKind: "deliverable"` / `"draft"`), or the `article_upsert` /
    `page_upsert` payload the maker attached. Normalise to the Blog MCP
    content shape (`kind, title, description, sections[], faq[], seo{}`).
-2. **The tenant** — from the issue's `tenant:` label. The issue's `parent`
+2. **The tenant** — from the issue's `tenant:` label. The issue's parent
    is its channel parent (`Blog` / `Instagram` / `Site`, `lane:<channel>`)
-   and that parent's `parent` is the tenant epic — `get_task` up the chain
-   — which carries the brand persona (`docKind: "brand-guide"`: adjectives, anti-adjectives, banned
-   phrases, claims policy), audience & hubs (`docKind: "audience"`), design
-   tokens (`docKind: "design-guide"`, the `.json`).
-3. **Rotation** — the last 5 published pieces: `list_tasks {kind: "issue",
-   parentId: <channel parent>, state: "done", includeClosed: true, label:
-   "channel:blog"}` → their
-   `style` (from the description or the draft's front matter), most recent
-   first.
+   and that parent's parent is the tenant epic — `get_issue` / `get_epic`
+   up the chain — which carries the brand persona (`docKind: "brand-guide"`:
+   adjectives, anti-adjectives, banned phrases, claims policy), audience &
+   hubs (`docKind: "audience"`), design tokens (`docKind: "design-guide"`,
+   the `.json`).
+3. **Rotation** — the last 5 published pieces: `list_issues {parent_id:
+   <channel parent>, state: "done", includeClosed: true, label:
+   "channel:blog"}` → their `style` (from the description or the draft's
+   front matter), most recent first.
 4. **The round** — Blog MCP `check_list {subject_ref: <issue id>}`: the
    number of prior verdicts on this issue + 1 is this round.
-5. Session start: Context `usage_guide`; Blog `usage_guide` and
+5. Session start: Context `start_context`; Blog MCP `usage_guide` and
    `get_capabilities` — confirm `content_lint`, `preview_render`,
    `check_record` are in `tools[]` (else `rules-blog` §8: check locally,
    attach the payload, say which tool was missing).
@@ -127,38 +127,41 @@ as a fact:
 
 ## What you post on the Context issue — every run
 
-1. `send_file {taskId: <issue>, filename: "checker-verdict-r<n>.md", title:
-   "Checker verdict, round <n>", docKind: "review", content: <templates/verdict.md filled>}`
+1. `attach_artifact {parent_id: <issue>, filename: "checker-verdict-r<n>.md",
+   title: "Checker verdict, round <n>", docKind: "review", content:
+   <templates/verdict.md filled>}`
 2. `preview_render {tenant_slug, kind, title, description, sections, faq,
-   seo, design_tokens: <design-tokens.json>}` → `send_file {taskId, filename:
-   "preview-r<n>.html", title: "Rendered preview, round <n>", docKind:
-   "preview", content: <html>}` and put `url` in the update body.
+   seo, design_tokens: <design-tokens.json>}` → `attach_artifact {parent_id,
+   filename: "preview-r<n>.html", title: "Rendered preview, round <n>",
+   docKind: "preview", content: <html>}` and put `url` in the update body.
 3. `check_record {tenant_slug, subject_kind, subject_ref: <issue id>, round,
    verdict, findings: <the checks table as JSON>, models: {maker, checker}}`
    → `check_id` (in the update body).
-4. `post_task_update {id: <issue>, body: "Checker round <n>: <verdict> — <k>
-   findings · preview <url> · check <check_id> · maker <model> · checker
+4. `post_comment {parent_id: <issue>, body: "Checker round <n>: <verdict> —
+   <k> findings · preview <url> · check <check_id> · maker <model> · checker
    <model>", workStats: {harness, model, role: "checker", thinking, tokens,
    cost, duration, skills: ["blog-checker"], tools: ["content_lint",
    "preview_render", "check_record"]}}`
-   - bounce: `state: "started"`, `assignee` back to the maker, no `reviewRequest`.
-   - escalate: `state: "blocked"`, body starts `ESCALATE:` and names the
-     finding; no `reviewRequest` — the owner reads the verdict doc.
+   - bounce: `update_issues {ids: [<issue>], state: "in_progress", assignee:
+     <maker>}`, no `request_review`.
+   - escalate: `update_issues {ids: [<issue>], state: "blocked"}`, body
+     starts `ESCALATE:` and names the finding; no `request_review` — the
+     owner reads the verdict doc.
 
 ## Only on pass — raise the gate
 
 ```
-post_task_update {id: <issue>, state: "in_review",
-  body: "Checker passed (round <n>) — draft, verdict, preview and models attached",
-  reviewRequest: {blocking: true, reason: "<title> · <channel>/<locale> · hub <hub> · <words> words · <citations> citations verified · preview <url> · maker <model> · checker <model>"}}
+update_issues {ids: [<issue>], state: "in_review"}
+post_comment {parent_id: <issue>, body: "Checker passed (round <n>) — draft, verdict, preview and models attached"}
+request_review {parent_id: <issue>, reason: "<title> · <channel>/<locale> · hub <hub> · <words> words · <citations> citations verified · preview <url> · maker <model> · checker <model>"}
 ```
 
-Then hand over: `get_events {cursor, waitMs: 25000}` belongs to the driver
-session, not to you. Never a second `reviewRequest`, never `publish`.
+Then hand over: `get_changes {cursor, waitMs: 25000}` belongs to the driver
+session, not to you. Never a second `request_review`, never `publish`.
 
 **Locale variants cascade.** An issue whose `locale:` differs from its EN
 master's and whose description says `Cascade` moves to `in_review`
-**without** a `reviewRequest` on pass — the EN approval cascades to it and
+**without** a `request_review` on pass — the EN approval cascades to it and
 `blog-publisher` moves it to `done` when the master is live (`rules-blog`
 §5). Everything else above (verdict, preview, `check_record`, models) is
 attached exactly the same way.

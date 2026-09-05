@@ -1,6 +1,6 @@
 # Checker verdict — <title> (round <n>)
 
-<!-- send_file {taskId: <issue id>, filename: "checker-verdict-r<n>.md", title: "Checker verdict, round <n>", docKind: "review", content: <this file, filled>}
+<!-- attach_artifact {parent_id: <issue id>, filename: "checker-verdict-r<n>.md", title: "Checker verdict, round <n>", docKind: "review", content: <this file, filled>}
      Then check_record {tenant_slug, subject_kind, subject_ref: <issue id>, round: <n>, verdict, findings: <the two tables as JSON>, models}. -->
 
 **Verdict:** `pass | bounce | escalate` · **Issue:** <CONT-…> · **Tenant:** `<slug>` · **Channel/locale:** <blog/en> · **Hub:** <hub> · **Style:** <style> · **Round:** <n> of ≤ 2 bounces

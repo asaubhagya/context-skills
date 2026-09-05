@@ -9,7 +9,7 @@ description: >-
   stay idempotent. Refuses anything that is not `done`.
 depends: [rules-blog, rules]
 license: MIT
-version: 2
+version: 3
 ---
 
 # Blog publisher — approved → live
@@ -17,18 +17,18 @@ version: 2
 You run every 3 hours as a routine, one tenant per run, and you are the only
 skill that calls `publish`. Approval truth is Context: an issue is
 publishable **only** when its state is `done` — the owner approved it
-through the checker's `reviewRequest` — and its slot has arrived. You make
+through the checker's `request_review` — and its slot has arrived. You make
 no content decisions; you verify, publish, record, and report.
 
 ## Inputs — fetch, never ask
 
 1. **Tenant** — slug and epic id from the routine prompt (or
    `CONTEXT_BLOG_TENANT`). State the tenant before any write.
-2. **Parent** — the epic's `Blog` parent (`list_tasks {kind: "issue",
-   parentId: <epic>, label: "lane:blog"}` → `<blog parent>`; the routine
-   prompt or the epic's `## Structure` may carry the id — confirm with
-   `get_task`). Every blog piece is its child (`rules-blog` §3 Hierarchy).
-3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+2. **Parent** — the epic's `Blog` parent (`list_issues {parent_id: <epic>,
+   label: "lane:blog"}` → `<blog parent>`; the routine prompt or the epic's
+   `## Structure` may carry the id — confirm with `get_issue`). Every blog
+   piece is its child (`rules-blog` §3 Hierarchy).
+3. **Session start** — Context `start_context`; Blog MCP `usage_guide` +
    `get_capabilities`: `publish`, `article_get`, `article_set_status` in
    `tools[]` (else `rules-blog` §8: say which is missing, post the payload
    you would have sent on the issue, stop).
@@ -37,10 +37,9 @@ no content decisions; you verify, publish, record, and report.
 
 ## 1. Candidates
 
-`list_tasks {kind: "issue", parentId: <blog parent>, state: "done",
-includeClosed: true, label: "channel:blog"}` — follow `nextCursor` to the end — then
-`get_task` each (the list is a hint; the record is the truth). Sort by
-`dueAt`:
+`list_issues {parent_id: <blog parent>, state: "done", includeClosed: true,
+label: "channel:blog"}` — follow `nextCursor` to the end — then `get_issue`
+each (the list is a hint; the record is the truth). Sort by `dueAt`:
 
 | condition | action |
 |---|---|
@@ -55,10 +54,10 @@ touches `channel:blog` only.
 ## 2. Publish one issue
 
 Pre-flight — every line must hold, otherwise skip the issue and post why on
-it **once** (`post_task_update`, no repeat on later runs):
+it **once** (`post_comment`, no repeat on later runs):
 
-1. `get_task` now shows `state.category: "done"`. Never trust the list, never
-   anything else — not `in_review`, not `started`.
+1. `get_issue` now shows `state.category: "done"`. Never trust the list, never
+   anything else — not `in_review`, not `in_progress`.
 2. The latest `docKind: "review"` document is a **pass** verdict and a
    preview (`docKind: "preview"` document or a preview URL in the updates)
    exists (`rules-blog` §4).
@@ -78,14 +77,14 @@ context_issue_id: <issue id>}` → `{url, published_at, action,
 publish_event_id}`. That assertion means "the Context issue is `done`"; you
 verified it in step 1 of this run, never earlier.
 
-Record, once: `post_task_update {id: <issue>, body: "Published: <url> at
+Record, once: `post_comment {parent_id: <issue>, body: "Published: <url> at
 <published_at> · publish_event <id> · article <id>", workStats}` (`role:
 "publisher"`). The topic, when it has this `context_issue_id`:
 `topics_upsert {items: [{id, status: "published"}]}`.
 
 Errors: `rate_limited` → wait for the window, retry once. Anything else →
-`post_task_update {body: "Publish failed: <code> — <message>"}`, no retry
-this run, next issue. The daily brief reports it.
+`post_comment {parent_id: <issue>, body: "Publish failed: <code> —
+<message>"}`, no retry this run, next issue. The daily brief reports it.
 
 ## 3. Cascade to locale variants
 
@@ -95,9 +94,10 @@ master's. For each variant:
 
 - **Eligible** — the latest `review` document is a pass, no owner comment
   requests changes after it, state `in_review` or `done`. If `in_review`:
-  `post_task_update {id, state: "done", body: "Cascade: EN master <ticket>
-  approved and live (rules-blog §5)", workStats}`. Then §2 for the variant
-  with its own `due` (same slot as the master → same run).
+  `update_issues {ids: [id], state: "done"}`, `post_comment {parent_id: id,
+  body: "Cascade: EN master <ticket> approved and live (rules-blog §5)",
+  workStats}`. Then §2 for the variant with its own `due` (same slot as the
+  master → same run).
 - **Not eligible** — no verdict, bounce, escalate, or changes requested:
   skip and post why on the variant once. The owner decides.
 
@@ -111,9 +111,9 @@ its own approval unless the owner approved it in Context.
 1. Next free cadence slot: from `tenant_get.recurrence` (or the epic's
    `## Rules`), the first slot after now where no other `channel:blog`
    child of `<blog parent>` is due.
-2. `save_work {id, due: <next slot>}` and `post_task_update {body: "Missed
-   window <old due>: re-slotted to <new due> — <reason if known: host down,
-   routine failed, verdict missing>"}`.
+2. `update_issues {ids: [id], due: <next slot>}` and `post_comment
+   {parent_id: id, body: "Missed window <old due>: re-slotted to <new due>
+   — <reason if known: host down, routine failed, verdict missing>"}`.
 3. Its variants move with it (same new `due`).
 
 Never publish late silently (`rules-blog` §5). An issue that already carries

@@ -9,7 +9,7 @@ description: >-
   citations found / missing and topic actions for the Topic Lane.
 depends: [rules-blog, rules]
 license: MIT
-version: 1
+version: 2
 attach: [templates/weekly.md, scripts/probe.mjs, routines/chat-routines-section.md]
 ---
 
@@ -24,7 +24,7 @@ source that is not wired is reported as `not configured: <NAMES>`.
 
 ## Inputs — fetch, never ask
 
-1. **Session start** — Context `usage_guide`; Blog `usage_guide` and
+1. **Session start** — Context `start_context`; Blog MCP `usage_guide` and
    `get_capabilities`. Confirm `stats_summary`, `visibility_report`,
    `visibility_results_ingest`, `tracking_setup_status` are in `tools[]`
    (contract ≥ `blog-1.3.0`). Missing → `rules-blog` §8: say "not available
@@ -34,7 +34,7 @@ source that is not wired is reported as `not configured: <NAMES>`.
 3. **Setup state** — `tracking_setup_status { tenant_slug }`. Its
    `missing[]` are NAMES; copy them verbatim into the report's
    "Not configured" line. Do not try to fix them.
-4. **The lanes** — from the tenant epic (`get_task {id: <epic>}` →
+4. **The lanes** — from the tenant epic (`get_epic {id: <epic>}` →
    children): the Performance Report issue (`lane:performance`), the Topic
    Lane (`lane:topic`), the AEO/SEO Health issue (`lane:aeo-seo`).
 5. **The query list** — `visibility_report { tenant_slug, period: "7d" }`
@@ -58,7 +58,7 @@ Call, all with `period: "7d"` and once with `"28d"` for context:
 | `ai_referrals` | per-engine visitors and landing pages; keep the under-count caveat |
 | `search_queries { striking_distance_only: true, limit: 20 }` | refresh candidates (position 5–20); empty + reason when GSC is not wired |
 | `indexing_status { limit: 10 }` | last IndexNow pings vs last publishes — every `publish` should have a matching `indexnow` with `ok: true`; a `failed` or missing ping is a Health finding |
-| Context `list_tasks {parentId: <epic>, includeClosed: true}` | what published / bounced / waited this week (from the issues, `channel:` labels, "Published:" comments) |
+| Context `list_issues {parent_id: <epic>, includeClosed: true}` | what published / bounced / waited this week (from the issues, `channel:` labels, "Published:" comments) |
 
 ## Step 2 — probe (agent-side, cost-capped)
 
@@ -122,14 +122,14 @@ OPENROUTER_API_KEY` (plus the other missing names) and last week's
    the posts cited; the queries where competitors are cited and we are not
    → share of voice) · Indexing · Health · Actions.
 2. Create **one sub-issue** under the Performance Report lane:
-   `save_work {kind: "issue", issueType: "complex", parentId: <Performance
-   Report issue id>, title: "Weekly report — <tenant> — <ISO week>", labels:
+   `create_issues {parent_id: <Performance Report issue id>, issues:
+   [{title: "Weekly report — <tenant> — <ISO week>", labels:
    ["tenant:<slug>", "lane:performance", "report:weekly", "gate:none"],
-   state: "done"}` — it is a record, not work for the owner. Attach the
-   report: `send_file {taskId: <sub-issue>, filename:
+   state: "done"}]}` — it is a record, not work for the owner. Attach the
+   report: `attach_artifact {parent_id: <sub-issue>, filename:
    "weekly-report-<yyyy-Www>.md", title: "Weekly report <week>", docKind:
    "report", content}`. Put the headline (3 lines) in the sub-issue
-   description and in one `post_task_update` on the Performance Report lane.
+   description and in one `post_comment` on the Performance Report lane.
 3. **AEO/SEO Health** — one comment on the Health issue only when something
    needs the owner: ingestion stale, IndexNow failing, a site-wide
    impressions cliff (kill-switch: pause net-new, say so), a claims-policy

@@ -7,11 +7,11 @@ description: >-
   slides from the paper-cards template with headless Chrome, upload them as
   tenant assets, `instagram_post_upsert`, attach slides + caption + models to
   the Context issue, hand it to `blog-checker`, and leave one blocking
-  reviewRequest. Degrades to copy-only when the host has no renderer. Never
+  request_review. Degrades to copy-only when the host has no renderer. Never
   publishes, never schedules.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 2
+version: 3
 attach: [templates/paper-cards.html, templates/motifs.html, scripts/render-cards.sh, scripts/attach-artifact.sh]
 ---
 
@@ -27,12 +27,12 @@ Nothing you do here reaches Instagram or Postiz.
 
 1. **Tenant** — slug, epic id, timezone from the routine prompt (or
    `CONTEXT_BLOG_TENANT`). State the tenant before any write.
-2. **Parent** — the epic's `Instagram` parent (`list_tasks {kind: "issue",
-   parentId: <epic>, label: "lane:instagram"}` → `<instagram parent>`; the
-   routine prompt or the epic's `## Structure` may carry the id — confirm
-   with `get_task`). Every Instagram issue is its child, never the epic's
+2. **Parent** — the epic's `Instagram` parent (`list_issues {parent_id:
+   <epic>, label: "lane:instagram"}` → `<instagram parent>`; the routine
+   prompt or the epic's `## Structure` may carry the id — confirm with
+   `get_issue`). Every Instagram issue is its child, never the epic's
    (`rules-blog` §3 Hierarchy).
-3. **Session start** — Context `usage_guide`; Blog `usage_guide` +
+3. **Session start** — Context `start_context`; Blog MCP `usage_guide` +
    `get_capabilities`: `instagram_post_upsert`, `asset_upload`,
    `asset_complete` must be in `tools[]` (else `rules-blog` §8: say which is
    missing, attach the payload you would have sent, stop).
@@ -53,16 +53,17 @@ Nothing you do here reaches Instagram or Postiz.
 
 In this order, first hit wins:
 
-1. Issues in `started` with `channel:instagram` whose latest activity is an
-   owner comment after a `reviewRequest` — **changes requested** come
+1. Issues in `in_progress` with `channel:instagram` whose latest activity is
+   an owner comment after a `request_review` — **changes requested** come
    first; revise with the same `instagram_post` id (§7).
-2. `list_tasks {kind: "issue", parentId: <instagram parent>, label:
-   "channel:instagram", state: "backlog", ready: true}` → no `deliverable` document yet, earliest
+2. `list_issues {parent_id: <instagram parent>, label: "channel:instagram",
+   state: "open", ready: true}` → no `deliverable` document yet, earliest
    `due` (the slot). At most **one new carousel per run**.
 3. Nothing → print `instagram-drafter: nothing to draft` and stop.
 
 Never touch an issue that is `ready: false` — say what blocks it. Claim:
-`save_work {id, assignee: "<your agent label>", state: "started"}`.
+`update_issues {ids: [id], assignee: "<your agent label>", state:
+"in_progress"}`.
 
 ## 2. Source — the linked blog topic
 
@@ -130,19 +131,20 @@ attribute, never below 76).
 
 ## 6. Attach
 
-- `send_file {taskId, filename: "<TICKET>-caption.md", title: "<title> —
-  caption", docKind: "deliverable", content: <caption + the slide copy as a
-  numbered list + asset ids + post id>}`.
+- `attach_artifact {parent_id: <issue>, filename: "<TICKET>-caption.md",
+  title: "<title> — caption", docKind: "deliverable", content: <caption +
+  the slide copy as a numbered list + asset ids + post id>}`.
 - Every slide PNG, first slide first, **without base64 through the model**:
-  Context `create_artifact_upload {filename: "<TICKET>-NN-<slug>.png", size,
-  sha256, contentType: "image/png"}` → `scripts/attach-artifact.sh <png>
-  <uploadUrl> <completeUrl> <issue id> <project> "Slide NN — <headline>"
+  Context `attach_artifact {filename: "<TICKET>-NN-<slug>.png", size, sha256,
+  contentType: "image/png"}` returns an upload plan → `scripts/attach-artifact.sh
+  <png> <uploadUrl> <completeUrl> <issue id> <space> "Slide NN — <headline>"
   tenant:<slug> channel:instagram <TICKET>` (PUTs the bytes and completes the
   transfer with the host's Context Access Key by name — `CONTEXT_ACCESS_KEY`
-  env or the secret store's `CONTEXT_MCP_TOKEN`; prints the document id). The
+  env or the secret store's `CONTEXT_MCP_TOKEN`; prints the artifact id). The
   session lives 15 minutes; create it right before the script. Script exit 3
-  (no key on this host) → `send_file {…, docKind: "preview", base64}` for the
-  **cover only** and the asset `public_url`s for the rest in the deliverable.
+  (no key on this host) → `attach_artifact {…, docKind: "preview", base64}`
+  for the **cover only** and the asset `public_url`s for the rest in the
+  deliverable.
 - **Copy-only mode** (no renderer): the deliverable carries the caption and
   every slide's eyebrow / headline / sub / motif names; no upload, no
   `instagram_post_upsert`; say `copy-only: no renderer on this host` on the
@@ -156,12 +158,12 @@ issue id and "follow `blog-checker` for an Instagram carousel" (`subject_kind`
 (voice, banned phrases, claims policy, Free / Pro wording, "Cloud bots"), the
 slide count and size, that every PNG attached matches an asset id, records
 the verdict with `check_record`, and on **pass** raises the one blocking
-`reviewRequest` (state `in_review`). Then read the outcome from the issue:
+`request_review` (state `in_review`). Then read the outcome from the issue:
 
 - **pass** — if the state or request is missing, raise it once yourself:
-  `post_task_update {state: "in_review", reviewRequest: {blocking: true,
-  reason: "Instagram carousel <TICKET>: <n> slides + caption attached ·
-  checker pass · maker <model> · checker <model> · slot <due>"}}`.
+  `update_issues {ids: [id], state: "in_review"}`, `request_review
+  {parent_id: id, reason: "Instagram carousel <TICKET>: <n> slides + caption
+  attached · checker pass · maker <model> · checker <model> · slot <due>"}`.
 - **bounce** — fix the named slides / caption lines, re-render, re-upload
   only the changed slides, `instagram_post_upsert` with the same `id`,
   re-attach, hand over again as round + 1. Two bounces at most; the third
@@ -174,9 +176,9 @@ verdicts superseded.
 
 ## 8. Report and stop
 
-`post_task_update {id, body: "Drafted <round> — instagram_post <id> · <n>
-slides · assets <ids> · check <check_id> · maker <model> · checker <model>",
-workStats}` (`role: "maker"`). Print one line for the routine log:
+`post_comment {parent_id: id, body: "Drafted <round> — instagram_post <id> ·
+<n> slides · assets <ids> · check <check_id> · maker <model> · checker
+<model>", workStats}` (`role: "maker"`). Print one line for the routine log:
 `instagram-drafter: <ISO> · drafted <TICKET> (<verdict>) · slides <n> · <ok |
 copy-only | stopped: reason>`. Stopped early → a handoff comment on the
 issue (rules §7).
@@ -187,5 +189,5 @@ Post, schedule or call Postiz · call `publish` · set an instagram post
 `approved` / `published` · check your own draft · invent a number, quote,
 customer or meeting · name a competitor on a slide · write bare "Pro" ·
 more than 10 slides · more than one new carousel per run · touch a blocked
-issue · raise a second `reviewRequest` · store or echo a key value (keys by
+issue · raise a second `request_review` · store or echo a key value (keys by
 name: `BLOG_ACCESS_KEY`; `POSTIZ_API_KEY` belongs to the publisher).

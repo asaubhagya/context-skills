@@ -1,7 +1,7 @@
 # Design tokens — <Brand>
 
-<!-- send_file {filename: "design-tokens.md", title: "Design tokens", docKind: "design-guide", taskId: <tenant epic id>, content: <this file, filled>}
-     and the JSON: send_file {filename: "design-tokens.json", title: "Design tokens (json)", docKind: "design-guide", taskId: <tenant epic id>, content: <design-tokens.json, filled>} -->
+<!-- attach_artifact {filename: "design-tokens.md", title: "Design tokens", docKind: "design-guide", parent_id: <tenant epic id>, content: <this file, filled>}
+     and the JSON: attach_artifact {filename: "design-tokens.json", title: "Design tokens (json)", docKind: "design-guide", parent_id: <tenant epic id>, content: <design-tokens.json, filled>} -->
 
 **Tenant:** `<slug>` · **Fetched from:** <https://…> on <YYYY-MM-DD> · **Approved by owner:** yes (Round 2)
 

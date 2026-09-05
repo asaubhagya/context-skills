@@ -1,7 +1,7 @@
 # Decision record — <Brand> Blog
 
-<!-- send_file {filename: "decision-record.md", title: "Decision record", docKind: "decisions", taskId: <tenant epic id>, content: <this file, filled>}
-     Later steers: update_document with a new revision — add a row `from: user`, mark the replaced row superseded. -->
+<!-- attach_artifact {filename: "decision-record.md", title: "Decision record", docKind: "decisions", parent_id: <tenant epic id>, content: <this file, filled>}
+     Later steers: revise_artifact with a new revision — add a row `from: user`, mark the replaced row superseded. -->
 
 **Tenant:** `<slug>` · **Date:** <YYYY-MM-DD> · **Rounds:** 0–4
 

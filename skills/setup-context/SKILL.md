@@ -1,10 +1,10 @@
 ---
 name: setup-context
 description: >-
-  Chart a piece of work as a Context map (an epic plus linked tickets) on
+  Chart a piece of work as a Context map (an Epic plus linked Issues) on
   Context, then work it to done with review gates. Use when the user asks to
   get started, to plan or track work in Context, or when a task needs a plan.
-depends: [rules, wayfinder, grill-me]
+depends: [context, rules, wayfinder, grill-me]
 license: MIT
 ---
 
@@ -13,25 +13,24 @@ license: MIT
 You are the agent working through Context — a tracker built for agent work:
 agents write, the human reviews at https://app.onecontext.me (or in the
 Context iOS app). This skill turns one job into a **Context map** that is
-repeatable. A Context map — `kind: "epic"` on the wire, shown as Map in the
-app — is a set of tickets with the work to be done, the rules, the approvals
-and the artifacts. What makes it repeatable is the *guidance* it records —
-the goal, the rules, which skills, tools and models to use, at what level the
-human approves — plus the aggregate picture after the run (cost, tokens,
-which models did the work) and every artifact. Who did which ticket, in what
-order, is not prescribed: that is the orchestrating agent's call and is
-recorded as it happens. The next person can open the map and run the same
-job their way.
+repeatable. A Context map is one Epic with a set of Issues under it: the work
+to be done, the rules, the approvals and the artifacts. What makes it
+repeatable is the *guidance* it records — the goal, the rules, which skills,
+tools and models to use, at what level the human approves — plus the
+aggregate picture after the run (cost, tokens, which models did the work)
+and every Artifact. Who did which Issue, in what order, is not prescribed:
+that is the orchestrating agent's call and is recorded as it happens. The
+next person can open the map and run the same job their way.
 
-This skill inherits `rules` (the Context harness) and uses Matt Pocock's
-`grill-me` and `wayfinder` **verbatim** for the interview and the charting.
-Load all three before you start; this file only adds the Context-specific
-opening, the artifact templates and the tool calls.
+This skill inherits `context` (the interface) and `rules` (the Context
+harness), and uses Matt Pocock's `grill-me` and `wayfinder` **verbatim** for
+the interview and the charting. Load all of them before you start; this
+file only adds the Context-specific opening, the artifact templates and the
+tool calls.
 
 Credit: inspired by Matt Pocock's wayfinder/grilling skills (MIT,
 github.com/mattpocock/skills); an independent rewrite, formerly published as
-`context-plan`. His skills work with Context as-is — see "Wayfinding
-operations" in `usage_guide`.
+`context-plan`. His skills work with Context as-is.
 
 ## Safety boundary
 
@@ -49,8 +48,8 @@ do and where (with the link).
 
 ## Opening
 
-Call `usage_guide` first if you have not this session. Then, if the user has
-not yet said what they want, open with a short message that does exactly
+Call `start_context` first if you have not this session. Then, if the user
+has not yet said what they want, open with a short message that does exactly
 five things, in this order:
 
 1. Introduce yourself in one line: you plan a job with them, chart it into a
@@ -194,10 +193,10 @@ wayfinder map.
 
 Once the frontier is empty:
 
-1. `save_work` the epic: `kind: "epic"`, a short title, and this
-   `description` (markdown, exactly these five headings — the same shape on
-   every map so a reader always knows where the goal, the finish line, the
-   checkpoints and the rules are; keep it short):
+1. `create_epic` with a short title, and this `description` (markdown,
+   exactly these five headings — the same shape on every map so a reader
+   always knows where the goal, the finish line, the checkpoints and the
+   rules are; keep it short):
 
    ```
    ## Goal
@@ -218,60 +217,63 @@ Once the frontier is empty:
    - <what was explicitly ruled out>
    ```
 
-2. Store what the user gave you: each upload/paste → `send_file {title,
-   content, docKind: "<brand-guide | design-guide | template | example |
-   brief | repo-notes>", taskId: <epic>}` (binaries via the upload route,
-   see "Artifacts back to Context"). Then **distill** each into 3–8 short
-   bullets under `## Rules`; the original stays attached for reference.
-   Every skill you recommended and the user accepted → `send_file {title:
-   "<skill name>", docKind: "skill", taskId: <epic>, content}` with a
-   header block first: `Source: <url>` · `Licence: <licence>` · `Fetched:
-   <date>` · `Why: <one line>`. Only permissively licensed skills
-   (MIT/Apache/CC-BY) are stored; otherwise link them in the description.
-   The user's own skill files are stored as `docKind: "skill"` too.
+2. Store what the user gave you: each upload/paste → `attach_artifact
+   {parent_id: <epic>, title, content, docKind: "<brand-guide | design-guide
+   | template | example | brief | repo-notes>"}` (binaries via the upload
+   plan `attach_artifact` returns, see "Artifacts back to Context"). Then
+   **distill** each into 3–8 short bullets under `## Rules`; the original
+   stays attached for reference. Every skill you recommended and the user
+   accepted → `attach_artifact {parent_id: <epic>, title: "<skill name>",
+   docKind: "skill", content}` with a header block first: `Source: <url>` ·
+   `Licence: <licence>` · `Fetched: <date>` · `Why: <one line>`. Only
+   permissively licensed skills (MIT/Apache/CC-BY) are stored; otherwise
+   link them in the description. The user's own skill files are stored as
+   `docKind: "skill"` too.
 3. Attach the records to the epic, before any ticket. Do **not** store a
    verbatim conversation transcript:
-   - `send_file {title: "Context brief", docKind: "brief", taskId: <epic>,
-     content}` — an approved, concise brief covering goal, audience, done
-     criteria, constraints, inputs, preferences, review gates, and exclusions.
-     Show it to the user before storing it.
-   - `send_file {title: "Decision record", docKind: "decisions", taskId:
-     <epic>, content}` — one markdown table, one row per settled
+   - `attach_artifact {parent_id: <epic>, title: "Context brief", docKind:
+     "brief", content}` — an approved, concise brief covering goal,
+     audience, done criteria, constraints, inputs, preferences, review
+     gates, and exclusions. Show it to the user before storing it.
+   - `attach_artifact {parent_id: <epic>, title: "Decision record", docKind:
+     "decisions", content}` — one markdown table, one row per settled
      question: `| # | decision | options | chosen | why | from |`, where
      `from` is the `Qn` it came from, `default` if the user never answered
      it, or `user` for an unprompted steer. Include the toolbox rows.
-   - For code work, `send_file {title: "Spec", docKind: "spec", taskId:
-     <epic>, content}` following `spec-template.md` (code layout, NFRs,
-     runbook — every section present).
-4. The tickets are the charted path between the milestones. `save_work` once
-   per ticket: `kind: "issue"`, `parentId` = the epic, `title`,
-   `description` (the work and the guidance: which stored skill to load,
-   which tool/model/thinking from the Rules, the rules that bite here, and
-   the reminder that the ticket ships a mini-spec, acceptance tests and a
-   release doc), `acceptanceCriteria` (5–12 tickets total, one agent session
-   each), and:
+   - For code work, `attach_artifact {parent_id: <epic>, title: "Spec",
+     docKind: "spec", content}` following `spec-template.md` (code layout,
+     NFRs, runbook — every section present).
+4. The tickets are the charted path between the milestones.
+   `create_issues {parent_id: <epic>, issues: [...]}` — one entry per
+   ticket, each with `title`, `description` (the work and the guidance:
+   which stored skill to load, which tool/model/thinking from the Rules,
+   the rules that bite here, and the reminder that the ticket ships a
+   mini-spec, acceptance tests and a release doc), `acceptance_criteria`
+   (5–12 tickets total, one agent session each), and:
    - one label `gate:<artifact|final|none>` — the level at which the human
-     approves this ticket's output. Add `skill:<name>` **only if a document
-     titled `<name>` with `docKind: "skill"` is attached to the epic** (step
-     2); otherwise the description says `Skill: built-in — none`. **Do not
-     assign tickets or pin models at chart time** — leave `assignee` empty;
-     whoever claims the ticket records who it is and what it ran on
-     (`workStats`). The one exception is work the human must do themselves:
-     `assignee: "me"`.
-   - `links: [{id, type: "blocks"}]` / `blockedBy` only for real
-     dependencies — never to impose an order of your own. Wire links in a
-     second pass, once every ticket has an id.
+     approves this ticket's output. Add `skill:<name>` **only if an
+     Artifact titled `<name>` with `docKind: "skill"` is attached to the
+     epic** (step 2); otherwise the description says `Skill: built-in —
+     none`. **Do not assign tickets or pin models at chart time** — leave
+     `assignee` empty; whoever claims the ticket records who it is and what
+     it ran on (`workStats`). The one exception is work the human must do
+     themselves: `assignee: "me"`. Decomposition is child Issues
+     (`create_issues {parent_id: <this issue>}`), never a `steps` list.
+   - `blocked_by: [issueId]` only for real dependencies — never to impose
+     an order of your own. Wire these in a second pass, once every ticket
+     has an id (`update_issues {ids: [id], blocked_by: [...]}`).
 5. **One combined gate.** The first ticket is "Map + spec review"
-   (`gate:plan`, assigned to you); everything else is `blockedBy` it. Right
-   after charting: `post_task_update {id, body: "Map and spec charted —
-   please review both", state: "in_review", reviewRequest: {reason,
-   blocking: true}}` where `reason` (≤ 500 chars) is a real summary in this
-   order: `<goal, one line> · done when: <one line> · <n> milestones · <n>
-   tickets · <n> decisions · skills stored: <names or none> · tools/models:
-   <one line> · est. <cost / time>`. Hand the user the epic `url`. This is
-   the only `reviewRequest` for the plan; never raise a second one for the
-   spec alone.
-6. Re-read the epic with `get_task` to confirm the shape, then report the
+   (`gate:plan`, assigned to you); everything else is `blocked_by` it.
+   Right after charting: `post_comment {parent_id: <review issue>, body:
+   "Map and spec charted — please review both"}`, `update_issues {ids:
+   [<review issue>], state: "in_review"}`, then `request_review {parent_id:
+   <review issue>, reason}` where `reason` (≤ 500 chars) is a real summary
+   in this order: `<goal, one line> · done when: <one line> · <n>
+   milestones · <n> tickets · <n> decisions · skills stored: <names or
+   none> · tools/models: <one line> · est. <cost / time>`. Hand the user
+   the epic `url`. This is the only `request_review` for the plan; never
+   raise a second one for the spec alone.
+6. Re-read the epic with `get_epic` to confirm the shape, then report the
    epic's link (`https://app.onecontext.me/e/<id>`) and the next step.
 
 Remember the hard cap (2 active epics, 5 total) — finish or delete before
@@ -280,41 +282,46 @@ starting a new one.
 ## When the user steers mid-run
 
 Any change of direction after charting ("make it 6 slides", "drop the
-video") is a new decision: `update_document` the Decision record with a
+video") is a new decision: `revise_artifact` the Decision record with a
 new revision — add a row with `from: user` and mark the row it replaces as
-superseded — `save_work` the epic with the amended `## Rules`, and say in
-the ticket's next update which row changed. The record is what the next run
-reads; keep it true.
+superseded — `update_epic {id, description}` with the amended `## Rules`,
+and say in the ticket's next update which row changed. The record is what
+the next run reads; keep it true.
 
 ## Work the tickets
 
-1. `list_tasks {kind: "issue", ready: true, parentId: <epic>}` — the frontier
-   of unblocked work. Pick one you're suited to (the map's Rules and the
+1. `list_issues {parent_id: <epic>, ready: true}` — the frontier of
+   unblocked work. Pick one you're suited to (the map's Rules and the
    ticket's guidance tell you which skill/model fits). **Parallel** mode:
    spin one subagent per ready ticket, each in its own task-owned worktree,
    and keep integration and verification yourself. **Single** mode: one
    ticket, start to finish. The split between agents is yours.
-2. Claim it as yourself: `save_work {id, assignee: "agent:<harness>",
-   state: "started"}` — `<harness>` is what you are: `chatgpt`,
-   `claude-ai`, `claude-code`, `cursor`, `codex`, `opencode`, `gemini`, or
-   another lower-case host name.
+2. Claim it as yourself: `update_issues {ids: [id], assignee:
+   "agent:<harness>", state: "in_progress"}` — `<harness>` is what you are:
+   `chatgpt`, `claude-ai`, `claude-code`, `cursor`, `codex`, `opencode`,
+   `gemini`, or another lower-case host name.
 3. Do the work with the skills the ticket names. Post progress with
-   `post_task_update {id, body}` as you go. **Every intermediate and final
-   output goes back to Context, attached to this ticket** — see "Artifacts
-   back to Context" — before you ask for review. At minimum: `Mini-spec`
-   (`docKind: "spec"`), `Acceptance tests` (`docKind: "tests"`, each item
-   with how it was verified) and `Release` (`docKind: "release"`). If the
-   ticket produced a skill, also `Benchmark` (`docKind: "benchmark"`).
-4. Mark acceptance criteria passed — `save_work {id, acceptanceCriteria:
-   [{text, passed: true}]}` — then move to review when the ticket's gate
-   says so: `post_task_update {id, body, state: "in_review", reviewRequest:
-   {reason, blocking: true}}`. Gate `none` → `complete_tasks` directly.
-5. Wait for the decision with `get_events {cursor, waitMs: 25000}` (the only
-   event channel — no SSE). On `gate.decided`, `get_task`:
+   `post_comment {parent_id: id, body}` as you go. **Every intermediate and
+   final output goes back to Context, attached to this ticket** — see
+   "Artifacts back to Context" — before you ask for review. At minimum:
+   `Mini-spec` (`docKind: "spec"`), `Acceptance tests` (`docKind: "tests"`,
+   each item with how it was verified) and `Release` (`docKind: "release"`).
+   If the ticket produced a skill, also `Benchmark` (`docKind:
+   "benchmark"`).
+4. Mark acceptance criteria passed — `update_issues {ids: [id],
+   acceptance_criteria: [{text, passed: true}]}` — then move to review when
+   the ticket's gate says so: `claim_issue {id, evidence}` →
+   `update_issues {ids: [id], state: "in_review"}` → `request_review
+   {parent_id: id, reason}`. Gate `none` → `complete_issues` directly.
+5. Wait for the decision with `get_changes {cursor, waitMs: 25000}` (the
+   only event channel — no SSE). On a decision event, `get_issue`:
    - `approved` → the ticket is `done`; move to the next ready ticket.
-   - `changes_requested` → it is back in `started`; read the note, address
-     it, request review again.
-   If the host can't hold a long poll, fall back to `get_task` every 5 s up
+     Where the harness requires independent verification, route
+     `verify_issue` to a **different** principal before treating it as
+     trustworthy-done.
+   - `changes_requested` → it is back in `in_progress`; read the note,
+     address it, request review again.
+   If the host can't hold a long poll, fall back to `get_issue` every 5 s up
    to 10 times, then stop and tell the user you're waiting and where to
    approve.
 6. **Report who did it on every update that completes a unit of work**:
@@ -333,15 +340,16 @@ reads; keep it true.
 7. Handing a ticket to another agent (your choice, or the user's), or
    stopping for any reason: post the handoff comment `rules` prescribes
    (goal · repo · worktree · done · remaining · next action) with
-   `post_task_update`, clear or reset `assignee`, and tell the user which
-   agent to open and what to say.
+   `post_comment`, clear or reset `assignee`, and tell the user which agent
+   to open and what to say.
 8. When every ticket is done or canceled the epic's status becomes `done`
-   by itself. Attach the **overall release doc** to the epic (`docKind:
-   "release"`, linking each ticket's release doc) and close with the epic
-   link — its Overview now shows the whole run: total cost, tokens and time,
-   which models and agents did the work, the gates the human took. New maps
-   are private; the owner may make a map public or private in Context Web.
-   Never change sharing through MCP tools.
+   by itself (derived, never set directly). Attach the **overall release
+   doc** to the epic (`docKind: "release"`, linking each ticket's release
+   doc) and close with the epic link — its Overview now shows the whole
+   run: total cost, tokens and time, which models and agents did the work,
+   the gates the human took. New maps are private; the owner may make a
+   map public or private in Context Web. Never change sharing through MCP
+   tools.
 
 ## Artifacts back to Context
 
@@ -349,32 +357,32 @@ The reviewer approves what they can see on the ticket — never something
 that only exists in this chat.
 
 - **Everything goes back, to its ticket**: drafts, briefs, prompts, data,
-  intermediate renders, the final file — `taskId` = the ticket that made
+  intermediate renders, the final file — `parent_id` = the ticket that made
   it. The server rejects `in_review` on a ticket gated `artifact` or
-  `final` until at least one document is attached to it.
-- **Text** (markdown, HTML, JSON, CSV — ≤ 512 KB): `send_file {title,
-  content, taskId, docKind}`.
+  `final` until at least one Artifact is attached to it.
+- **Text** (markdown, HTML, JSON, CSV — ≤ 512 KB): `attach_artifact
+  {title, content, parent_id, docKind}`.
 - **Binary** (PDF, PNG, PPTX, MP4… ≤ 25 MB): never put file bytes or
-  base64 into tool arguments. `create_artifact_upload {filename, size,
-  sha256, contentType}` → one `PUT` of the raw bytes to `uploadUrl`
-  (header `content-type`) → `POST completeUrl` with `{filename, title?,
-  taskId, docKind?}`. Try this first whenever your sandbox has network
-  (Claude Code, Codex, Cursor). Finish before `expiresAt`. **ChatGPT's
-  python sandbox has no network egress** (verified 2026-08-30 — DNS fails
-  for both the Supabase upload host and this app): never attempt the raw
-  `PUT` there, and never burn a turn checking — go straight to the
-  fallback below.
+  base64 into tool arguments. `attach_artifact {filename, size, sha256,
+  contentType}` returns an upload plan — one `PUT` of the raw bytes to
+  `uploadUrl` (header `content-type`) → `POST completeUrl` with
+  `{filename, title?, parent_id, docKind?}`. Try this first whenever your
+  sandbox has network (Claude Code, Codex, Cursor). Finish before
+  `expiresAt`. **ChatGPT's python sandbox has no network egress** (verified
+  2026-08-30 — DNS fails for both the Supabase upload host and this app):
+  never attempt the raw `PUT` there, and never burn a turn checking — go
+  straight to the fallback below.
 - **If you cannot upload** (no network from the sandbox — always true on
   ChatGPT — or the file is > 25 MB): attach a small self-contained
-  `preview.html` via `send_file` (≤ 512 KB: slide text + layout, images
-  only as tiny `data:` URIs or omitted, `docKind: "preview"`) so the
+  `preview.html` via `attach_artifact` (≤ 512 KB: slide text + layout,
+  images only as tiny `data:` URIs or omitted, `docKind: "preview"`) so the
   reviewer sees something on the ticket now, give the real file to the
-  user in chat, and post the exact hand-off in that same
-  `post_task_update`, one line per file: `Drop <filename> (<size>) on
-  ticket #n → <ticket url> → Artifacts`. The ticket page has a drop zone.
-  Then wait on `get_events` for a `document.created` event on this ticket
-  before requesting the final review — the server rejects `in_review` on
-  a `gate:final`/`gate:artifact` ticket with no document attached.
+  user in chat, and post the exact hand-off in that same `post_comment`,
+  one line per file: `Drop <filename> (<size>) on ticket #n → <ticket url>
+  → Artifacts`. The ticket page has a drop zone. Then wait on `get_changes`
+  for an artifact-attached event on this ticket before requesting the
+  final review — the server rejects `in_review` on a `gate:final`/
+  `gate:artifact` ticket with no Artifact attached.
 - **Visual deliverables get a preview** (carousel, slides, ad frames,
   layouts, charts): also attach `title: "<name> preview.html"`, `mime:
   "text/html"`, `docKind: "preview"` — one self-contained page ≤ 512 KB:
@@ -384,29 +392,29 @@ that only exists in this chat.
 - The **final deliverable** (the file the user will actually use — the PDF,
   the post, the memo) is attached with `docKind: "deliverable"`; the map's
   Overview highlights it as the Output.
-- Name what you attached, by title, in the same `post_task_update`.
+- Name what you attached, by title, in the same `post_comment`.
 
 ## Returning users
 
-If the user comes back mid-run ("where are we?", "continue"): `list_tasks
-{kind: "issue", ready: true}` plus `get_task` on the epic; summarize state
-in ≤ 5 lines (done · in review · blocked · next), then either continue the
-next ready ticket or say exactly what you're waiting on and where.
+If the user comes back mid-run ("where are we?", "continue"): `list_issues
+{ready: true}` plus `get_epic` on the epic; summarize state in ≤ 5 lines
+(done · in review · blocked · next), then either continue the next ready
+ticket or say exactly what you're waiting on and where.
 
 Search public maps before charting from scratch — an owner may have shared
-something close enough to reuse (`search {query}` → `get_task` the hit →
-read its Rules/skills as your starting point).
+something close enough to reuse (`search_context {query}` → `get_epic` the
+hit → read its Rules/skills as your starting point).
 
 ## Conventions
 
 - Reference tickets in prose as their `#n` ticket number, wrapped in their
   name (wayfinder: refer by name, never a bare id).
-- One `reviewRequest` per decision point — don't batch decisions; the map +
+- One `request_review` per decision point — don't batch decisions; the map +
   spec gate is the one exception, by design.
 - Model ids in `workStats` are always lower-case (`gpt-5`, not `GPT-5`).
 - Fetching a skill: never guess a raw-file path. List the repository (its
   page or `api.github.com/repos/<owner>/<repo>/contents/<dir>`), then fetch
   the exact `SKILL.md`, and record the URL you actually fetched in the
   header.
-- If `save_work` rejects a hard rule (epic limits, orphan ticket, bad
-  kind), read the message — it names the rule and how to unblock it.
+- If a write rejects a hard rule (Epic limits, orphan ticket, bad shape),
+  read the message — it names the rule and how to unblock it.
