@@ -7,7 +7,7 @@ description: >-
   server does what. Every blog, site and Instagram skill inherits this.
 depends: [rules]
 license: MIT
-version: 4
+version: 5
 ---
 
 # Context Blog — rules
@@ -77,10 +77,11 @@ keys:
 | `gate:` | `artifact` · `final` · `none` (harness) | always |
 | `brief:daily` | — | the Daily Brief issue only |
 
-A locale variant is its own Issue, linked `relates` to the EN master and
-carrying the same `hub:`/`kind:` labels (`relates` is a plain label-carried
-link, distinct from `blocked_by`). Title format: `<Channel>: <title>
-(<locale>)`.
+A locale variant is its own Issue, a **child of the EN master Issue**
+(`parent_id` = the master, not the channel parent), `blocked_by` the master,
+carrying the same `hub:`/`kind:` labels plus `relates:<master>` for search.
+Title format: `<Channel>: <title> (<locale>)`. The owner reviews one blog
+Issue and finds its languages underneath it.
 
 ### Hierarchy
 
@@ -108,13 +109,21 @@ issue; it is never deleted or re-parented.
 No draft reaches the owner unchecked. Before any `request_review` on a
 content Issue, the Issue must carry, attached or in its latest update:
 
-1. the draft itself (`attach_artifact`, `docKind: "deliverable"` for the
-   final text, `draft` for intermediates);
+1. the draft **text** (`attach_artifact`, `docKind: "deliverable"`, markdown)
+   — this is the copy the owner leaves inline comments on; `draft` for
+   intermediates;
 2. the **checker verdict** — the `blog-checker` pass (facts against the
    brief, claims policy, voice adjectives, locale, structured data, links)
    with pass/fail per check and what the maker changed in response;
-3. the **rendered preview** (`docKind: "preview"`, self-contained HTML) or
-   the Blog MCP preview URL;
+3. the **final rendered preview** — one self-contained HTML artifact
+   (`docKind: "preview"`) the owner clicks open to see the piece as it will
+   publish: for a blog the Blog MCP `preview_render` of the *final* draft in
+   the tenant's design tokens (title `Preview — <title>`); for an Instagram
+   carousel the one-file Instagram-style viewer from
+   `instagram-drafter/templates/instagram-preview.html` that swipes through
+   the slide assets by URL (title `Preview — <title> (Instagram)`). Never one
+   artifact per slide, never a screenshot of the page instead of the page.
+   Put the artifact `url` in the review request reason;
 4. the **models used** (maker, checker) in the update body and `workStats`.
 
 Then `update_issues {ids: [id], state: "in_review"}` and `request_review

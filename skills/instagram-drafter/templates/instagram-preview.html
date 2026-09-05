@@ -1,0 +1,84 @@
+<!doctype html>
+<!--
+  Instagram-style carousel preview — ONE artifact per post.
+  Fill the three placeholders and attach as docKind "preview":
+    __HANDLE__   tenant handle, e.g. getmeetly.ai
+    __CAPTION__  the caption, HTML-escaped, newlines as <br>
+    __SLIDES__   JSON array of {"src": "<asset public_url>", "alt": "<headline>"}
+  Slides load from their public URLs as the reader swipes; nothing is inlined.
+  Same frame will host Facebook and video previews later — keep the shell generic.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__HANDLE__ — carousel preview</title>
+<style>
+  :root { color-scheme: light; --ink:#262626; --muted:#8e8e8e; --line:#dbdbdb; --bg:#fafafa; }
+  html,body { margin:0; background:var(--bg); font:14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); }
+  .phone { max-width:470px; margin:24px auto; background:#fff; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .head { display:flex; align-items:center; gap:10px; padding:10px 12px; }
+  .avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#f9ce34,#ee2a7b 50%,#6228d7); padding:2px; box-sizing:border-box; }
+  .avatar i { display:block; width:100%; height:100%; border-radius:50%; background:#fff; }
+  .handle { font-weight:600; } .dots-menu { margin-left:auto; color:var(--ink); letter-spacing:2px; }
+  .carousel { position:relative; aspect-ratio:4/5; background:#000; }
+  .track { display:flex; height:100%; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .track::-webkit-scrollbar { display:none; }
+  .slide { flex:0 0 100%; height:100%; scroll-snap-align:start; display:grid; place-items:center; }
+  .slide img { width:100%; height:100%; object-fit:contain; display:block; }
+  .counter { position:absolute; top:12px; right:12px; background:rgba(0,0,0,.6); color:#fff; font-size:12px; padding:3px 8px; border-radius:12px; }
+  .arrow { position:absolute; top:50%; transform:translateY(-50%); width:28px; height:28px; border-radius:50%; border:0; background:rgba(255,255,255,.9); color:#262626; font-size:16px; cursor:pointer; display:grid; place-items:center; }
+  .arrow.prev { left:8px; } .arrow.next { right:8px; } .arrow[hidden] { display:none; }
+  .actions { display:flex; gap:14px; padding:10px 12px 4px; font-size:22px; }
+  .actions .save { margin-left:auto; }
+  .dots { text-align:center; margin:-26px 0 6px; position:relative; }
+  .dots b { display:inline-block; width:6px; height:6px; border-radius:50%; background:#a8a8a8; margin:0 2px; }
+  .dots b.on { background:#0095f6; }
+  .likes { padding:0 12px; font-weight:600; }
+  .caption { padding:4px 12px 12px; white-space:normal; word-wrap:break-word; }
+  .caption .handle { margin-right:6px; }
+  .meta { padding:0 12px 14px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.2px; }
+  .kbd { text-align:center; color:var(--muted); font-size:12px; margin-bottom:24px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="head"><span class="avatar"><i></i></span><span class="handle">__HANDLE__</span><span class="dots-menu">•••</span></div>
+  <div class="carousel">
+    <div class="track" id="track"></div>
+    <span class="counter" id="counter"></span>
+    <button class="arrow prev" id="prev" aria-label="Previous slide">‹</button>
+    <button class="arrow next" id="next" aria-label="Next slide">›</button>
+  </div>
+  <div class="actions"><span>♡</span><span>◯</span><span>➤</span><span class="save">▢</span></div>
+  <div class="dots" id="dots"></div>
+  <div class="likes">Preview — not published</div>
+  <div class="caption"><span class="handle">__HANDLE__</span>__CAPTION__</div>
+  <div class="meta">Draft for review</div>
+</div>
+<p class="kbd">Swipe, scroll, or use ← → to move between slides.</p>
+<script>
+  const slides = __SLIDES__;
+  const track = document.getElementById('track'), dots = document.getElementById('dots'), counter = document.getElementById('counter');
+  slides.forEach((s, i) => {
+    const d = document.createElement('div'); d.className = 'slide';
+    const img = document.createElement('img'); img.src = s.src; img.alt = s.alt || ('Slide ' + (i + 1)); img.loading = i ? 'lazy' : 'eager'; img.decoding = 'async';
+    d.appendChild(img); track.appendChild(d);
+    const b = document.createElement('b'); dots.appendChild(b);
+  });
+  let idx = 0;
+  const go = n => { idx = Math.max(0, Math.min(slides.length - 1, n)); track.scrollTo({ left: idx * track.clientWidth, behavior: 'smooth' }); };
+  const paint = () => {
+    counter.textContent = (idx + 1) + '/' + slides.length;
+    [...dots.children].forEach((b, i) => b.classList.toggle('on', i === idx));
+    document.getElementById('prev').hidden = idx === 0;
+    document.getElementById('next').hidden = idx === slides.length - 1;
+  };
+  track.addEventListener('scroll', () => { const n = Math.round(track.scrollLeft / track.clientWidth); if (n !== idx) { idx = n; paint(); } }, { passive: true });
+  document.getElementById('prev').onclick = () => go(idx - 1);
+  document.getElementById('next').onclick = () => go(idx + 1);
+  document.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') go(idx - 1); if (e.key === 'ArrowRight') go(idx + 1); });
+  paint();
+</script>
+</body>
+</html>

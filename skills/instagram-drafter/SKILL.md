@@ -5,14 +5,16 @@ description: >-
   `channel:instagram` publish issue of the tenant epic, write the caption and
   the slide copy from its linked blog topic in the tenant's voice, render the
   slides from the paper-cards template with headless Chrome, upload them as
-  tenant assets, `instagram_post_upsert`, attach slides + caption + models to
-  the Context issue, hand it to `blog-checker`, and leave one blocking
+  tenant assets, `instagram_post_upsert`, attach ONE Instagram-style
+  swipeable preview (templates/instagram-preview.html over the asset URLs)
+  + caption + models to the Context issue, hand it to `blog-checker`, and
+  leave one blocking
   request_review. Degrades to copy-only when the host has no renderer. Never
   publishes, never schedules.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 3
-attach: [templates/paper-cards.html, templates/motifs.html, scripts/render-cards.sh, scripts/attach-artifact.sh]
+version: 4
+attach: [templates/paper-cards.html, templates/motifs.html, templates/instagram-preview.html, scripts/render-cards.sh, scripts/attach-artifact.sh]
 ---
 
 # Instagram drafter — the maker
@@ -134,17 +136,21 @@ attribute, never below 76).
 - `attach_artifact {parent_id: <issue>, filename: "<TICKET>-caption.md",
   title: "<title> — caption", docKind: "deliverable", content: <caption +
   the slide copy as a numbered list + asset ids + post id>}`.
-- Every slide PNG, first slide first, **without base64 through the model**:
-  Context `attach_artifact {filename: "<TICKET>-NN-<slug>.png", size, sha256,
-  contentType: "image/png"}` returns an upload plan → `scripts/attach-artifact.sh
-  <png> <uploadUrl> <completeUrl> <issue id> <space> "Slide NN — <headline>"
-  tenant:<slug> channel:instagram <TICKET>` (PUTs the bytes and completes the
-  transfer with the host's Context Access Key by name — `CONTEXT_ACCESS_KEY`
-  env or the secret store's `CONTEXT_MCP_TOKEN`; prints the artifact id). The
-  session lives 15 minutes; create it right before the script. Script exit 3
-  (no key on this host) → `attach_artifact {…, docKind: "preview", base64}`
-  for the **cover only** and the asset `public_url`s for the rest in the
-  deliverable.
+- **One preview artifact — the post as the owner would see it.** Fill
+  `templates/instagram-preview.html`: `__HANDLE__` = the tenant's Instagram
+  handle (brand profile), `__CAPTION__` = the caption HTML-escaped with
+  newlines as `<br>`, `__SLIDES__` = a JSON array of `{src: <asset
+  public_url from asset_complete>, alt: <slide headline>}` in slide order.
+  Then `attach_artifact {parent_id: <issue>, filename: "<TICKET>-carousel.html",
+  title: "Preview — <title> (Instagram)", docKind: "preview", content:
+  <filled html>}` and put its `url` on the issue. The slides load from their
+  asset URLs as the owner swipes; nothing is inlined, nothing is re-hosted.
+  **Never attach the PNGs one by one** — ten image artifacts are not a
+  review; one swipeable post is. The same shell will carry Facebook and video
+  previews later, so keep the template's frame intact and only fill the
+  placeholders.
+- Cover PNG as a standalone artifact only if the owner's host cannot open
+  HTML artifacts (not the case on Context iOS/web) — otherwise skip it.
 - **Copy-only mode** (no renderer): the deliverable carries the caption and
   every slide's eyebrow / headline / sub / motif names; no upload, no
   `instagram_post_upsert`; say `copy-only: no renderer on this host` on the

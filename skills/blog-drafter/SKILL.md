@@ -6,11 +6,13 @@ description: >-
   under the tenant's `Blog` parent or graduate one from the `Backlog`, research it with cited sources, draft through the Blog MCP
   `article_upsert` (lint-gated, fix and retry, two bounces then escalate),
   hand the draft to `blog-checker` in a separate call, spawn the locale
-  variants as linked issues, and leave the publish issue carrying draft +
-  verdict + preview + models behind one blocking request_review. Never publishes.
+  variants as child issues of the EN master, and leave the publish issue
+  carrying the markdown draft (for comments) + verdict + the final rendered
+  preview (to click and see) + models behind one blocking request_review.
+  Never publishes.
 depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 6
+version: 7
 attach: [templates/draft-notes.md]
 ---
 
@@ -289,6 +291,14 @@ What the lint and the checker will hold you to:
 - `attach_artifact {parent_id: <issue>, filename:
   "draft-notes-<locale>-r<n>.md", title: "Draft notes, round <n>", docKind:
   "notes", content: <templates/draft-notes.md filled>}`.
+- The **final rendered preview**, attached by whoever holds the final draft
+  (the maker after the last lint pass; the checker re-renders on its round):
+  `preview_render {tenant_slug, kind, title, description, sections, faq, seo,
+  design_tokens}` → `attach_artifact {parent_id: <issue>, filename:
+  "<slug>.<locale>.preview.html", title: "Preview — <title>", docKind:
+  "preview", content: <html>}`. This is what the owner clicks to get the feel
+  of the published page; the markdown deliverable above is what they comment
+  on. Both are mandatory before `request_review` (rules-blog §4).
 
 ## 7. Hand to the checker — a separate call
 
@@ -313,14 +323,18 @@ After the EN master passes (state `in_review`), for every locale the tenant
 feeds (the persona's locale table: e.g. `de` full, `fr` reduced; frozen
 locales get nothing):
 
-1. Reuse the variant issue if `list_issues {parent_id: <blog parent>,
-   label: "locale:<l>"}` shows one that `relates` to this master; else
-   `create_issues {parent_id: <blog parent>, issues: [{title: "Blog:
+1. Reuse the variant issue if `list_issues {parent_id: <master issue>,
+   label: "locale:<l>"}` shows one; else
+   `create_issues {parent_id: <master issue>, issues: [{title: "Blog:
    <localised title> (<l>)", labels: ["channel:blog", "locale:<l>",
    "tenant:<slug>", "hub:<hub>", "kind:<kind>", "gate:artifact", "relates:
    <master>"], due: <the master's due>, blocked_by: [<master>],
    description: "Cascade: publish after EN master <ticket> is done. Depth:
    full | reduced. Approval cascades from EN (rules-blog §5)."}]}`.
+   Variants live **under the master**, never beside it under the channel
+   parent — the owner opens one blog Issue and sees every language as a
+   child. (Publisher and daily brief walk `list_issues {parent_id: <master>}`
+   for the cascade.)
 2. Draft it as **localisation, not translation**: examples, currency, units,
    idiom and the App Store storefront link for that market; own `slug`,
    `title`, `description`; same `translation_group`. *Full* = every section;

@@ -8,7 +8,7 @@ description: >-
   rendered preview + models), and raise the request_review only on pass.
 depends: [rules-blog, rules]
 license: MIT
-version: 4
+version: 5
 attach: [templates/verdict.md, templates/checklist.md]
 ---
 
@@ -130,10 +130,16 @@ as a fact:
 1. `attach_artifact {parent_id: <issue>, filename: "checker-verdict-r<n>.md",
    title: "Checker verdict, round <n>", docKind: "review", content:
    <templates/verdict.md filled>}`
-2. `preview_render {tenant_slug, kind, title, description, sections, faq,
+2. The **final rendered preview** the owner clicks (rules-blog §4.3). Blog:
+   `preview_render {tenant_slug, kind, title, description, sections, faq,
    seo, design_tokens: <design-tokens.json>}` → `attach_artifact {parent_id,
-   filename: "preview-r<n>.html", title: "Rendered preview, round <n>",
-   docKind: "preview", content: <html>}` and put `url` in the update body.
+   filename: "<slug>.<locale>.preview.html", title: "Preview — <title>",
+   docKind: "preview", content: <html>}`. Instagram: confirm the maker's
+   `<TICKET>-carousel.html` (Instagram-style viewer over the asset URLs) is
+   attached, opens, and every slide `src` matches an asset id on the post;
+   re-attach it if a bounce changed slides. Put the artifact `url` in the
+   update body and in the review reason. Bounce a blog with no preview or
+   an Instagram post with per-slide image artifacts instead of the viewer.
 3. `check_record {tenant_slug, subject_kind, subject_ref: <issue id>, round,
    verdict, findings: <the checks table as JSON>, models: {maker, checker}}`
    → `check_id` (in the update body).

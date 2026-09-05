@@ -9,7 +9,7 @@ description: >-
   stay idempotent. Refuses anything that is not `done`.
 depends: [rules-blog, rules]
 license: MIT
-version: 3
+version: 4
 ---
 
 # Blog publisher — approved → live
@@ -89,8 +89,10 @@ Errors: `rate_limited` → wait for the window, retry once. Anything else →
 ## 3. Cascade to locale variants
 
 After a master is live (published now, or found `published`), take its
-`relates` relations with `channel:blog` and a `locale:` other than the
-master's. For each variant:
+child Issues — `list_issues {parent_id: <master>, includeClosed: true}` —
+with `channel:blog` and a `locale:` other than the master's (variants are
+children of the master since rules-blog v5; for older pieces fall back to
+the master's `relates` relations). For each variant:
 
 - **Eligible** — the latest `review` document is a pass, no owner comment
   requests changes after it, state `in_review` or `done`. If `in_review`:
