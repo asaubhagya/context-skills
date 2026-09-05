@@ -3,7 +3,7 @@
 **Headline.** <one sentence: traffic direction, AI share, cited rate — with numbers or "not configured">
 **Sources.** Umami: <last day | not configured: NAMES> · Search Console: <last day | not configured: NAMES> · Probe: <run date, engines, cost USD | not run: NAMES> · IndexNow: <ok n / failed n | not configured: NAMES>
 **Not configured.** <comma-separated NAMES from tracking_setup_status.missing, or "—">
-**Dashboard.** https://blog.onecontext.me/tenants/<slug>/analytics — the same numbers, live (sign in as a tenant member; hosted tenants see every section, others AI visibility + indexing).
+**Dashboard.** https://sites.onecontext.me/tenants/<slug>/analytics — the same numbers, live (sign in as a tenant member; hosted tenants see every section, others AI visibility + indexing).
 
 ## Traffic (7d vs previous 7d)
 

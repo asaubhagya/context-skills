@@ -112,7 +112,7 @@ async function openRouter(job) {
   else body.model = `${model}:online`;
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
-    headers: { authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "content-type": "application/json", "HTTP-Referer": "https://blog.onecontext.me", "X-Title": "Context Blog assessment" },
+    headers: { authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "content-type": "application/json", "HTTP-Referer": "https://sites.onecontext.me", "X-Title": "Context Blog assessment" },
     body: JSON.stringify(body),
   });
   const json = await res.json().catch(() => ({}));

@@ -59,7 +59,7 @@ Layout: `skills/<key>/SKILL.md` (first-party), `skills/third-party/<key>/SKILL.m
   agent with no filesystem). `start_context` never writes files itself and
   never edits `AGENTS.md`/`CLAUDE.md` as a side effect — the agent (or the
   human) carries out the plan with its own tools.
-- **Context Blog MCP** (`blog.onecontext.me/api/mcp`) — a separate,
+- **Context Blog MCP** (`sites.onecontext.me/api/mcp`) — a separate,
   independently versioned server for tenants, drafts, preview render,
   publishing and analytics. It keeps its own tool names (`article_upsert`,
   `content_lint`, `tenant_get`, `publish`, …) and its own `usage_guide` /

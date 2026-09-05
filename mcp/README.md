@@ -28,7 +28,13 @@ Every file here has a top-level `schema: "context-mcp-catalog/1"`:
     {
       "name": "issues",
       "tools": [
-        { "name": "claim_issue", "title": "Claim issue", "description": "…" }
+        {
+          "name": "claim_issue",
+          "title": "Claim issue",
+          "description": "…",
+          "inputSchema": { "type": "object", "properties": {} },
+          "outputSchema": null
+        }
       ]
     }
   ],
@@ -44,6 +50,10 @@ Every file here has a top-level `schema: "context-mcp-catalog/1"`:
   Paired/Private one, or both — `shared`/`paired` count membership in each,
   so a tool available in both counts toward both).
 - Every tool needs a non-empty `name`, `title` and `description`.
+- A tool may optionally carry `inputSchema` (an object with `type: "object"`)
+  and `outputSchema` (an object, or `null`) — the catalogs now embed the
+  exact schemas the server's own `tools/list` response returns, so a
+  consumer never has to guess a tool's parameters or result shape.
 
 `pnpm check-mcp-catalogs` (also run by `pnpm check-skills` and `pnpm check`)
 validates all of this. `pnpm build-manifest` indexes every catalog that

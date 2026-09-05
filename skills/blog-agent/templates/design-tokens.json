@@ -1,5 +1,5 @@
 {
-  "$schema": "https://blog.onecontext.me/schemas/design-tokens-v1.json",
+  "$schema": "https://sites.onecontext.me/schemas/design-tokens-v1.json",
   "tenant": "<slug>",
   "source": { "fetchedFrom": "https://<site>", "fetchedAt": "<YYYY-MM-DD>", "method": "css + computed styles" },
   "style": "<paper-sketch | clean | editorial | bold>",

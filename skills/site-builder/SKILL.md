@@ -49,7 +49,7 @@ ticket — and you say which.
    the **hub view** — the article list — not a page. A landing page
    therefore needs a slug (`launch`, `home`, `pricing`); say so before the
    owner expects `/`. With `primary_hostname` set the page is served on that
-   host, otherwise at `https://blog.onecontext.me/t/<slug><mount>/<page>`.
+   host, otherwise at `https://sites.onecontext.me/t/<slug><mount>/<page>`.
 
 ## Interview — one round, `grill-me` shape
 

@@ -13,6 +13,8 @@
  *   - `counts.total` equals the number of tools
  *   - `counts.shared + counts.paired == counts.total`
  *   - every tool has a non-empty name, title and description
+ *   - a tool's optional `inputSchema`, when present, is an object with `type: "object"`
+ *   - a tool's optional `outputSchema`, when present, is an object or null
  *
  * Exit 1 with one line per problem. No database, no network.
  *
@@ -24,7 +26,13 @@ import { fileURLToPath } from "node:url";
 
 export const MCP_CATALOG_SCHEMA = "context-mcp-catalog/1";
 
-export type McpTool = { name?: string; title?: string; description?: string };
+export type McpTool = {
+  name?: string;
+  title?: string;
+  description?: string;
+  inputSchema?: unknown;
+  outputSchema?: unknown;
+};
 export type McpToolGroup = { tools?: McpTool[] };
 export type McpCatalog = {
   schema?: string;
@@ -55,6 +63,18 @@ export function validateCatalog(file: string, key: string, catalog: McpCatalog):
     else seen.add(t.name);
     if (!t.title) problems.push(`${file}: tool "${t.name ?? "?"}" is missing a title`);
     if (!t.description || !t.description.trim()) problems.push(`${file}: tool "${t.name ?? "?"}" is missing a description`);
+    if (t.inputSchema !== undefined) {
+      if (typeof t.inputSchema !== "object" || t.inputSchema === null || Array.isArray(t.inputSchema)) {
+        problems.push(`${file}: tool "${t.name ?? "?"}" inputSchema must be an object`);
+      } else if ((t.inputSchema as { type?: unknown }).type !== "object") {
+        problems.push(`${file}: tool "${t.name ?? "?"}" inputSchema.type must be "object"`);
+      }
+    }
+    if (t.outputSchema !== undefined && t.outputSchema !== null) {
+      if (typeof t.outputSchema !== "object" || Array.isArray(t.outputSchema)) {
+        problems.push(`${file}: tool "${t.name ?? "?"}" outputSchema must be an object or null`);
+      }
+    }
   }
 
   const total = catalog.counts?.total;

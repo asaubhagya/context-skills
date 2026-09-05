@@ -25,7 +25,7 @@ what is blog-specific.
 | Server | Owns | Never |
 |---|---|---|
 | **Context MCP** (`app.onecontext.me`) | work: Epic, Issues, labels, `due`, Artifacts, comments, `request_review`, approvals, `get_changes` | content bytes, publishing |
-| **Context Blog MCP** (`blog.onecontext.me/api/mcp`) | tenants, brand/hubs/topics, drafts, preview render, `publish`, sites, domains, analytics, AI-visibility | tracking, approving, reading Context |
+| **Context Blog MCP** (`sites.onecontext.me/api/mcp`) | tenants, brand/hubs/topics, drafts, preview render, `publish`, sites, domains, analytics, AI-visibility | tracking, approving, reading Context |
 
 The Blog MCP is a separate, independently versioned server with its own
 tool names (`usage_guide`, `get_capabilities`, `article_upsert`,
