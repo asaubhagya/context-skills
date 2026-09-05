@@ -16,10 +16,10 @@
     },
     "contractVersion": "3.0.0",
     "startingPrompt": "Nomi, get me started",
-    "generatedAt": "2026-09-05T12:08:23.183Z",
+    "generatedAt": "2026-09-05T13:01:53.231Z",
     "sourceRepo": "asaubhagya/meetly-macos",
     "sourcePath": "supabase/functions/mcp/tools_v3.ts",
-    "sourceCommit": "2e441f24"
+    "sourceCommit": "2a5d1c0e"
   },
   "connect": {
     "claude-ai": "Settings → Connectors → Add custom connector → name Context, URL https://mcp.onecontext.me/mcp → Connect",
@@ -81,7 +81,147 @@
             "install_scope",
             "installed_skill_version",
             "installed_skill_sha256"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "host": {
+                "type": "string",
+                "enum": [
+                  "claude-code",
+                  "codex",
+                  "cursor",
+                  "claude-ai",
+                  "chatgpt",
+                  "generic",
+                  "chat"
+                ],
+                "description": "The host you are running in. Decides whether the install plan is `agent_install` (a local agent that can write files) or `human_upload` (a hosted chat surface). Omit to be treated as a hosted chat surface."
+              },
+              "environment": {
+                "type": "string",
+                "maxLength": 100,
+                "description": "Optional free-form environment hint (for example `macos`, `linux`, `web`)."
+              },
+              "install_scope": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "project"
+                ],
+                "description": "Where a local install would land: the user's own skills directory or this repository."
+              },
+              "installed_skill_version": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Version of the `context` skill you already have installed, if any. Drives `update_skill` vs `install_skill`."
+              },
+              "installed_skill_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{64}$",
+                "description": "SHA-256 of the installed SKILL.md, if any. A mismatch with the published digest yields `update_skill`."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "account": {
+                "type": "object"
+              },
+              "pairing": {
+                "type": "string",
+                "enum": [
+                  "paired",
+                  "required"
+                ]
+              },
+              "spaces": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "modules": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "nextAction": {
+                "type": "string",
+                "enum": [
+                  "continue",
+                  "pair_phone",
+                  "install_skill",
+                  "update_skill",
+                  "human_upload"
+                ]
+              },
+              "guide": {
+                "type": "object"
+              },
+              "skill": {
+                "type": "object"
+              },
+              "install": {
+                "type": "object"
+              },
+              "contract": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string"
+                  },
+                  "limits": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "version",
+                  "limits"
+                ],
+                "additionalProperties": true
+              },
+              "endpoint": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "pairing",
+              "spaces",
+              "nextAction",
+              "contract"
+            ],
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -106,7 +246,109 @@
             "kinds",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "query": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 256,
+                "description": "Search text (2–256 characters)."
+              },
+              "space": {
+                "type": "string",
+                "description": "Space id or name. `shared` = the Shared Space (server-readable, available with Google sign-in alone); `personal`/`work` = the private built-ins on the paired iPhone; any other named private Space resolves by id or name. Omit to read across every Space you hold."
+              },
+              "kinds": {
+                "type": "array",
+                "maxItems": 6,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "epic",
+                    "issue",
+                    "artifact",
+                    "memory",
+                    "person",
+                    "log"
+                  ]
+                },
+                "description": "Restrict to these primitive kinds. Omit for every kind you can read."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50,
+                "default": 20,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "query",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "results": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "kind"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "results"
+            ],
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -125,7 +367,72 @@
           "scopes": [
             "context:shared"
           ],
-          "inputParams": []
+          "inputParams": [],
+          "inputSchema": {
+            "properties": {
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "spaces": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name",
+                    "privacy"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "spaces"
+            ],
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -151,7 +458,103 @@
             "updated_after",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "space": {
+                "type": "string",
+                "description": "Space id or name. `shared` = the Shared Space (server-readable, available with Google sign-in alone); `personal`/`work` = the private built-ins on the paired iPhone; any other named private Space resolves by id or name. Omit to read across every Space you hold."
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "description": "Labels to set (replaces the existing set)."
+              },
+              "include_closed": {
+                "type": "boolean",
+                "default": false,
+                "description": "Include Epics whose Issues are all done."
+              },
+              "updated_after": {
+                "type": "string",
+                "description": "Only Epics updated at or after this ISO 8601 instant."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "epics": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "title"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "epics"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_epic",
@@ -165,7 +568,50 @@
           ],
           "inputParams": [
             "epic_id"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "epic_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Epic id."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "epic_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "create_epic",
@@ -184,7 +630,138 @@
             "labels",
             "issues",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "space": {
+                "type": "string",
+                "description": "Required. Destination Space: `shared` (Shared Space, the only destination until an iPhone is paired), `personal`/`work` (private built-ins), or a named private Space's id/name."
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "goal": {
+                "type": "string",
+                "maxLength": 2048,
+                "description": "What done looks like for this Epic — the blueprint the Issues serve."
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "description": "Labels to set (replaces the existing set)."
+              },
+              "issues": {
+                "type": "array",
+                "maxItems": 25,
+                "description": "Optional first Issues, created under the new Epic in the same call.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "description": {
+                      "type": "string",
+                      "maxLength": 2048
+                    },
+                    "acceptance_criteria": {
+                      "type": "array",
+                      "maxItems": 25,
+                      "description": "Replaces the whole criteria set ([] clears, omit to leave unchanged). Mark `passed: true` only for criteria you actually verified — `verify_issue` scores these.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string",
+                            "maxLength": 500
+                          },
+                          "passed": {
+                            "type": "boolean",
+                            "default": false
+                          }
+                        },
+                        "required": [
+                          "text"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 25,
+                      "description": "Labels to set (replaces the existing set)."
+                    },
+                    "assignee": {
+                      "type": "string",
+                      "description": "Owner: `me` (the user), an agent name (use your reported caller label when picking work up yourself), or an empty string to clear."
+                    },
+                    "priority": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4,
+                      "description": "0 none … 4 urgent."
+                    },
+                    "due_at": {
+                      "type": "string",
+                      "description": "Deadline as an ISO 8601 datetime (include the user's offset when known) or date (YYYY-MM-DD)."
+                    }
+                  },
+                  "required": [
+                    "title"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "space",
+              "title",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "update_epic",
@@ -203,7 +780,74 @@
             "labels",
             "space",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "epic_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "goal": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "description": "Labels to set (replaces the existing set)."
+              },
+              "space": {
+                "type": "string",
+                "description": "Move the Epic to this Space. Omit to leave it where it is."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "epic_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "delete_epic",
@@ -218,7 +862,54 @@
           "inputParams": [
             "epic_id",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "epic_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "epic_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -247,7 +938,120 @@
             "updated_after",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "space": {
+                "type": "string",
+                "description": "Space id or name. `shared` = the Shared Space (server-readable, available with Google sign-in alone); `personal`/`work` = the private built-ins on the paired iPhone; any other named private Space resolves by id or name. Omit to read across every Space you hold."
+              },
+              "parent_id": {
+                "type": "string",
+                "description": "Only Issues directly under this Epic or parent Issue. Decomposition is child Issues — there are no checklists."
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "in_progress",
+                  "in_review",
+                  "done"
+                ],
+                "description": "Issue lifecycle state. `blocked` is derived from `blocked_by` edges, not a state."
+              },
+              "assignee": {
+                "type": "string",
+                "description": "`me`, an agent name, or `none` for unassigned. Use this to find your own queue."
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "description": "Labels to set (replaces the existing set)."
+              },
+              "include_closed": {
+                "type": "boolean",
+                "default": false
+              },
+              "updated_after": {
+                "type": "string",
+                "description": "Only Issues updated at or after this ISO 8601 instant."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "issues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "title"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "issues"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_issue",
@@ -261,7 +1065,49 @@
           ],
           "inputParams": [
             "issue_id"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "issue_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "issue_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "create_issues",
@@ -277,7 +1123,130 @@
             "parent_id",
             "issues",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "parent_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The Epic or Issue these Issues belong to. Their Space follows the parent."
+              },
+              "issues": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 25,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "description": {
+                      "type": "string",
+                      "maxLength": 2048
+                    },
+                    "acceptance_criteria": {
+                      "type": "array",
+                      "maxItems": 25,
+                      "description": "Replaces the whole criteria set ([] clears, omit to leave unchanged). Mark `passed: true` only for criteria you actually verified — `verify_issue` scores these.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string",
+                            "maxLength": 500
+                          },
+                          "passed": {
+                            "type": "boolean",
+                            "default": false
+                          }
+                        },
+                        "required": [
+                          "text"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 25,
+                      "description": "Labels to set (replaces the existing set)."
+                    },
+                    "blocked_by": {
+                      "type": "array",
+                      "maxItems": 25,
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Issue ids this Issue is blocked by — replaces the whole set ([] clears). `blocked` status is derived from these edges."
+                    },
+                    "assignee": {
+                      "type": "string",
+                      "description": "Owner: `me` (the user), an agent name (use your reported caller label when picking work up yourself), or an empty string to clear."
+                    },
+                    "priority": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4,
+                      "description": "0 none … 4 urgent."
+                    },
+                    "due_at": {
+                      "type": "string",
+                      "description": "Deadline as an ISO 8601 datetime (include the user's offset when known) or date (YYYY-MM-DD)."
+                    }
+                  },
+                  "required": [
+                    "title"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "parent_id",
+              "issues",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "update_issues",
@@ -292,7 +1261,147 @@
           "inputParams": [
             "issues",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "issues": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 25,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "issue_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "description": {
+                      "type": "string",
+                      "maxLength": 2048
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "open",
+                        "in_progress",
+                        "in_review",
+                        "done"
+                      ],
+                      "description": "Issue lifecycle state. `blocked` is derived from `blocked_by` edges, not a state."
+                    },
+                    "parent_id": {
+                      "type": "string",
+                      "description": "Move this Issue under another Epic or Issue. Empty string un-nests it."
+                    },
+                    "blocked_by": {
+                      "type": "array",
+                      "maxItems": 25,
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Issue ids this Issue is blocked by — replaces the whole set ([] clears). `blocked` status is derived from these edges."
+                    },
+                    "acceptance_criteria": {
+                      "type": "array",
+                      "maxItems": 25,
+                      "description": "Replaces the whole criteria set ([] clears, omit to leave unchanged). Mark `passed: true` only for criteria you actually verified — `verify_issue` scores these.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string",
+                            "maxLength": 500
+                          },
+                          "passed": {
+                            "type": "boolean",
+                            "default": false
+                          }
+                        },
+                        "required": [
+                          "text"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 25,
+                      "description": "Labels to set (replaces the existing set)."
+                    },
+                    "assignee": {
+                      "type": "string",
+                      "description": "Owner: `me` (the user), an agent name (use your reported caller label when picking work up yourself), or an empty string to clear."
+                    },
+                    "priority": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4,
+                      "description": "0 none … 4 urgent."
+                    },
+                    "due_at": {
+                      "type": "string",
+                      "description": "Deadline as an ISO 8601 datetime (include the user's offset when known) or date (YYYY-MM-DD)."
+                    },
+                    "expected_version": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Optimistic concurrency — the `version` you read from `get_issue`. A stale value is rejected, not merged."
+                    }
+                  },
+                  "required": [
+                    "issue_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "issues",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "complete_issues",
@@ -308,7 +1417,92 @@
             "issue_ids",
             "work_stats",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "issue_ids": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "work_stats": {
+                "type": "object",
+                "description": "Version 2 agent trace for this work unit. Exactly one primary contributor; subagents require labels. Report truthfully — never invent usage.",
+                "properties": {
+                  "schemaVersion": {
+                    "type": "integer",
+                    "const": 2
+                  },
+                  "unitId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "wallDurationSec": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "contributors": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "required": [
+                  "schemaVersion",
+                  "unitId",
+                  "wallDurationSec",
+                  "contributors"
+                ],
+                "additionalProperties": false
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "issue_ids",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "delete_issues",
@@ -323,7 +1517,58 @@
           "inputParams": [
             "issue_ids",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "issue_ids": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "issue_ids",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -347,7 +1592,107 @@
             "body",
             "anchor",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "target": {
+                "type": "object",
+                "description": "What this acts on: an Epic, an Issue, or an Artifact, by primitive kind and id.",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "epic",
+                      "issue",
+                      "artifact"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "body": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "anchor": {
+                "type": "object",
+                "description": "Artifact targets only — anchors this comment to a passage. Omit for a whole-document or Epic/Issue comment.",
+                "properties": {
+                  "quote": {
+                    "type": "string",
+                    "maxLength": 480,
+                    "description": "The exact passage, copied verbatim from the Artifact content."
+                  },
+                  "prefix": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "description": "The ~32 characters immediately before `quote`. Strongly recommended for short or repeated quotes."
+                  },
+                  "suffix": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "description": "The ~32 characters immediately after `quote`."
+                  },
+                  "parent_id": {
+                    "type": "string",
+                    "description": "Comment id you are replying to. Threads are one level deep."
+                  }
+                },
+                "required": [
+                  "quote"
+                ],
+                "additionalProperties": false
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "target",
+              "body",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -371,7 +1716,84 @@
             "reason",
             "blocking",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "target": {
+                "type": "object",
+                "description": "What this acts on: an Epic, an Issue, or an Artifact, by primitive kind and id.",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "epic",
+                      "issue",
+                      "artifact"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "reason": {
+                "type": "string",
+                "maxLength": 500,
+                "description": "Why a human decision is needed here."
+              },
+              "blocking": {
+                "type": "boolean",
+                "default": false,
+                "description": "True when downstream work must wait for the decision."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "target",
+              "reason",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "claim_issue",
@@ -389,7 +1811,112 @@
             "expected_version",
             "summary",
             "evidence"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "issue_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "request_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "description": "Idempotency key — retried with the same value replays the original result."
+              },
+              "expected_version": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8000
+              },
+              "evidence": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 50,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "test",
+                        "observation",
+                        "artifact",
+                        "source",
+                        "attestation"
+                      ]
+                    },
+                    "reference": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    },
+                    "documentId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "reference",
+                    "summary"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "issue_id",
+              "request_id",
+              "expected_version",
+              "summary",
+              "evidence",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "verify_issue",
@@ -411,7 +1938,166 @@
             "independence",
             "results",
             "evidence"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "issue_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "request_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "expected_version": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "claim_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The claim being verified (from `get_issue`)."
+              },
+              "method": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8000
+              },
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "failed",
+                  "inconclusive"
+                ]
+              },
+              "independence": {
+                "type": "string",
+                "enum": [
+                  "independent",
+                  "self"
+                ]
+              },
+              "results": {
+                "type": "array",
+                "maxItems": 200,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "criterion_id": {
+                      "type": "string"
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": [
+                        "passed",
+                        "failed",
+                        "inconclusive"
+                      ]
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    }
+                  },
+                  "required": [
+                    "criterion_id",
+                    "outcome",
+                    "note"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "evidence": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 50,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "test",
+                        "observation",
+                        "artifact",
+                        "source",
+                        "attestation"
+                      ]
+                    },
+                    "reference": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    },
+                    "documentId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "reference",
+                    "summary"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "issue_id",
+              "request_id",
+              "expected_version",
+              "claim_id",
+              "method",
+              "outcome",
+              "independence",
+              "results",
+              "evidence",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -435,7 +2121,109 @@
             "target",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "space": {
+                "type": "string",
+                "description": "Space id or name. `shared` = the Shared Space (server-readable, available with Google sign-in alone); `personal`/`work` = the private built-ins on the paired iPhone; any other named private Space resolves by id or name. Omit to read across every Space you hold."
+              },
+              "target": {
+                "type": "object",
+                "description": "Only Artifacts attached to this Epic or Issue. `kind: \"artifact\"` is not a valid filter here.",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "epic",
+                      "issue",
+                      "artifact"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "artifacts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "title"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "artifacts"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_artifact",
@@ -451,7 +2239,58 @@
             "artifact_id",
             "revision_id",
             "include_content"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision_id": {
+                "type": "string",
+                "description": "Read this immutable revision instead of the current head."
+              },
+              "include_content": {
+                "type": "boolean",
+                "default": true,
+                "description": "False returns metadata plus a resource link only — use it for large or binary Artifacts."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "artifact_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "attach_artifact",
@@ -474,7 +2313,109 @@
             "sha256",
             "space",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "target": {
+                "type": "object",
+                "description": "What this acts on: an Epic, an Issue, or an Artifact, by primitive kind and id.",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "epic",
+                      "issue",
+                      "artifact"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "content": {
+                "type": "string",
+                "description": "Inline text you authored (markdown or HTML). Use this path whenever the Artifact is text — it avoids a lossy, token-expensive encoding step."
+              },
+              "mime": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "Content type of `content` or of the file being uploaded, for example `text/markdown` or `application/pdf`."
+              },
+              "base64": {
+                "type": "string",
+                "description": "Small binary payload, base64-encoded. For anything large prefer the upload plan (`filename`+`size`+`sha256`)."
+              },
+              "filename": {
+                "type": "string",
+                "maxLength": 300,
+                "description": "Original filename. With `size` and `sha256` this selects the upload-plan path."
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Exact byte size of the file being uploaded."
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{64}$",
+                "description": "SHA-256 of the file being uploaded."
+              },
+              "space": {
+                "type": "string",
+                "description": "Destination Space when the target does not already fix one. Defaults to the target's Space."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "target",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "revise_artifact",
@@ -495,7 +2436,80 @@
             "change_summary",
             "revision_id",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_revision_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The head revision id you read from `get_artifact`. Stale values are rejected."
+              },
+              "content": {
+                "type": "string",
+                "description": "New UTF-8 text content. Use this or `base64`."
+              },
+              "base64": {
+                "type": "string",
+                "description": "New file bytes, base64-encoded. Use this or `content`."
+              },
+              "mime": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "change_summary": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "revision_id": {
+                "type": "string",
+                "description": "Stable id for this revision — reuse it when retrying an ambiguous call."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "artifact_id",
+              "expected_revision_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "update_artifact",
@@ -514,7 +2528,74 @@
             "kind",
             "space",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 20
+              },
+              "kind": {
+                "type": "string",
+                "maxLength": 40,
+                "description": "What this Artifact IS: `adr`, `rfc`, `spec`, `prd`, `postmortem`, `runbook`, `note`, `review`, or anything else. Case-insensitive."
+              },
+              "space": {
+                "type": "string",
+                "description": "Move the Artifact to this Space."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "artifact_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "delete_artifacts",
@@ -529,7 +2610,58 @@
           "inputParams": [
             "artifact_ids",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "artifact_ids": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "artifact_ids",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_artifact_transfer",
@@ -543,7 +2675,50 @@
           ],
           "inputParams": [
             "transfer_id"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "transfer_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The transfer handle returned by `attach_artifact`."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "transfer_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -566,7 +2741,79 @@
             "cursor",
             "wait_ms",
             "limit"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "wait_ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 25000,
+                "default": 0,
+                "description": "Bounded wait in milliseconds (25 s ceiling). 0 returns immediately."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "changes": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "next_cursor": {
+                "type": "string"
+              },
+              "waited_ms": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "changes",
+              "next_cursor"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "list_mutation_receipts",
@@ -583,7 +2830,110 @@
             "updated_after",
             "states",
             "limit"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "ids": {
+                "type": "array",
+                "maxItems": 50,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "description": "Specific receipt ids (returned by mutation tools). Omit to sweep by watermark."
+              },
+              "updated_after": {
+                "type": "string",
+                "description": "Only receipts changed at or after this ISO 8601 instant. Persist the last one you processed."
+              },
+              "states": {
+                "type": "array",
+                "maxItems": 9,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "accepted",
+                    "delivered",
+                    "applying",
+                    "applied",
+                    "device_rejected",
+                    "delivery_failed",
+                    "expired",
+                    "canceled",
+                    "rejected"
+                  ]
+                }
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "receipts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "state"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "receipts"
+            ],
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -606,7 +2956,59 @@
             "name",
             "key",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "key": {
+                "type": "string",
+                "maxLength": 10,
+                "description": "Optional short prefix (1–10 alphanumerics, starting with a letter). Derived on the phone when omitted."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "name",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "delete_space",
@@ -621,7 +3023,54 @@
           "inputParams": [
             "space",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "space": {
+                "type": "string",
+                "description": "Private Space id or name to delete."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "space",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -648,7 +3097,103 @@
             "to",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "space": {
+                "type": "string",
+                "description": "Space id or name. `shared` = the Shared Space (server-readable, available with Google sign-in alone); `personal`/`work` = the private built-ins on the paired iPhone; any other named private Space resolves by id or name. Omit to read across every Space you hold."
+              },
+              "query": {
+                "type": "string",
+                "maxLength": 256,
+                "description": "Optional substring filter. For real search across everything, use `search_context`."
+              },
+              "include_text": {
+                "type": "boolean",
+                "default": false,
+                "description": "Decrypt and inline each memory's text. Costly — leave false for discovery."
+              },
+              "from": {
+                "type": "string",
+                "description": "Only memories at or after this ISO 8601 instant."
+              },
+              "to": {
+                "type": "string",
+                "description": "Only memories before this ISO 8601 instant."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "memories": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "memories"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_memory",
@@ -662,7 +3207,49 @@
           ],
           "inputParams": [
             "memory_id"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "memory_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "memory_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "save_memories",
@@ -678,7 +3265,121 @@
             "memories",
             "facts",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "memories": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "maxLength": 5000
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "space": {
+                      "type": "string",
+                      "description": "Required. Destination Space: `shared` (Shared Space, the only destination until an iPhone is paired), `personal`/`work` (private built-ins), or a named private Space's id/name."
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp. Defaults to now."
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "space"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "facts": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "description": "One atomic durable fact, one sentence."
+                    },
+                    "space": {
+                      "type": "string",
+                      "description": "Required. Destination Space: `shared` (Shared Space, the only destination until an iPhone is paired), `personal`/`work` (private built-ins), or a named private Space's id/name."
+                    },
+                    "confidence": {
+                      "type": "string",
+                      "enum": [
+                        "low",
+                        "medium",
+                        "high"
+                      ],
+                      "description": "Your certainty this is durable. Use `low`/`medium` for anything you inferred rather than heard."
+                    },
+                    "source_memory_ids": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Memory ids this fact was distilled from. Unknown ids are skipped."
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "space"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "delete_memories",
@@ -693,7 +3394,58 @@
           "inputParams": [
             "memory_ids",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "memory_ids": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "memory_ids",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -719,7 +3471,105 @@
             "to",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "meal",
+                  "workout",
+                  "expense",
+                  "health",
+                  "all"
+                ],
+                "default": "all",
+                "description": "`meal` (calories), `workout`, `expense`, `health` (blood pressure, body metrics and HealthKit-mirrored fitness items), or `all`."
+              },
+              "space": {
+                "type": "string",
+                "description": "Space id or name. `shared` = the Shared Space (server-readable, available with Google sign-in alone); `personal`/`work` = the private built-ins on the paired iPhone; any other named private Space resolves by id or name. Omit to read across every Space you hold."
+              },
+              "from": {
+                "type": "string",
+                "description": "Only logs at or after this ISO 8601 instant."
+              },
+              "to": {
+                "type": "string",
+                "description": "Only logs before this ISO 8601 instant."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500,
+                "default": 100,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "logs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "kind"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "logs"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "log_meal",
@@ -738,7 +3588,110 @@
             "notes",
             "space",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "title": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 25,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "maxLength": 100
+                    },
+                    "kcal": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "protein_g": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "carbs_g": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "fat_g": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "sugar_g": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "kcal"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "due_at": {
+                "type": "string",
+                "description": "Deadline as an ISO 8601 datetime (include the user's offset when known) or date (YYYY-MM-DD)."
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "space": {
+                "type": "string",
+                "description": "Destination Space. Meal data is inherently personal, so omitting this files it under Personal."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "items",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "log_workout",
@@ -757,7 +3710,126 @@
             "notes",
             "space",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "title": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "exercises": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 25,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "sets": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "reps": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "weight": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "weight_unit": {
+                      "type": "string",
+                      "enum": [
+                        "kg",
+                        "lb"
+                      ]
+                    },
+                    "duration_minutes": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "muscle_groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "estimated_kcal_burn": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "instructions_url": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "due_at": {
+                "type": "string",
+                "description": "Deadline as an ISO 8601 datetime (include the user's offset when known) or date (YYYY-MM-DD)."
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "space": {
+                "type": "string",
+                "description": "Destination Space. Health data is inherently personal, so omitting this files it under Personal."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "exercises",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "delete_logs",
@@ -772,7 +3844,76 @@
           "inputParams": [
             "logs",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "logs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "memory_id": {
+                      "type": "string",
+                      "description": "The memory that owns this log (from `list_logs`)."
+                    },
+                    "log_id": {
+                      "type": "string"
+                    },
+                    "item_id": {
+                      "type": "string",
+                      "description": "One row inside the log group. Omit to delete the whole group."
+                    }
+                  },
+                  "required": [
+                    "memory_id",
+                    "log_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "logs",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -796,7 +3937,92 @@
             "fields",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Name, alias, or organization substring."
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Projection — return only these fields per person (`id` is always included). Use it for whole-roster scans."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "people": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "people"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_person",
@@ -812,7 +4038,59 @@
             "person_id",
             "include_memories",
             "memories_limit"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "person_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "include_memories": {
+                "type": "boolean",
+                "default": false,
+                "description": "Also return the confirmed memories linked to this person."
+              },
+              "memories_limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "person_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "create_people",
@@ -827,7 +4105,108 @@
           "inputParams": [
             "people",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "people": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "display_name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "given_name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "family_name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "nickname": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "organization_name": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "job_title": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "department_name": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "phone_numbers": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 50
+                      }
+                    },
+                    "email_addresses": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 300
+                      }
+                    }
+                  },
+                  "required": [
+                    "display_name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "people",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "update_people",
@@ -842,7 +4221,121 @@
           "inputParams": [
             "people",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "people": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "person_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "display_name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "given_name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "family_name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "nickname": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "organization_name": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "job_title": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "department_name": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "phone_numbers": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 50
+                      }
+                    },
+                    "email_addresses": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 300
+                      }
+                    },
+                    "remembered_facts": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 300
+                      },
+                      "description": "Durable free-text facts the user told you — 'has two kids', 'met at the Bangalore off-site'. One sentence each."
+                    }
+                  },
+                  "required": [
+                    "person_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "people",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "delete_people",
@@ -857,7 +4350,58 @@
           "inputParams": [
             "person_ids",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "person_ids": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "person_ids",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "merge_people",
@@ -872,7 +4416,77 @@
           "inputParams": [
             "merges",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "merges": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "keep_person_id": {
+                      "type": "string",
+                      "description": "The profile that survives and absorbs the others — prefer the richest, most correct one."
+                    },
+                    "merge_person_ids": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 20,
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "keep_person_id",
+                    "merge_person_ids"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "merges",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -899,7 +4513,106 @@
             "unit_policy",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "type": {
+                "type": "string",
+                "minLength": 1,
+                "description": "HealthKit type identifier, for example `heartRate`, `stepCount`, `sleepAnalysis`. Omit to discover which types have data."
+              },
+              "from": {
+                "type": "string",
+                "description": "Inclusive range start, ISO 8601."
+              },
+              "to": {
+                "type": "string",
+                "description": "Exclusive range end, ISO 8601. At most 31 days."
+              },
+              "source": {
+                "type": "string",
+                "description": "Filter by source app or device name (substring)."
+              },
+              "unit_policy": {
+                "type": "string",
+                "enum": [
+                  "canonical",
+                  "source"
+                ],
+                "default": "canonical",
+                "description": "Convert to the canonical HealthKit unit, or preserve the uploaded unit."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500,
+                "default": 100,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "samples": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "types": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "partial": {
+                "type": "boolean"
+              },
+              "coverage": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": true
+          }
         },
         {
           "name": "summarize_health",
@@ -921,7 +4634,130 @@
             "source",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "from": {
+                "type": "string",
+                "description": "Inclusive range start, ISO 8601."
+              },
+              "to": {
+                "type": "string",
+                "description": "Exclusive range end, ISO 8601."
+              },
+              "bucket": {
+                "type": "string",
+                "enum": [
+                  "hour",
+                  "day",
+                  "week",
+                  "month"
+                ]
+              },
+              "timezone": {
+                "type": "string",
+                "description": "IANA timezone for bucket boundaries, for example `Asia/Singapore`. Weeks start Monday."
+              },
+              "statistic": {
+                "type": "string",
+                "enum": [
+                  "sum",
+                  "average",
+                  "min",
+                  "max",
+                  "latest",
+                  "count",
+                  "duration"
+                ],
+                "description": "Validated per type — an unsupported combination is rejected rather than guessed. Defaults per the HealthKit type registry."
+              },
+              "source": {
+                "type": "string",
+                "description": "Case-insensitive source app or device substring."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 366,
+                "default": 100,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "type",
+              "from",
+              "to",
+              "bucket",
+              "timezone",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "buckets": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "partial": {
+                "type": "boolean"
+              },
+              "coverage": {
+                "type": "object"
+              },
+              "statistic": {
+                "type": "string"
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -949,7 +4785,105 @@
             "include_cancelled",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "Window start, ISO 8601. An event counts when it overlaps the window."
+              },
+              "to": {
+                "type": "string",
+                "description": "Window end, ISO 8601, exclusive."
+              },
+              "attendee": {
+                "type": "string",
+                "description": "Attendee or organizer email (exact, case-insensitive) or a name substring."
+              },
+              "person_id": {
+                "type": "string",
+                "description": "Only events this person attended."
+              },
+              "query": {
+                "type": "string",
+                "description": "Case-insensitive substring over title, location and description."
+              },
+              "include_cancelled": {
+                "type": "boolean",
+                "default": false
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "events"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_calendar_event",
@@ -963,7 +4897,49 @@
           ],
           "inputParams": [
             "event_id"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "event_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "event_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -986,7 +4962,85 @@
             "space",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "space": {
+                "type": "string",
+                "description": "Space id or name. `shared` = the Shared Space (server-readable, available with Google sign-in alone); `personal`/`work` = the private built-ins on the paired iPhone; any other named private Space resolves by id or name. Omit to read across every Space you hold."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50,
+                "description": "Maximum rows to return. Server-capped."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque continuation from the previous call's `next_cursor`. Never parse it."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "next_cursor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "space": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "skills"
+            ],
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_skill",
@@ -1000,7 +5054,49 @@
           ],
           "inputParams": [
             "skill_id"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "skill_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "skill_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "save_skill",
@@ -1019,7 +5115,70 @@
             "description",
             "space",
             "dedupe_key"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "skill_id": {
+                "type": "string",
+                "description": "Omit to add a new skill; pass an id from `list_skills` to overwrite that one."
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "markdown": {
+                "type": "string",
+                "description": "The skill's full markdown content (≤256 KB)."
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500,
+                "description": "One-line description, used for frontmatter when the markdown has none."
+              },
+              "space": {
+                "type": "string",
+                "description": "Required when adding a new skill."
+              },
+              "dedupe_key": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "Optional idempotency key for retries. Per-account and GLOBAL across every tool — it dedupes the WHOLE call. Use a distinct value per call, or omit unless you are actually retrying."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     },
@@ -1043,7 +5202,69 @@
             "resource_id",
             "selector",
             "content_version"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "resource_kind": {
+                "type": "string",
+                "enum": [
+                  "artifact",
+                  "memory",
+                  "log",
+                  "person"
+                ]
+              },
+              "resource_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "selector": {
+                "type": "object",
+                "description": "Optional narrowing selector for the resource.",
+                "additionalProperties": true
+              },
+              "content_version": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "resource_kind",
+              "resource_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         },
         {
           "name": "get_content_request",
@@ -1057,7 +5278,49 @@
           ],
           "inputParams": [
             "request_id"
-          ]
+          ],
+          "inputSchema": {
+            "properties": {
+              "request_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "request_id",
+              "caller"
+            ],
+            "type": "object",
+            "additionalProperties": false
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
+            "additionalProperties": true
+          }
         }
       ]
     }

@@ -3,7 +3,7 @@
   "server": {
     "key": "context-blog",
     "name": "Context Blog",
-    "endpoint": "https://blog.onecontext.me/api/mcp",
+    "endpoint": "https://sites.onecontext.me/api/mcp",
     "purpose": "The publishing engine for Context: agents draft, lint and publish blog posts, site pages and Instagram carousels on the user's own domain, with a person approving every piece before it goes live. Also drives the AEO/GEO loop — tracking AI-referral traffic, Search Console queries and an AI-visibility probe so the agent can see and improve how often assistants cite the site.",
     "auth": {
       "type": "oauth2",
@@ -16,16 +16,16 @@
     },
     "contractVersion": "blog-1.3.0",
     "startingPrompt": "Call the Context Blog tool `setup` with workflow 'blog' and follow its nextStep.",
-    "generatedAt": "2026-09-05T12:08:18.769Z",
+    "generatedAt": "2026-09-05T13:09:08.829Z",
     "sourceRepo": "asaubhagya/context-blog",
     "sourcePath": "lib/mcp/server.ts",
-    "sourceCommit": "4d020cf"
+    "sourceCommit": "eb4d5c4"
   },
   "connect": {
-    "claude-ai": "Settings → Connectors → Add custom connector → name Context Blog, URL https://blog.onecontext.me/api/mcp",
-    "chatgpt": "Settings → Connectors → Add → URL https://blog.onecontext.me/api/mcp",
-    "claude-code": "claude mcp add --transport http context-blog https://blog.onecontext.me/api/mcp",
-    "cursor": "Add an HTTP MCP server with URL https://blog.onecontext.me/api/mcp"
+    "claude-ai": "Settings → Connectors → Add custom connector → name Context Blog, URL https://sites.onecontext.me/api/mcp",
+    "chatgpt": "Settings → Connectors → Add → URL https://sites.onecontext.me/api/mcp",
+    "claude-code": "claude mcp add --transport http context-blog https://sites.onecontext.me/api/mcp",
+    "cursor": "Add an HTTP MCP server with URL https://sites.onecontext.me/api/mcp"
   },
   "skills": [
     {
@@ -88,7 +88,82 @@
           "destructive": false,
           "idempotent": false,
           "scopes": [],
-          "inputParams": []
+          "inputParams": [],
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "guide": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "guide"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "get_capabilities",
@@ -98,7 +173,130 @@
           "destructive": false,
           "idempotent": false,
           "scopes": [],
-          "inputParams": []
+          "inputParams": [],
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "product": {
+                    "type": "string"
+                  },
+                  "tools": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "workflows": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "harnesses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "harnessSkills": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "skillChannel": {
+                    "type": "string"
+                  },
+                  "features": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "auth": {
+                    "$ref": "#/properties/data/properties/features"
+                  },
+                  "limits": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "contractVersion",
+                  "product",
+                  "tools",
+                  "workflows",
+                  "harnesses",
+                  "harnessSkills",
+                  "skillChannel",
+                  "features",
+                  "auth",
+                  "limits"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data/properties/features"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "list_skill_catalog",
@@ -108,7 +306,85 @@
           "destructive": false,
           "idempotent": false,
           "scopes": [],
-          "inputParams": []
+          "inputParams": [],
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "skills": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  }
+                },
+                "required": [
+                  "skills"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data/properties/skills/items"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "get_skill",
@@ -121,7 +397,97 @@
           "inputParams": [
             "key",
             "version"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "pattern": "^[a-z0-9][a-z0-9-]*$"
+              },
+              "version": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "skill": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "skill"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data/properties/skill"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "setup",
@@ -136,7 +502,123 @@
             "canWriteFiles",
             "workflow",
             "installedSkills"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "harness": {
+                "type": "string",
+                "enum": [
+                  "claude-code",
+                  "codex",
+                  "cursor",
+                  "generic",
+                  "chat"
+                ]
+              },
+              "canWriteFiles": {
+                "type": "boolean"
+              },
+              "workflow": {
+                "type": "string",
+                "enum": [
+                  "blog",
+                  "site",
+                  "instagram"
+                ]
+              },
+              "installedSkills": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 64
+              }
+            },
+            "required": [
+              "workflow"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "chat",
+                      "files"
+                    ]
+                  },
+                  "nextStep": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "mode",
+                  "nextStep"
+                ],
+                "additionalProperties": true
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     },
@@ -162,7 +644,408 @@
             "faq",
             "seo",
             "design_tokens"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "article",
+                  "page"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "paragraph"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "heading"
+                        },
+                        "level": {
+                          "type": "number",
+                          "enum": [
+                            2,
+                            3
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "level",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "list"
+                        },
+                        "ordered": {
+                          "type": "boolean"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "quote"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "cite": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "source": {
+                          "type": "string",
+                          "format": "uri",
+                          "maxLength": 2048
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "callout"
+                        },
+                        "title": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "appCta"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "href": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text",
+                        "href",
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "comparisonTable"
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 300
+                        },
+                        "columns": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 200
+                          },
+                          "minItems": 2,
+                          "maxItems": 8
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "maxLength": 1000
+                            }
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "columns",
+                        "rows"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "image"
+                        },
+                        "src": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "alt": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "src",
+                        "alt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 200
+              },
+              "faq": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "q": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "a": {
+                      "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                    }
+                  },
+                  "required": [
+                    "q",
+                    "a"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              },
+              "seo": {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "slug": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "canonical": {
+                    "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                  },
+                  "keywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 80
+                    },
+                    "maxItems": 20
+                  }
+                },
+                "additionalProperties": false
+              },
+              "design_tokens": {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "kind",
+              "title",
+              "description",
+              "sections"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "preview_id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "html": {
+                    "type": "string"
+                  },
+                  "expires_at": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "preview_id",
+                  "url",
+                  "html",
+                  "expires_at"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "content_lint",
@@ -186,7 +1069,513 @@
             "master",
             "recent_styles",
             "brand"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "article",
+                  "page"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "paragraph"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "heading"
+                        },
+                        "level": {
+                          "type": "number",
+                          "enum": [
+                            2,
+                            3
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "level",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "list"
+                        },
+                        "ordered": {
+                          "type": "boolean"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "quote"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "cite": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "source": {
+                          "type": "string",
+                          "format": "uri",
+                          "maxLength": 2048
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "callout"
+                        },
+                        "title": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "appCta"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "href": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text",
+                        "href",
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "comparisonTable"
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 300
+                        },
+                        "columns": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 200
+                          },
+                          "minItems": 2,
+                          "maxItems": 8
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "maxLength": 1000
+                            }
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "columns",
+                        "rows"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "image"
+                        },
+                        "src": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "alt": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "src",
+                        "alt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 200
+              },
+              "faq": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "q": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "a": {
+                      "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                    }
+                  },
+                  "required": [
+                    "q",
+                    "a"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              },
+              "seo": {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "slug": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "canonical": {
+                    "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                  },
+                  "keywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 80
+                    },
+                    "maxItems": 20
+                  }
+                },
+                "additionalProperties": false
+              },
+              "design_tokens": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "style": {
+                "type": "string",
+                "enum": [
+                  "guide",
+                  "how-to",
+                  "comparison",
+                  "listicle",
+                  "explainer",
+                  "opinion",
+                  "news",
+                  "case-study"
+                ]
+              },
+              "hub": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "locale": {
+                "type": "string",
+                "maxLength": 16
+              },
+              "master": {
+                "type": "object",
+                "properties": {
+                  "slug": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                  }
+                },
+                "additionalProperties": false
+              },
+              "recent_styles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                "maxItems": 5
+              },
+              "brand": {
+                "type": "object",
+                "properties": {
+                  "banned_phrases": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "maxItems": 100
+                  },
+                  "own_hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 253
+                    },
+                    "maxItems": 10
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "kind",
+              "title",
+              "description",
+              "sections"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "warnings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "severity": {
+                          "type": "string",
+                          "enum": [
+                            "error",
+                            "warn"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "severity"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "stats": {
+                    "type": "object",
+                    "properties": {
+                      "words": {
+                        "type": "number"
+                      },
+                      "h2s": {
+                        "type": "number"
+                      },
+                      "citations": {
+                        "type": "number"
+                      },
+                      "numbers": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "words",
+                      "h2s",
+                      "citations",
+                      "numbers"
+                    ],
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "warnings",
+                  "stats"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "check_record",
@@ -204,7 +1593,145 @@
             "verdict",
             "findings",
             "models"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "subject_kind": {
+                "type": "string",
+                "enum": [
+                  "article",
+                  "page",
+                  "instagram"
+                ]
+              },
+              "subject_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "round": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 99
+              },
+              "verdict": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "bounce",
+                  "escalate"
+                ]
+              },
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "maxItems": 200
+              },
+              "models": {
+                "type": "object",
+                "properties": {
+                  "maker": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "checker": {
+                    "type": "string",
+                    "maxLength": 120
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "subject_kind",
+              "subject_ref",
+              "round",
+              "verdict",
+              "findings",
+              "models"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "check_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "check_id"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "check_list",
@@ -216,7 +1743,130 @@
           "scopes": [],
           "inputParams": [
             "subject_ref"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "subject_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "subject_ref"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "checks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "check_id": {
+                          "type": "string"
+                        },
+                        "tenant_slug": {
+                          "type": "string"
+                        },
+                        "subject_kind": {
+                          "type": "string"
+                        },
+                        "subject_ref": {
+                          "type": "string"
+                        },
+                        "round": {
+                          "type": "number"
+                        },
+                        "verdict": {
+                          "type": "string"
+                        },
+                        "findings": {},
+                        "models": {},
+                        "created_at": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "check_id",
+                        "tenant_slug",
+                        "subject_kind",
+                        "subject_ref",
+                        "round",
+                        "verdict",
+                        "created_at"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "checks"
+                ],
+                "additionalProperties": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     },
@@ -245,7 +1895,144 @@
             "mount_path",
             "primary_hostname",
             "context_epic_id"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "artifact",
+                  "review",
+                  "hosted"
+                ]
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "blog",
+                    "site",
+                    "instagram"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 3
+              },
+              "recurrence": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "locales": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+                },
+                "minItems": 1,
+                "maxItems": 20
+              },
+              "default_locale": {
+                "$ref": "#/properties/locales/items"
+              },
+              "timezone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "mount_path": {
+                "type": "string",
+                "pattern": "^\\/[a-z0-9/-]*$",
+                "maxLength": 120
+              },
+              "primary_hostname": {
+                "type": "string",
+                "pattern": "^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              "context_epic_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "slug",
+              "name",
+              "tier"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "tenant_get",
@@ -257,7 +2044,82 @@
           "scopes": [],
           "inputParams": [
             "slug"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              }
+            },
+            "required": [
+              "slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "tenant_update",
@@ -281,7 +2143,242 @@
             "context_epic_id",
             "context_epic_surface",
             "tracking"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "artifact",
+                  "review",
+                  "hosted"
+                ]
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "blog",
+                    "site",
+                    "instagram"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 3
+              },
+              "recurrence": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "locales": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+                },
+                "minItems": 1,
+                "maxItems": 20
+              },
+              "default_locale": {
+                "$ref": "#/properties/locales/items"
+              },
+              "timezone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "mount_path": {
+                "type": "string",
+                "pattern": "^\\/[a-z0-9/-]*$",
+                "maxLength": 120
+              },
+              "primary_hostname": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "context_epic_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "context_epic_surface": {
+                "type": "string",
+                "enum": [
+                  "phone",
+                  "web"
+                ]
+              },
+              "tracking": {
+                "type": "object",
+                "properties": {
+                  "umami_website_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_-]{4,64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "ga4_measurement_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^G-[A-Z0-9]{4,16}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "gsc_property": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 300
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "bing_site_url": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uri",
+                        "maxLength": 300
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "indexnow_enabled": {
+                    "type": "boolean"
+                  },
+                  "brand_aliases": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "maxItems": 30
+                  },
+                  "owned_domains": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/properties/primary_hostname/anyOf/0"
+                    },
+                    "maxItems": 30
+                  },
+                  "probe_markets": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z]{2}$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 10
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "brand_upsert",
@@ -298,7 +2395,102 @@
             "design_tokens",
             "organization_ld",
             "software_application_ld"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "voice": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "byline": {
+                "$ref": "#/properties/voice"
+              },
+              "design_tokens": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "organization_ld": {
+                "$ref": "#/properties/voice"
+              },
+              "software_application_ld": {
+                "$ref": "#/properties/voice"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "voice",
+              "byline",
+              "design_tokens"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "audiences_upsert",
@@ -311,7 +2503,127 @@
           "inputParams": [
             "tenant_slug",
             "items"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "description": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "pains": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 300
+                      },
+                      "maxItems": 50
+                    },
+                    "queries": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 300
+                      },
+                      "maxItems": 100
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 50
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "items"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "hubs_upsert",
@@ -324,7 +2636,115 @@
           "inputParams": [
             "tenant_slug",
             "items"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "pillar_article_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "title"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 50
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "items"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "topics_upsert",
@@ -337,7 +2757,139 @@
           "inputParams": [
             "tenant_slug",
             "items"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "hub_slug": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "target_query": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "fanout_queries": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 300
+                      },
+                      "maxItems": 50
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "idea",
+                        "researched",
+                        "drafting",
+                        "published",
+                        "retired"
+                      ]
+                    },
+                    "context_issue_id": {
+                      "$ref": "#/properties/items/items/properties/id"
+                    },
+                    "source": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "title"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 100
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "items"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "topics_list",
@@ -350,7 +2902,92 @@
           "inputParams": [
             "tenant_slug",
             "status"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "idea",
+                  "researched",
+                  "drafting",
+                  "published",
+                  "retired"
+                ]
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     },
@@ -389,7 +3026,456 @@
             "publish_at",
             "context_issue_id",
             "dry_run"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,199}$"
+              },
+              "locale": {
+                "type": "string",
+                "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+              },
+              "translation_group": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "paragraph"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "heading"
+                        },
+                        "level": {
+                          "type": "number",
+                          "enum": [
+                            2,
+                            3
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "level",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "list"
+                        },
+                        "ordered": {
+                          "type": "boolean"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "quote"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "cite": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "source": {
+                          "type": "string",
+                          "format": "uri",
+                          "maxLength": 2048
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "callout"
+                        },
+                        "title": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "appCta"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "href": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text",
+                        "href",
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "comparisonTable"
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 300
+                        },
+                        "columns": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 200
+                          },
+                          "minItems": 2,
+                          "maxItems": 8
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "maxLength": 1000
+                            }
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "columns",
+                        "rows"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "image"
+                        },
+                        "src": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "alt": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "src",
+                        "alt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 200
+              },
+              "faq": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "q": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "a": {
+                      "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                    }
+                  },
+                  "required": [
+                    "q",
+                    "a"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              },
+              "seo": {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "slug": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "canonical": {
+                    "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                  },
+                  "keywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 80
+                    },
+                    "maxItems": 20
+                  }
+                },
+                "additionalProperties": false
+              },
+              "style": {
+                "type": "string",
+                "enum": [
+                  "guide",
+                  "how-to",
+                  "comparison",
+                  "listicle",
+                  "explainer",
+                  "opinion",
+                  "news",
+                  "case-study"
+                ]
+              },
+              "hub_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "topic_id": {
+                "$ref": "#/properties/id"
+              },
+              "hero_asset_id": {
+                "$ref": "#/properties/id"
+              },
+              "faq_title": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                "maxItems": 20
+              },
+              "category": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "internal_links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                "maxItems": 50
+              },
+              "publish_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "context_issue_id": {
+                "$ref": "#/properties/id"
+              },
+              "dry_run": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "slug",
+              "locale",
+              "translation_group",
+              "title",
+              "description",
+              "sections",
+              "seo",
+              "hub_slug",
+              "context_issue_id"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "article_get",
@@ -404,7 +3490,94 @@
             "id",
             "slug",
             "locale"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,199}$"
+              },
+              "locale": {
+                "type": "string",
+                "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "article_list",
@@ -421,7 +3594,109 @@
             "hub_slug",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "in_review",
+                  "approved",
+                  "published",
+                  "retired"
+                ]
+              },
+              "locale": {
+                "type": "string",
+                "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+              },
+              "hub_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "cursor": {
+                "type": "string",
+                "maxLength": 400
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "article_set_status",
@@ -436,7 +3711,101 @@
             "id",
             "status",
             "assert_context_done"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "in_review",
+                  "approved",
+                  "published",
+                  "retired"
+                ]
+              },
+              "assert_context_done": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "id",
+              "status"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "page_upsert",
@@ -459,7 +3828,401 @@
             "design_overrides",
             "context_issue_id",
             "dry_run"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,199}$"
+              },
+              "locale": {
+                "type": "string",
+                "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "paragraph"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "heading"
+                        },
+                        "level": {
+                          "type": "number",
+                          "enum": [
+                            2,
+                            3
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "level",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "list"
+                        },
+                        "ordered": {
+                          "type": "boolean"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "quote"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "cite": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "source": {
+                          "type": "string",
+                          "format": "uri",
+                          "maxLength": 2048
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "callout"
+                        },
+                        "title": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "appCta"
+                        },
+                        "text": {
+                          "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                        },
+                        "href": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text",
+                        "href",
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "comparisonTable"
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 300
+                        },
+                        "columns": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 200
+                          },
+                          "minItems": 2,
+                          "maxItems": 8
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "maxLength": 1000
+                            }
+                          },
+                          "minItems": 1,
+                          "maxItems": 50
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "columns",
+                        "rows"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "image"
+                        },
+                        "src": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "alt": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "src",
+                        "alt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 200
+              },
+              "faq": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "q": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "a": {
+                      "$ref": "#/properties/sections/items/anyOf/0/properties/text"
+                    }
+                  },
+                  "required": [
+                    "q",
+                    "a"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              },
+              "seo": {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "slug": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "canonical": {
+                    "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                  },
+                  "keywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 80
+                    },
+                    "maxItems": 20
+                  }
+                },
+                "additionalProperties": false
+              },
+              "design_overrides": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "context_issue_id": {
+                "$ref": "#/properties/id"
+              },
+              "dry_run": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "slug",
+              "locale",
+              "title",
+              "description",
+              "sections",
+              "seo",
+              "context_issue_id"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "page_get",
@@ -474,7 +4237,94 @@
             "id",
             "slug",
             "locale"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,199}$"
+              },
+              "locale": {
+                "type": "string",
+                "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "page_list",
@@ -490,7 +4340,105 @@
             "locale",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "in_review",
+                  "approved",
+                  "published",
+                  "retired"
+                ]
+              },
+              "locale": {
+                "type": "string",
+                "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "cursor": {
+                "type": "string",
+                "maxLength": 400
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "page_set_status",
@@ -505,7 +4453,101 @@
             "id",
             "status",
             "assert_context_done"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "in_review",
+                  "approved",
+                  "published",
+                  "retired"
+                ]
+              },
+              "assert_context_done": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "id",
+              "status"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "publish",
@@ -522,7 +4564,100 @@
             "instagram_post_id",
             "assert_context_done",
             "context_issue_id"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "article_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "page_id": {
+                "$ref": "#/properties/article_id"
+              },
+              "instagram_post_id": {
+                "$ref": "#/properties/article_id"
+              },
+              "assert_context_done": {
+                "type": "boolean"
+              },
+              "context_issue_id": {
+                "$ref": "#/properties/article_id"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "assert_context_done",
+              "context_issue_id"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     },
@@ -546,7 +4681,120 @@
             "sha256",
             "content_type",
             "kind"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "filename": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 26214400
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "content_type": {
+                "type": "string",
+                "enum": [
+                  "image/jpeg",
+                  "image/png",
+                  "image/webp",
+                  "image/gif",
+                  "image/avif",
+                  "image/svg+xml",
+                  "video/mp4"
+                ]
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "image",
+                  "video",
+                  "file"
+                ]
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "filename",
+              "size",
+              "sha256",
+              "content_type"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "asset_complete",
@@ -562,7 +4810,101 @@
             "width",
             "height",
             "alt"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "asset_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20000
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20000
+              },
+              "alt": {
+                "type": "string",
+                "maxLength": 300
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "asset_id"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     },
@@ -586,7 +4928,109 @@
             "slides",
             "publish_at",
             "context_issue_id"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "caption": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2200
+              },
+              "slides": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/properties/id"
+                },
+                "minItems": 1,
+                "maxItems": 10
+              },
+              "publish_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "context_issue_id": {
+                "$ref": "#/properties/id"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "caption",
+              "slides",
+              "context_issue_id"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "instagram_post_get",
@@ -599,7 +5043,87 @@
           "inputParams": [
             "tenant_slug",
             "id"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "id"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "instagram_post_list",
@@ -614,7 +5138,101 @@
             "status",
             "limit",
             "cursor"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "in_review",
+                  "approved",
+                  "published",
+                  "retired"
+                ]
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "cursor": {
+                "type": "string",
+                "maxLength": 400
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "instagram_post_set_status",
@@ -629,7 +5247,101 @@
             "id",
             "status",
             "assert_context_done"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "in_review",
+                  "approved",
+                  "published",
+                  "retired"
+                ]
+              },
+              "assert_context_done": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "id",
+              "status"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     },
@@ -650,7 +5362,96 @@
             "tenant_slug",
             "hostname",
             "mode"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "hostname": {
+                "type": "string",
+                "pattern": "^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "proxy",
+                  "cname",
+                  "platform"
+                ]
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "hostname",
+              "mode"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "domain_status",
@@ -663,7 +5464,87 @@
           "inputParams": [
             "tenant_slug",
             "hostname"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "hostname": {
+                "type": "string",
+                "pattern": "^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "hostname"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     },
@@ -686,7 +5567,100 @@
             "from",
             "to",
             "compare_previous"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "period": {
+                "type": "string",
+                "enum": [
+                  "7d",
+                  "28d",
+                  "90d"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "to": {
+                "$ref": "#/properties/from"
+              },
+              "compare_previous": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "top_posts",
@@ -702,7 +5676,102 @@
             "from",
             "to",
             "limit"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "period": {
+                "type": "string",
+                "enum": [
+                  "7d",
+                  "28d",
+                  "90d"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "to": {
+                "$ref": "#/properties/from"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "post_stats",
@@ -720,7 +5789,109 @@
             "period",
             "from",
             "to"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "article_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,199}$"
+              },
+              "locale": {
+                "type": "string",
+                "pattern": "^[a-z]{2}(-[A-Za-z]{2})?$"
+              },
+              "period": {
+                "type": "string",
+                "enum": [
+                  "7d",
+                  "28d",
+                  "90d"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "to": {
+                "$ref": "#/properties/from"
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "ai_referrals",
@@ -736,7 +5907,111 @@
             "from",
             "to",
             "engine"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "period": {
+                "type": "string",
+                "enum": [
+                  "7d",
+                  "28d",
+                  "90d"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "to": {
+                "$ref": "#/properties/from"
+              },
+              "engine": {
+                "type": "string",
+                "enum": [
+                  "chatgpt",
+                  "perplexity",
+                  "gemini",
+                  "claude",
+                  "copilot",
+                  "grok",
+                  "meta",
+                  "you",
+                  "google_aio"
+                ]
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "search_queries",
@@ -756,7 +6031,122 @@
             "page_url",
             "striking_distance_only",
             "limit"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "period": {
+                "type": "string",
+                "enum": [
+                  "7d",
+                  "28d",
+                  "90d"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "to": {
+                "$ref": "#/properties/from"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "google",
+                  "bing"
+                ]
+              },
+              "min_impressions": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "page_url": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 500
+              },
+              "striking_distance_only": {
+                "type": "boolean"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "visibility_report",
@@ -773,7 +6163,105 @@
             "to",
             "engine",
             "topic"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "period": {
+                "type": "string",
+                "enum": [
+                  "7d",
+                  "28d",
+                  "90d"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "to": {
+                "$ref": "#/properties/from"
+              },
+              "engine": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "topic": {
+                "type": "string",
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "visibility_queries_set",
@@ -787,7 +6275,121 @@
             "tenant_slug",
             "items",
             "replace"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 300
+                    },
+                    "topic": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "priority": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 5
+                    },
+                    "article_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "query"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 200
+              },
+              "replace": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "items"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "visibility_results_ingest",
@@ -801,7 +6403,229 @@
             "tenant_slug",
             "run",
             "results"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "run": {
+                "type": "object",
+                "properties": {
+                  "trigger": {
+                    "type": "string",
+                    "enum": [
+                      "weekly",
+                      "daily",
+                      "manual"
+                    ]
+                  },
+                  "engines": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "maxItems": 20
+                  },
+                  "cost_usd": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000
+                  },
+                  "started_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "finished_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "done",
+                      "partial",
+                      "failed"
+                    ]
+                  },
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "trigger"
+                ],
+                "additionalProperties": false
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 300
+                    },
+                    "engine": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "model_slug": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "market": {
+                      "type": "string",
+                      "maxLength": 10
+                    },
+                    "sample_no": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "cited",
+                        "mentioned",
+                        "absent",
+                        "error",
+                        "no_ai_answer"
+                      ]
+                    },
+                    "answer_text": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "citations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "maxLength": 2000
+                          },
+                          "title": {
+                            "type": "string",
+                            "maxLength": 300
+                          },
+                          "rank": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "url"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 100
+                    },
+                    "cost_usd": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    "raw_response": {},
+                    "probed_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "query",
+                    "engine"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 600
+              }
+            },
+            "required": [
+              "tenant_slug",
+              "run",
+              "results"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "indexing_status",
@@ -815,7 +6639,92 @@
             "tenant_slug",
             "url",
             "limit"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 500
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         {
           "name": "tracking_setup_status",
@@ -827,7 +6736,82 @@
           "scopes": [],
           "inputParams": [
             "tenant_slug"
-          ]
+          ],
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "tenant_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+              }
+            },
+            "required": [
+              "tenant_slug"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "$ref": "#/properties/data"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "generatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "contractVersion",
+                  "generatedAt"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "meta"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         }
       ]
     }
