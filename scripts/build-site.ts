@@ -92,6 +92,8 @@ select{font:inherit;font-size:15px;padding:8px 10px;border-radius:8px;border:1px
 details{border-top:1px solid var(--line);padding:10px 0}details summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
 details summary::-webkit-details-marker{display:none}summary .n{font-family:ui-monospace,Menlo,monospace;font-weight:600}summary .d{color:var(--mute);font-size:14px;flex-basis:100%;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 details[open] summary .d{display:none}.tool p{font-size:15px}.tool{scroll-margin-top:12px}
+details.grp{border-top:2px solid var(--line);padding:12px 0 4px}details.grp>summary .gt{font-weight:700;font-size:17px}details.grp .tool{margin-left:0}
+.card details.grp:first-child{border-top:0}
 button.tgl{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:3px 10px}
 dl.params{margin:8px 0 0;padding:0}dl.params dt{margin-top:10px;font-family:ui-monospace,Menlo,monospace;font-weight:600}dl.params dt .ty{font-family:-apple-system,system-ui,sans-serif;font-weight:400;color:var(--mute);font-size:13px}
 dl.params dt .req{color:#c33;font-weight:400;font-size:13px}dl.params dd{margin:2px 0 0;font-size:14px;color:var(--mute)}dl.params dl.params{border-left:2px solid var(--line);padding-left:10px;margin-left:2px}
@@ -103,11 +105,11 @@ footer{margin-top:40px;font-size:13px;color:var(--mute);border-top:1px solid var
 `;
 const JS = `document.querySelectorAll('select[data-nav]').forEach(s=>s.addEventListener('change',()=>location.href=s.value));
 document.querySelectorAll('.copy button').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.previousElementSibling.textContent);b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1200)}catch{}}));
-document.querySelectorAll('button.tgl').forEach(b=>b.addEventListener('click',()=>document.querySelectorAll('details.tool').forEach(d=>d.open=b.dataset.open==='1')));
-if(location.hash){const d=document.getElementById(location.hash.slice(1));if(d&&d.tagName==='DETAILS'){d.open=true;d.scrollIntoView()}}`;
+document.querySelectorAll('button.tgl').forEach(b=>b.addEventListener('click',()=>document.querySelectorAll('details.tool,details.grp').forEach(d=>d.open=b.dataset.open==='1')));
+if(location.hash){const d=document.getElementById(location.hash.slice(1));if(d&&d.tagName==='DETAILS'){d.open=true;let p=d.parentElement;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement}d.scrollIntoView()}}`;
 
 function page(title: string, body: string, opts: { alt?: string; desc?: string } = {}) {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} — agents.onecontext.me</title>${opts.desc ? `<meta name="description" content="${esc(opts.desc)}">` : ""}${opts.alt ? `<link rel="alternate" type="text/markdown" href="${opts.alt}">` : ""}<style>${CSS}</style></head><body><nav class="top"><a class="brand" href="/">agents.onecontext.me</a><a href="/skills">Skills</a><a href="/mcp">MCP</a><span class="r">${latest.name}</span></nav><main>${body}<footer>Built ${time(generatedAt)} from <a href="https://github.com/${REPO}">${REPO}</a> · latest <code>${latest.name}</code> · beta <code>main@${beta.sha}</code> · <a href="/llms.txt">llms.txt</a> · <a href="/README.md">README.md</a></footer></main><script>${JS}</script></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} — agents.onecontext.me</title>${opts.desc ? `<meta name="description" content="${esc(opts.desc)}">` : ""}${opts.alt ? `<link rel="alternate" type="text/markdown" href="${opts.alt}">` : ""}<style>${CSS}</style></head><body><nav class="top"><a class="brand" href="/">agents.onecontext.me</a><a href="/skills">Skills</a><a href="/mcp">MCP</a><a href="/guides">Guides</a><span class="r">${latest.name}</span></nav><main>${body}<footer>Built ${time(generatedAt)} from <a href="https://github.com/${REPO}">${REPO}</a> · latest <code>${latest.name}</code> · beta <code>main@${beta.sha}</code> · <a href="/llms.txt">llms.txt</a> · <a href="/README.md">README.md</a></footer></main><script>${JS}</script></body></html>`;
 }
 const copyBox = (cmd: string) => `<div class="copy"><pre><code>${esc(cmd)}</code></pre><button type="button">Copy</button></div>`;
 
@@ -188,30 +190,53 @@ function params(schema: any, depth = 0): string {
 function toolBlock(t: Tool) {
   const flags = [t.readOnly ? `<span class="badge ro">read-only</span>` : "", t.destructive ? `<span class="badge danger">destructive</span>` : "", t.idempotent && !t.readOnly ? `<span class="badge">idempotent</span>` : ""].join(" ");
   const out = t.outputSchema && Object.keys(t.outputSchema.properties ?? {}).length ? `<details style="border:0"><summary class="mute">Output</summary>${params(t.outputSchema, 1)}</details>` : "";
-  return `<details class="tool" id="${esc(t.name)}" open><summary><span class="n">${esc(t.name)}</span> ${flags}<span class="d">${esc(t.description.split(/(?<=\.)\s/)[0])}</span></summary>${t.title ? `<p><b>${esc(t.title)}</b></p>` : ""}<p>${esc(t.description)}</p>${t.scopes?.length ? `<p class="mute" style="font-size:13px">scopes: ${t.scopes.map((s) => `<code>${esc(s)}</code>`).join(" ")}</p>` : ""}<h3 style="margin-top:12px">Parameters</h3>${params(t.inputSchema)}${out}<p class="mute" style="font-size:13px"><a href="#${esc(t.name)}">#${esc(t.name)}</a></p></details>`;
+  return `<details class="tool" id="${esc(t.name)}" open><summary><span class="n">${esc(t.name)}</span> ${flags}<span class="d">${esc(firstSentence(t.description))}</span></summary>${t.title ? `<p><b>${esc(t.title)}</b></p>` : ""}<p>${esc(t.description)}</p>${t.scopes?.length ? `<p class="mute" style="font-size:13px">scopes: ${t.scopes.map((s) => `<code>${esc(s)}</code>`).join(" ")}</p>` : ""}<h3 style="margin-top:12px">Parameters</h3>${params(t.inputSchema)}${out}<p class="mute" style="font-size:13px"><a href="#${esc(t.name)}">#${esc(t.name)}</a></p></details>`;
 }
 const catalogs = (latest.manifest.mcp ?? []).map((m) => ({ m, cat: JSON.parse(show(latest.name, m.path)!) as Catalog }));
+const firstSentence = (s: string) => s.split(/(?<=\.)\s/)[0];
+const toolFlags = (t: Tool) => [t.readOnly ? `<span class="badge ro">read-only</span>` : "", t.destructive ? `<span class="badge danger">destructive</span>` : ""].filter(Boolean).join(" ");
+// One shape for both pages: header → groups (<details class="grp">) → tools. `full` renders parameters; otherwise a link row.
+function serverHeader(m: ManifestMcp, cat: Catalog, full: boolean) {
+  const s = cat.server; const n = cat.toolGroups.reduce((a, g) => a + g.tools.length, 0);
+  const title = full ? `<h1>${esc(s.name)} <span class="badge latest">MCP</span></h1>` : `<h2 style="margin-top:0"><a href="/mcp/${m.key}" style="text-decoration:none;color:inherit">${esc(s.name)}</a> <span class="badge latest">MCP</span></h2>`;
+  return `${title}
+<div class="meta"><span>${n} tools</span><span>contract <code>${esc(s.contractVersion)}</code></span><span>catalog ${time(s.generatedAt ?? latest.date)}</span>${s.sourceCommit ? `<span>source <code>${esc(s.sourceCommit)}</code></span>` : ""}</div>
+<p>${esc(s.purpose ?? "")}</p>
+${copyBox(s.endpoint)}
+<div class="meta" style="margin-top:8px">${full ? "" : `<a href="/mcp/${m.key}">all parameters</a>`}<a href="/mcp/${m.key}/tools.json">tools.json</a><a href="https://cdn.jsdelivr.net/gh/${REPO}@${latest.name}/${m.path}">raw catalog</a>${s.auth ? `<span>auth: ${esc(s.auth.type)}${s.auth.signIn ? ` · ${esc(s.auth.signIn)}` : ""}</span>` : ""}${s.startingPrompt ? `<span>say: <code>${esc(s.startingPrompt)}</code></span>` : ""}</div>`;
+}
+function groupBlock(m: ManifestMcp, g: Catalog["toolGroups"][number], full: boolean) {
+  const rows = full ? g.tools.map(toolBlock).join("") : `<ul class="list" style="margin:4px 0 0">${g.tools.map((t) => `<li style="padding:8px 0"><a class="n" href="/mcp/${m.key}#${esc(t.name)}" style="text-decoration:none">${esc(t.name)}</a> ${toolFlags(t)}<div class="d">${esc(firstSentence(t.description))}</div></li>`).join("")}</ul>`;
+  return `<details class="grp" id="group-${esc(g.key)}"${full ? " open" : ""}><summary><span class="gt">${esc(g.title)}</span> <span class="mute" style="font-size:13px">${g.tools.length}${g.access ? ` · ${esc(g.access)}` : ""}</span></summary>${rows}</details>`;
+}
 for (const { m, cat } of catalogs) {
   const s = cat.server; const tools = cat.toolGroups.flatMap((g) => g.tools);
   const connect = cat.connect ? `<h2>Connect</h2>${Object.entries(cat.connect).map(([h, c]) => `<p><b>${esc(h)}</b></p>${c.startsWith("claude mcp") ? copyBox(c) : `<p class="mute" style="font-size:14px">${esc(c)}</p>`}`).join("")}` : "";
   const skills = cat.skills?.length ? `<h2>Skills that wrap this server</h2><ul>${cat.skills.map((k) => `<li><a href="/skills/${k.key}">${esc(k.key)}</a> <span class="badge">${esc(k.role)}</span> <span class="mute">${esc(k.description)}</span></li>`).join("")}</ul>` : "";
-  const body = `<h1>${esc(s.name)} <span class="badge latest">MCP</span></h1>
-<div class="meta"><span>contract <code>${esc(s.contractVersion)}</code></span><span>${tools.length} tools</span><span>catalog ${time(s.generatedAt ?? latest.date)}</span>${s.sourceCommit ? `<span>source <code>${esc(s.sourceCommit)}</code></span>` : ""}</div>
-<p>${esc(s.purpose ?? "")}</p>
-<p>Endpoint ${copyBox(s.endpoint)}</p>
-<div class="meta"><a href="/mcp/${m.key}/tools.json">tools.json</a><a href="https://cdn.jsdelivr.net/gh/${REPO}@${latest.name}/${m.path}">raw catalog</a>${s.auth ? `<span>auth: ${esc(s.auth.type)}${s.auth.signIn ? ` · ${esc(s.auth.signIn)}` : ""}</span>` : ""}${s.startingPrompt ? `<span>say: <code>${esc(s.startingPrompt)}</code></span>` : ""}</div>
+  const body = `${serverHeader(m, cat, true)}
 ${connect}${skills}
-<h2>Tools <span class="mute" style="font-weight:400;font-size:14px">${tools.length}</span></h2><p class="meta"><button type="button" class="tgl" data-open="0">Collapse all</button><button type="button" class="tgl" data-open="1">Expand all</button><span>tap a name to fold it</span></p><div class="toc">${cat.toolGroups.map((g) => g.tools.map((t) => `<a href="#${esc(t.name)}">${esc(t.name)}</a>`).join("")).join("")}</div>
-${cat.toolGroups.map((g) => `<h3 id="group-${esc(g.key)}">${esc(g.title)} <span class="mute" style="font-weight:400;font-size:14px">${g.tools.length}${g.access ? ` · ${esc(g.access)}` : ""}</span></h3>${g.tools.map(toolBlock).join("")}`).join("")}`;
+<h2>Tools <span class="mute" style="font-weight:400;font-size:14px">${tools.length}</span></h2><p class="meta"><button type="button" class="tgl" data-open="0">Collapse all</button><button type="button" class="tgl" data-open="1">Expand all</button><span>tap a group or a tool to fold it</span></p>
+${cat.toolGroups.map((g) => groupBlock(m, g, true)).join("")}`;
   write(`mcp/${m.key}.html`, page(`${s.name} MCP`, body, { alt: `/mcp/${m.key}/tools.json`, desc: s.purpose }));
   write(`mcp/${m.key}/tools.json`, JSON.stringify({ generatedAt, server: s, tools: tools.map(({ name, title, description, readOnly, destructive, idempotent, scopes, inputSchema, outputSchema }) => ({ name, title, description, readOnly, destructive, idempotent, scopes, inputSchema, outputSchema })) }, null, 2));
 }
-const firstSentence = (s: string) => s.split(/(?<=\.)\s/)[0];
-write("mcp/index.html", page("MCP servers", `<h1>MCP servers</h1><p class="mute">Two servers, one catalog each — generated from the servers' own <code>tools/list</code> at <code>${latest.name}</code>. Connect the endpoint, then load the skills that wrap it. Tap a group to see its tools; tap a tool for parameters.</p>
-<div class="grid">${catalogs.map(({ m, cat }) => { const tools = cat.toolGroups.flatMap((g) => g.tools); return `<div class="card"><a class="t" href="/mcp/${m.key}">${esc(cat.server.name)}</a> <span class="badge">${tools.length} tools</span> <span class="badge">contract ${esc(m.server.contractVersion)}</span><div class="mute" style="font-size:14px;margin:6px 0">${esc(cat.server.purpose ?? "")}</div><div class="meta"><code>${esc(m.server.endpoint)}</code><a href="/mcp/${m.key}/tools.json">tools.json</a>${cat.server.generatedAt ? `<span>catalog ${time(cat.server.generatedAt)}</span>` : ""}</div>
-${cat.toolGroups.map((g) => `<details style="border-top:1px solid var(--line);padding:8px 0"><summary><span class="n" style="font-family:inherit">${esc(g.title)}</span> <span class="mute" style="font-size:13px">${g.tools.length}${g.access ? ` · ${esc(g.access)}` : ""}</span></summary><ul class="list" style="margin:6px 0 0">${g.tools.map((t) => `<li style="padding:8px 0"><a href="/mcp/${m.key}#${esc(t.name)}" style="font-family:ui-monospace,Menlo,monospace;font-weight:600;text-decoration:none">${esc(t.name)}</a> ${t.readOnly ? `<span class="badge ro">read-only</span>` : ""}${t.destructive ? ` <span class="badge danger">destructive</span>` : ""}<div class="d">${esc(firstSentence(t.description))}</div></li>`).join("")}</ul></details>`).join("")}
-</div>`; }).join("")}</div>`, { alt: "/mcp/index.json" }));
+write("mcp/index.html", page("MCP servers", `<h1>MCP servers</h1><p class="mute">Two servers, one catalog each — generated from the servers' own <code>tools/list</code> at <code>${latest.name}</code>. Connect the endpoint, then load the skills that wrap it. Tap a group to see its tools; tap a tool for its parameters.</p>
+${catalogs.map(({ m, cat }) => `<section class="card" style="margin:16px 0">${serverHeader(m, cat, false)}<div style="margin-top:10px">${cat.toolGroups.map((g) => groupBlock(m, g, false)).join("")}</div></section>`).join("")}`, { alt: "/mcp/index.json" }));
 write("mcp/index.json", JSON.stringify({ generatedAt, servers: catalogs.map(({ m, cat }) => ({ key: m.key, name: cat.server.name, endpoint: cat.server.endpoint, contractVersion: cat.server.contractVersion, toolCount: m.toolCount, url: `${HOST}/mcp/${m.key}`, tools: `${HOST}/mcp/${m.key}/tools.json` })) }, null, 2));
+
+// ---------- guides (guides/<key>.md on main; frontmatter title/description/server/updated) ----------
+type Guide = { key: string; title: string; description: string; server?: string; updated?: string; body: string; raw: string };
+const guides: Guide[] = git("ls-tree --name-only main guides/ 2>/dev/null || true").split("\n").filter((p) => p.endsWith(".md")).map((p) => {
+  const raw = show("main", p)!; const fm = raw.match(/^---\n([\s\S]*?)\n---\n?/)?.[1] ?? "";
+  const get = (k: string) => fm.match(new RegExp(`^${k}:\\s*(.+)$`, "m"))?.[1].trim().replace(/^["']|["']$/g, "") ?? "";
+  return { key: p.replace(/^guides\//, "").replace(/\.md$/, ""), title: get("title") || p, description: get("description"), server: get("server"), updated: get("updated"), body: stripFm(raw), raw };
+});
+for (const g of guides) {
+  write(`guides/${g.key}.md`, g.raw);
+  write(`guides/${g.key}.html`, page(g.title, `<h1>${esc(g.title)}</h1><div class="meta">${g.server ? `<span>server <a href="/mcp/${esc(g.server === "context-blog" ? "context-blog" : g.server)}">${esc(g.server)}</a></span>` : ""}${g.updated ? `<span>updated ${esc(g.updated)}</span>` : ""}<span>beta <code>main@${beta.sha}</code></span><a href="/guides/${g.key}.md">Raw .md</a><a href="https://github.com/${REPO}/blob/main/guides/${g.key}.md">Source</a></div><p>${esc(g.description)}</p><div class="md">${marked.parse(g.body)}</div>`, { alt: `/guides/${g.key}.md`, desc: g.description }));
+}
+write("guides/index.html", page("Guides", `<h1>Guides</h1><p class="mute">Short, agent-readable guides — what each server is, how to connect, the loop, the rules that bite, and a tool map. Served from <code>main</code>; every page has a raw <code>.md</code> sibling.</p><ul class="list">${guides.map((g) => `<li><a class="t" href="/guides/${g.key}">${esc(g.title)}</a>${g.server ? ` <span class="badge">${esc(g.server)}</span>` : ""}<div class="d">${esc(g.description)}</div><div class="m">${g.updated ? `<span>updated ${esc(g.updated)}</span>` : ""}<a href="/guides/${g.key}.md">raw .md</a></div></li>`).join("") || `<li class="mute">No guides yet.</li>`}</ul>`, { alt: "/guides/index.json" }));
+write("guides/index.json", JSON.stringify({ generatedAt, source: `main@${beta.sha}`, guides: guides.map((g) => ({ key: g.key, title: g.title, description: g.description, server: g.server || null, updated: g.updated || null, url: `${HOST}/guides/${g.key}`, raw: `${HOST}/guides/${g.key}.md` })) }, null, 2));
 
 // ---------- README / root ----------
 const ctx = catalogs.find((c) => c.m.key === "context"); const blog = catalogs.find((c) => c.m.key !== "context");
@@ -238,6 +263,10 @@ ${catalogs.map(({ cat }) => cat.connect?.["claude-code"] ?? `claude mcp add --tr
 \`\`\`
 
 claude.ai / ChatGPT / Cursor: add a custom connector with the endpoint URL. Sign in with Google; pair your iPhone in the Context app for private Spaces.
+
+## Guides
+
+${guides.map((g) => `- [${g.title}](${HOST}/guides/${g.key}) — ${g.description} ([raw](${HOST}/guides/${g.key}.md))`).join("\n") || "_none yet_"}
 
 ## Start
 
@@ -268,7 +297,7 @@ _Built ${generatedAt} · Context contract ${ctx?.cat.server.contractVersion ?? "
 `;
 write("README.md", readme);
 write("index.html", page("Agent interface for Context", `<div class="md">${marked.parse(readme.replace(/^# .*\n/, "<h1>Agent interface for Context</h1>\n"))}</div>`, { alt: "/README.md", desc: "MCP servers, skills and channels for agents working with Context." }));
-write("llms.txt", `# agents.onecontext.me\n\n> Agent interface for Context: MCP endpoints, tool catalogs, and versioned skills on latest/beta channels.\n\n## Start\n- ${HOST}/README.md\n- ${HOST}/channels.json\n\n## MCP\n${catalogs.map(({ m, cat }) => `- ${cat.server.name}: ${cat.server.endpoint} — catalog ${HOST}/mcp/${m.key}/tools.json`).join("\n")}\n\n## Skills (latest ${latest.name})\n${skillKeys.map((k) => `- ${k}: ${HOST}/skills/${k}.md — versions ${HOST}/skills/${k}/versions.json`).join("\n")}\n`);
+write("llms.txt", `# agents.onecontext.me\n\n> Agent interface for Context: MCP endpoints, tool catalogs, and versioned skills on latest/beta channels.\n\n## Start\n- ${HOST}/README.md\n- ${HOST}/channels.json\n\n## Guides\n${guides.map((g) => `- ${g.title}: ${HOST}/guides/${g.key}.md`).join("\n")}\n\n## MCP\n${catalogs.map(({ m, cat }) => `- ${cat.server.name}: ${cat.server.endpoint} — catalog ${HOST}/mcp/${m.key}/tools.json`).join("\n")}\n\n## Skills (latest ${latest.name})\n${skillKeys.map((k) => `- ${k}: ${HOST}/skills/${k}.md — versions ${HOST}/skills/${k}/versions.json`).join("\n")}\n`);
 
 // ---------- vercel ----------
 write("vercel.json", JSON.stringify({ cleanUrls: true, trailingSlash: false, headers: [
