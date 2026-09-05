@@ -16,9 +16,9 @@ every file against its sha256 before serving it.
 
 | skill | kind | description | served by |
 |---|---|---|---|
-| [`rules`](skills/rules/SKILL.md) | rules | The Context harness: the execution discipline any agent follows when a task needs a plan. Ships `agents-block.md` (appended to AGENTS.md / CLAUDE.md) and [`spec-template.md`](skills/spec-template.md). | Context iOS MCP · Context Web MCP |
-| [`setup-context`](skills/setup-context/SKILL.md) | skill | Chart a piece of work as a Context map (epic + linked tickets) and work it to done with review gates. | Context iOS MCP · Context Web MCP |
-| [`daily-brief`](skills/daily-brief/SKILL.md) | skill | Daily heartbeat for any recurring agent workflow tracked in Context. | Context iOS MCP · Context Web MCP · Context Blog MCP |
+| [`rules`](skills/rules/SKILL.md) | rules | The Context harness: the execution discipline any agent follows when a task needs a plan. Ships `agents-block.md` (appended to AGENTS.md / CLAUDE.md) and [`spec-template.md`](skills/spec-template.md). | Context MCP |
+| [`setup-context`](skills/setup-context/SKILL.md) | skill | Chart a piece of work as a Context map (epic + linked tickets) and work it to done with review gates. | Context MCP |
+| [`daily-brief`](skills/daily-brief/SKILL.md) | skill | Daily heartbeat for any recurring agent workflow tracked in Context. | Context MCP · Context Blog MCP |
 | [`rules-blog`](skills/rules-blog/SKILL.md) | rules | Rules for every Context Blog workflow, layered on `rules`. | Context Blog MCP |
 | [`blog-agent`](skills/blog-agent/SKILL.md) | skill | "Set up blog": interview the owner, chart a tenant epic, install the routines. Ships `templates/` and `routines/`. | Context Blog MCP |
 | [`blog-assessment`](skills/blog-assessment/SKILL.md) | skill | Weekly performance and AI-visibility report for a tenant: reads the Blog MCP stats, runs the agent-side citation probe with the host's own keys (by NAME, cost-capped), ingests the results and posts one report under the Performance Report lane. |
@@ -39,7 +39,7 @@ Layout: `skills/<key>/SKILL.md` (first-party), `skills/third-party/<key>/SKILL.m
 
 You normally never install these by hand — each MCP's `setup` tool does it:
 
-- **Context iOS MCP** and **Context Web MCP** (`app.onecontext.me`):
+- **Context MCP** (`https://mcp.onecontext.me/mcp` — one endpoint for the iPhone app and the web; sign in with Google, pair your iPhone for Private Spaces):
   `setup {workflow: "harness", harness, canWriteFiles}` resolves `rules`,
   `setup-context`, `daily-brief` and their dependencies `wayfinder` / `grill-me`.
 - **Context Blog MCP** (`blog.onecontext.me/api/mcp`): `setup {workflow: "blog" | "site" | "instagram",
