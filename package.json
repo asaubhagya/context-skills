@@ -4,16 +4,20 @@
   "private": true,
   "description": "Source of truth for the skills served by the Context MCPs (iOS, Web, Blog) and the Skills hub at https://app.onecontext.me/skills.",
   "license": "MIT",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "check-skills": "tsx scripts/check-skills.ts && tsx scripts/check-mcp-catalogs.ts",
     "check-mcp-catalogs": "tsx scripts/check-mcp-catalogs.ts",
     "build-manifest": "tsx scripts/build-manifest.ts",
+    "build-site": "tsx scripts/build-site.ts",
     "check-manifest": "tsx scripts/build-manifest.ts --check",
     "check": "pnpm check-skills && pnpm check-manifest"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "marked": "^15.0.12",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
