@@ -17,17 +17,25 @@
  * sha256 and the byte size. Loaders verify each downloaded file against
  * `sha256` before serving it. `depends` must resolve to a skill in this tree.
  *
+ * Also walks `mcp/*.json` and emits a top-level `mcp[]` for every file whose
+ * `schema` is `"context-mcp-catalog/1"` — one entry per MCP tool catalog
+ * (key, path, sha256, bytes, server summary, toolCount), validated the same
+ * way `pnpm check-mcp-catalogs` does. See mcp/README.md for what these files
+ * are and how they are refreshed.
+ *
  * Deterministic: same tree → same manifest (except `generatedAt`, which
  * `--check` ignores). No network, no database.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseFrontmatter, walkSkillDirs, KEY_RE, MAX_FILE_BYTES } from "./check-skills";
+import { MCP_CATALOG_SCHEMA, validateCatalog, type McpCatalog } from "./check-mcp-catalogs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SKILLS_DIR = join(ROOT, "skills");
+const MCP_DIR = join(ROOT, "mcp");
 const MANIFEST = join(ROOT, "manifest.json");
 
 export type ManifestFile = { path: string; src: string; sha256: string; bytes: number };
@@ -43,7 +51,15 @@ export type ManifestSkill = {
   primary: string;
   files: ManifestFile[];
 };
-export type Manifest = { generatedAt: string; ref?: string; skills: ManifestSkill[] };
+export type ManifestMcp = {
+  key: string;
+  path: string;
+  sha256: string;
+  bytes: number;
+  server: { name: string; endpoint: string; contractVersion: string };
+  toolCount: number;
+};
+export type Manifest = { generatedAt: string; ref?: string; skills: ManifestSkill[]; mcp: ManifestMcp[] };
 
 const argv = process.argv.slice(2);
 const check = argv.includes("--check");
@@ -124,8 +140,37 @@ export function collect(): ManifestSkill[] {
   return skills;
 }
 
+/** Every `mcp/*.json` whose top-level `schema` is "context-mcp-catalog/1". */
+export function collectMcp(): ManifestMcp[] {
+  if (!existsSync(MCP_DIR)) return [];
+  const entries: ManifestMcp[] = [];
+  for (const f of readdirSync(MCP_DIR).filter((f) => f.endsWith(".json")).sort()) {
+    const abs = join(MCP_DIR, f);
+    const key = basename(f, ".json");
+    const rel = `mcp/${f}`;
+    const buf = readChecked(abs);
+    const catalog = JSON.parse(buf.toString("utf8")) as McpCatalog;
+    if (catalog.schema !== MCP_CATALOG_SCHEMA) continue;
+    const problems = validateCatalog(rel, key, catalog);
+    if (problems.length > 0) throw new Error(problems.join("\n"));
+    entries.push({
+      key,
+      path: rel,
+      sha256: createHash("sha256").update(buf).digest("hex"),
+      bytes: buf.byteLength,
+      server: {
+        name: catalog.server!.name!,
+        endpoint: catalog.server!.endpoint!,
+        contractVersion: catalog.server!.contractVersion!,
+      },
+      toolCount: catalog.counts!.total!,
+    });
+  }
+  return entries;
+}
+
 function main() {
-  const manifest: Manifest = { generatedAt: new Date().toISOString(), ...(ref ? { ref } : {}), skills: collect() };
+  const manifest: Manifest = { generatedAt: new Date().toISOString(), ...(ref ? { ref } : {}), skills: collect(), mcp: collectMcp() };
   const next = JSON.stringify(manifest, null, 2) + "\n";
   if (check) {
     if (!existsSync(MANIFEST)) { console.error("manifest.json is missing — run `pnpm build-manifest`"); process.exit(1); }
@@ -135,11 +180,11 @@ function main() {
       console.error("manifest.json is stale — run `pnpm build-manifest` and commit the result");
       process.exit(1);
     }
-    console.log(`manifest.json is up to date (${manifest.skills.length} skills)`);
+    console.log(`manifest.json is up to date (${manifest.skills.length} skills, ${manifest.mcp.length} MCP catalogs)`);
     return;
   }
   writeFileSync(MANIFEST, next);
-  console.log(`manifest.json: ${manifest.skills.length} skills, ${manifest.skills.reduce((n, s) => n + s.files.length, 0)} files${ref ? `, ref ${ref}` : ""}`);
+  console.log(`manifest.json: ${manifest.skills.length} skills, ${manifest.skills.reduce((n, s) => n + s.files.length, 0)} files, ${manifest.mcp.length} MCP catalogs${ref ? `, ref ${ref}` : ""}`);
 }
 
 main();

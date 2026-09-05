@@ -122,6 +122,14 @@ Frontmatter fields: `name`, `description`, `depends: [..]`, `version`,
 `license`, `source` (upstream URL, marks a skill as third-party),
 `attach: [..]` (extra files outside the walk, e.g. `../spec-template.md`).
 
+## MCP catalogs
+
+Alongside skills, `manifest.json` also indexes `mcp/*.json` — one generated
+tool catalog per Context MCP server (Context, Context Blog, …), verified by
+sha256 the same way skill files are. See [mcp/README.md](mcp/README.md) for
+the schema and how to refresh a catalog. These catalogs are rendered at
+[app.onecontext.me/mcp](https://app.onecontext.me/mcp).
+
 ## Credits and licence
 
 MIT — see [LICENSE](LICENSE). `wayfinder` and `grill-me` are Matt Pocock's
