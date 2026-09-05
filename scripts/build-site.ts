@@ -91,7 +91,8 @@ select{font:inherit;font-size:15px;padding:8px 10px;border-radius:8px;border:1px
 .copy{display:flex;gap:8px;align-items:stretch}.copy pre{flex:1;margin:0}.copy button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:8px;padding:0 10px}
 details{border-top:1px solid var(--line);padding:10px 0}details summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
 details summary::-webkit-details-marker{display:none}summary .n{font-family:ui-monospace,Menlo,monospace;font-weight:600}summary .d{color:var(--mute);font-size:14px;flex-basis:100%;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-details[open] summary .d{display:none}.tool p{font-size:15px}
+details[open] summary .d{display:none}.tool p{font-size:15px}.tool{scroll-margin-top:12px}
+button.tgl{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:3px 10px}
 dl.params{margin:8px 0 0;padding:0}dl.params dt{margin-top:10px;font-family:ui-monospace,Menlo,monospace;font-weight:600}dl.params dt .ty{font-family:-apple-system,system-ui,sans-serif;font-weight:400;color:var(--mute);font-size:13px}
 dl.params dt .req{color:#c33;font-weight:400;font-size:13px}dl.params dd{margin:2px 0 0;font-size:14px;color:var(--mute)}dl.params dl.params{border-left:2px solid var(--line);padding-left:10px;margin-left:2px}
 .md img{max-width:100%}.md table{display:block;overflow-x:auto;border-collapse:collapse;font-size:14px}.md th,.md td{border:1px solid var(--line);padding:4px 8px;text-align:left}.md blockquote{margin:8px 0;padding-left:12px;border-left:3px solid var(--line);color:var(--mute)}
@@ -102,7 +103,8 @@ footer{margin-top:40px;font-size:13px;color:var(--mute);border-top:1px solid var
 `;
 const JS = `document.querySelectorAll('select[data-nav]').forEach(s=>s.addEventListener('change',()=>location.href=s.value));
 document.querySelectorAll('.copy button').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.previousElementSibling.textContent);b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1200)}catch{}}));
-if(location.hash){const d=document.getElementById(location.hash.slice(1));if(d&&d.tagName==='DETAILS')d.open=true}`;
+document.querySelectorAll('button.tgl').forEach(b=>b.addEventListener('click',()=>document.querySelectorAll('details.tool').forEach(d=>d.open=b.dataset.open==='1')));
+if(location.hash){const d=document.getElementById(location.hash.slice(1));if(d&&d.tagName==='DETAILS'){d.open=true;d.scrollIntoView()}}`;
 
 function page(title: string, body: string, opts: { alt?: string; desc?: string } = {}) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} — agents.onecontext.me</title>${opts.desc ? `<meta name="description" content="${esc(opts.desc)}">` : ""}${opts.alt ? `<link rel="alternate" type="text/markdown" href="${opts.alt}">` : ""}<style>${CSS}</style></head><body><nav class="top"><a class="brand" href="/">agents.onecontext.me</a><a href="/skills">Skills</a><a href="/mcp">MCP</a><span class="r">${latest.name}</span></nav><main>${body}<footer>Built ${time(generatedAt)} from <a href="https://github.com/${REPO}">${REPO}</a> · latest <code>${latest.name}</code> · beta <code>main@${beta.sha}</code> · <a href="/llms.txt">llms.txt</a> · <a href="/README.md">README.md</a></footer></main><script>${JS}</script></body></html>`;
@@ -186,7 +188,7 @@ function params(schema: any, depth = 0): string {
 function toolBlock(t: Tool) {
   const flags = [t.readOnly ? `<span class="badge ro">read-only</span>` : "", t.destructive ? `<span class="badge danger">destructive</span>` : "", t.idempotent && !t.readOnly ? `<span class="badge">idempotent</span>` : ""].join(" ");
   const out = t.outputSchema && Object.keys(t.outputSchema.properties ?? {}).length ? `<details style="border:0"><summary class="mute">Output</summary>${params(t.outputSchema, 1)}</details>` : "";
-  return `<details class="tool" id="${esc(t.name)}"><summary><span class="n">${esc(t.name)}</span> ${flags}<span class="d">${esc(t.description.split(/(?<=\.)\s/)[0])}</span></summary>${t.title ? `<p><b>${esc(t.title)}</b></p>` : ""}<p>${esc(t.description)}</p>${t.scopes?.length ? `<p class="mute" style="font-size:13px">scopes: ${t.scopes.map((s) => `<code>${esc(s)}</code>`).join(" ")}</p>` : ""}<h3 style="margin-top:12px">Parameters</h3>${params(t.inputSchema)}${out}<p class="mute" style="font-size:13px"><a href="#${esc(t.name)}">#${esc(t.name)}</a></p></details>`;
+  return `<details class="tool" id="${esc(t.name)}" open><summary><span class="n">${esc(t.name)}</span> ${flags}<span class="d">${esc(t.description.split(/(?<=\.)\s/)[0])}</span></summary>${t.title ? `<p><b>${esc(t.title)}</b></p>` : ""}<p>${esc(t.description)}</p>${t.scopes?.length ? `<p class="mute" style="font-size:13px">scopes: ${t.scopes.map((s) => `<code>${esc(s)}</code>`).join(" ")}</p>` : ""}<h3 style="margin-top:12px">Parameters</h3>${params(t.inputSchema)}${out}<p class="mute" style="font-size:13px"><a href="#${esc(t.name)}">#${esc(t.name)}</a></p></details>`;
 }
 const catalogs = (latest.manifest.mcp ?? []).map((m) => ({ m, cat: JSON.parse(show(latest.name, m.path)!) as Catalog }));
 for (const { m, cat } of catalogs) {
@@ -199,7 +201,7 @@ for (const { m, cat } of catalogs) {
 <p>Endpoint ${copyBox(s.endpoint)}</p>
 <div class="meta"><a href="/mcp/${m.key}/tools.json">tools.json</a><a href="https://cdn.jsdelivr.net/gh/${REPO}@${latest.name}/${m.path}">raw catalog</a>${s.auth ? `<span>auth: ${esc(s.auth.type)}${s.auth.signIn ? ` · ${esc(s.auth.signIn)}` : ""}</span>` : ""}${s.startingPrompt ? `<span>say: <code>${esc(s.startingPrompt)}</code></span>` : ""}</div>
 ${connect}${skills}
-<h2>Tools</h2><div class="toc">${cat.toolGroups.map((g) => g.tools.map((t) => `<a href="#${esc(t.name)}">${esc(t.name)}</a>`).join("")).join("")}</div>
+<h2>Tools <span class="mute" style="font-weight:400;font-size:14px">${tools.length}</span></h2><p class="meta"><button type="button" class="tgl" data-open="0">Collapse all</button><button type="button" class="tgl" data-open="1">Expand all</button><span>tap a name to fold it</span></p><div class="toc">${cat.toolGroups.map((g) => g.tools.map((t) => `<a href="#${esc(t.name)}">${esc(t.name)}</a>`).join("")).join("")}</div>
 ${cat.toolGroups.map((g) => `<h3 id="group-${esc(g.key)}">${esc(g.title)} <span class="mute" style="font-weight:400;font-size:14px">${g.tools.length}${g.access ? ` · ${esc(g.access)}` : ""}</span></h3>${g.tools.map(toolBlock).join("")}`).join("")}`;
   write(`mcp/${m.key}.html`, page(`${s.name} MCP`, body, { alt: `/mcp/${m.key}/tools.json`, desc: s.purpose }));
   write(`mcp/${m.key}/tools.json`, JSON.stringify({ generatedAt, server: s, tools: tools.map(({ name, title, description, readOnly, destructive, idempotent, scopes, inputSchema, outputSchema }) => ({ name, title, description, readOnly, destructive, idempotent, scopes, inputSchema, outputSchema })) }, null, 2));
