@@ -331,12 +331,15 @@ function hydrate(md: string, p: string) {
 function homeMd(p: string) {
   const g = guides.get(p);
   const head = g ? hydrate(g.body, p) : `# ${productTitle(p)} — agent guide\n\n_No GUIDE.md yet._\n${hydrate("", p)}`;
-  const foot = `\n\n---\n_${p === CORE ? "This page is the Guide" : `Guide for ${productTitle(p)}`}: \`${g?.path ?? ""}\` at \`${g?.ref ?? ""}\`${g?.betaDiffers ? " (beta on main differs)" : ""} · built ${generatedAt} · [llms.txt](${HOST}${base(p)}/llms.txt) · [index.md](${HOST}${base(p)}/index.md)${p !== CORE ? ` · [Context](${HOST}/)` : ""}_\n`;
+  const foot = `\n\n---\n_${p === CORE ? "This page is the Guide" : `Guide for ${productTitle(p)}`}: \`${g?.path ?? ""}\` at \`${g?.ref ?? ""}\` ([raw](${HOST}${base(p)}/GUIDE.md))${g?.betaDiffers ? " (beta on main differs)" : ""} · built ${generatedAt} · [llms.txt](${HOST}${base(p)}/llms.txt) · [index.md](${HOST}${base(p)}/index.md)${p !== CORE ? ` · [Context](${HOST}/)` : ""}_\n`;
   return head + foot;
 }
 for (const p of products) {
   const g = guides.get(p);
   mdPage(p === CORE ? "" : `${base(p)}/`, g?.title ?? `${productTitle(p)} — agent guide`, homeMd(p), { product: p, desc: g?.description });
+  // The raw source file, byte-identical to the repo: this is what `setup` names as guide.url and hashes as guide.sha256.
+  if (g) write(W(`${base(p)}/GUIDE.md`), g.raw);
+  const gBeta = show("main", p === CORE ? "GUIDE.md" : `extensions/${p}/GUIDE.md`); if (gBeta) write(W(`${base(p)}/GUIDE@beta.md`), gBeta);
 }
 mdPage("/extensions", "Extensions", `# Extensions\n\nProducts that extend Context. Each has its own Guide, skills and MCP server under \`/extensions/<slug>/\`; approvals for all of them stay in Context.\n\n${extensionsBlock()}\n`, { desc: "Extension products: each with its own guide, skills and tools." });
 write("extensions/index.json", JSON.stringify({ generatedAt, extensions: products.filter((p) => p !== CORE).map((p) => ({ slug: p, title: productTitle(p), description: guides.get(p)?.description ?? "", url: `${HOST}${base(p)}/`, guide: `${HOST}${base(p)}/index.md`, skills: `${HOST}${base(p)}/skills/index.json`, tools: `${HOST}${base(p)}/tools/index.json`, llms: `${HOST}${base(p)}/llms.txt` })) }, null, 2));
