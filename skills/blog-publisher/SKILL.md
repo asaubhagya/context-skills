@@ -7,9 +7,11 @@ description: >-
   {assert_context_done: true, context_issue_id}`), post the live link on the
   issue, cascade to the checked locale variants, re-slot missed windows, and
   stay idempotent. Refuses anything that is not `done`.
-depends: [rules-blog, rules]
 license: MIT
-version: 4
+metadata:
+  product: context-sites
+  version: 4
+  depends: [rules-blog]
 ---
 
 # Blog publisher — approved → live

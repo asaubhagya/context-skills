@@ -8,10 +8,12 @@ description: >-
   instagram_post on the Blog MCP, and post the Postiz id, then the permalink,
   on the issue. Dedupe guard before any call; idempotent; refuses anything
   that is not `done`; degrades to owner self-publish without a key.
-depends: [rules-blog, rules]
 license: MIT
-version: 3
-attach: [scripts/postiz.sh]
+metadata:
+  product: context-sites
+  version: 3
+  depends: [rules-blog]
+  attach: [scripts/postiz.sh]
 ---
 
 # Instagram publisher — approved → scheduled → live

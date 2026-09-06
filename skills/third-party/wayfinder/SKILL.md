@@ -1,13 +1,14 @@
 ---
 name: wayfinder
 description: Plan a huge chunk of work (more than one agent session can hold) as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.
-disable-model-invocation: true
-depends: []
 license: MIT
-source: https://github.com/mattpocock/skills/blob/6654f6b60cd9d5be8b54c6fafe44346dabeb3b76/skills/engineering/wayfinder/SKILL.md
-source_commit: 6654f6b60cd9d5be8b54c6fafe44346dabeb3b76
-source_sha256: fee6e1d0c50f0e736b4ef8a599060c959afae904c9a97d82c97f049fcc3aa0f1
-fetched: 2026-09-02
+metadata:
+  product: context
+  disable-model-invocation: true
+  source: https://github.com/mattpocock/skills/blob/6654f6b60cd9d5be8b54c6fafe44346dabeb3b76/skills/engineering/wayfinder/SKILL.md
+  source_commit: 6654f6b60cd9d5be8b54c6fafe44346dabeb3b76
+  source_sha256: fee6e1d0c50f0e736b4ef8a599060c959afae904c9a97d82c97f049fcc3aa0f1
+  fetched: 2026-09-02
 ---
 <!--
   Third-party skill, used verbatim under the MIT licence.
