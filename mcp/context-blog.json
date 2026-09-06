@@ -2,7 +2,8 @@
   "schema": "context-mcp-catalog/1",
   "server": {
     "key": "context-blog",
-    "name": "Context Blog",
+    "name": "Context Sites",
+    "product": "context-sites",
     "endpoint": "https://sites.onecontext.me/api/mcp",
     "purpose": "The publishing engine for Context: agents draft, lint and publish blog posts, site pages and Instagram carousels on the user's own domain, with a person approving every piece before it goes live. Also drives the AEO/GEO loop — tracking AI-referral traffic, Search Console queries and an AI-visibility probe so the agent can see and improve how often assistants cite the site.",
     "auth": {
@@ -15,14 +16,16 @@
       ]
     },
     "contractVersion": "blog-1.3.0",
-    "startingPrompt": "Call the Context Blog tool `setup` with workflow 'blog' and follow its nextStep.",
-    "generatedAt": "2026-09-05T13:09:08.829Z",
+    "startingPrompt": "Call the Context Sites tool `setup` with workflow 'blog' and follow its nextAction.",
+    "generatedAt": "2026-09-06T02:43:19.942Z",
+    "publishedAt": "2026-09-06T02:43:19.942Z",
     "sourceRepo": "asaubhagya/context-blog",
     "sourcePath": "lib/mcp/server.ts",
-    "sourceCommit": "eb4d5c4"
+    "sourceCommit": "5c4f325",
+    "docsUrl": "https://agents.onecontext.me/extensions/context-sites/tools/context-blog"
   },
   "connect": {
-    "claude-ai": "Settings → Connectors → Add custom connector → name Context Blog, URL https://sites.onecontext.me/api/mcp",
+    "claude-ai": "Settings → Connectors → Add custom connector → name Context Sites, URL https://sites.onecontext.me/api/mcp",
     "chatgpt": "Settings → Connectors → Add → URL https://sites.onecontext.me/api/mcp",
     "claude-code": "claude mcp add --transport http context-blog https://sites.onecontext.me/api/mcp",
     "cursor": "Add an HTTP MCP server with URL https://sites.onecontext.me/api/mcp"
@@ -31,46 +34,55 @@
     {
       "key": "rules",
       "role": "base",
+      "product": "context",
       "description": "Operating rules every Context-connected agent follows: sources of truth, work units, credentials by key name, verification before completion."
     },
     {
       "key": "setup-context",
       "role": "base",
+      "product": "context",
       "description": "Connect this harness to the Context MCP and verify the connection before any other Context or Context Blog work."
     },
     {
       "key": "grill-me",
       "role": "base",
+      "product": "context",
       "description": "Interview protocol that stress-tests a plan or brief with numbered questions and a recommendation per question until nothing is assumed."
     },
     {
       "key": "wayfinder",
       "role": "base",
+      "product": "context",
       "description": "Chart a piece of work as a Context epic plus gated issues after a grilling interview, then work the issues one at a time."
     },
     {
       "key": "daily-brief",
       "role": "base",
+      "product": "context",
       "description": "Format and rules for the once-a-day headless brief a routine posts to the tenant's Context brief issue."
     },
     {
       "key": "rules-blog",
       "role": "base",
+      "product": "context-sites",
       "description": "Rules for every Context Blog workflow: approvals in Context, one tenant at a time, key names only, no publishing without an approval reference."
     },
     {
       "key": "blog-agent",
       "role": "workflow",
+      "product": "context-sites",
       "description": "Draft, review and publish one blog post for a Context Blog tenant, tracked as one Context issue with an approval gate before publishing."
     },
     {
       "key": "site-builder",
       "role": "workflow",
+      "product": "context-sites",
       "description": "STUB — build or update a tenant site (pages, navigation, theme) through Context Blog with approval gates in Context. Full protocol lands with the site content tools."
     },
     {
       "key": "instagram-drafter",
       "role": "workflow",
+      "product": "context-sites",
       "description": "STUB — draft Instagram captions and carousel copy for a tenant, attached to a Context issue for approval. Full protocol lands with the Instagram tools."
     }
   ],
@@ -168,7 +180,7 @@
         {
           "name": "get_capabilities",
           "title": "Get capabilities",
-          "description": "Machine-readable Context Blog contract: version, tools, workflows, harnesses, auth methods and limits.",
+          "description": "Machine-readable Context Blog contract: version, tools, workflows, harnesses, auth methods, limits and the server card URL (the full tool catalog with schemas, unauthenticated).",
           "readOnly": true,
           "destructive": false,
           "idempotent": false,
@@ -221,6 +233,9 @@
                   "skillChannel": {
                     "type": "string"
                   },
+                  "serverCard": {
+                    "type": "string"
+                  },
                   "features": {
                     "type": "object",
                     "additionalProperties": {}
@@ -240,6 +255,7 @@
                   "harnesses",
                   "harnessSkills",
                   "skillChannel",
+                  "serverCard",
                   "features",
                   "auth",
                   "limits"
@@ -301,7 +317,7 @@
         {
           "name": "list_skill_catalog",
           "title": "List skill catalog",
-          "description": "Active skills on the shared skill channel (key, kind, version, name, description, depends, url).",
+          "description": "Active skills on the shared skill channel (key, kind, version, name, description, depends, product, url).",
           "readOnly": true,
           "destructive": false,
           "idempotent": false,
@@ -492,7 +508,7 @@
         {
           "name": "setup",
           "title": "Setup",
-          "description": "CALL THIS FIRST when starting Context Blog work in a repo or chat. Resolves the workflow's skill (blog-agent / site-builder / instagram-drafter) plus `rules-blog` and dependencies; harness skills (rules, setup-context, wayfinder, grill-me, daily-brief) are included unless listed in `installedSkills`. Returns `mode:\"files\"` (paths per harness + an AGENTS.md block) or `mode:\"chat\"` (public skill links + inline protocol). Idempotent, no side effects.",
+          "description": "CALL THIS FIRST in every session (agent-setup/1). Resolves the workflow's skill (blog-agent / site-builder / instagram-drafter) plus `rules-blog` and dependencies on a skill channel (`channel`: latest | beta | vN); harness skills (rules, setup-context, wayfinder, grill-me, daily-brief) are included unless listed in `installedSkills`. Pass `skills_held` / `guide_held_sha256` (what you have on disk) to get per-skill `status` (current | update | install), `drift`, `nextAction` and `install.commands`; `include:\"bodies\"` inlines the Agent guide and every SKILL.md for chat hosts. Also returns `mode:\"files\"` (paths per harness + an AGENTS.md block) or `mode:\"chat\"` (public skill links + inline protocol) with `nextStep`. Idempotent, no side effects.",
           "readOnly": true,
           "destructive": false,
           "idempotent": false,
@@ -501,7 +517,14 @@
             "harness",
             "canWriteFiles",
             "workflow",
-            "installedSkills"
+            "installedSkills",
+            "caller",
+            "host",
+            "channel",
+            "include",
+            "skills_held",
+            "guide_held_sha256",
+            "install_scope"
           ],
           "inputSchema": {
             "type": "object",
@@ -533,6 +556,77 @@
                   "type": "string"
                 },
                 "maxItems": 64
+              },
+              "caller": {
+                "type": "object",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "model": {
+                    "type": "string",
+                    "maxLength": 120
+                  }
+                },
+                "additionalProperties": false
+              },
+              "host": {
+                "type": "string",
+                "enum": [
+                  "claude-code",
+                  "codex",
+                  "cursor",
+                  "claude-ai",
+                  "chatgpt",
+                  "generic",
+                  "chat"
+                ]
+              },
+              "channel": {
+                "type": "string",
+                "pattern": "^(latest|beta|v[1-9]\\d*)$"
+              },
+              "include": {
+                "type": "string",
+                "enum": [
+                  "manifest",
+                  "bodies"
+                ]
+              },
+              "skills_held": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "sha256"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 64
+              },
+              "guide_held_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "install_scope": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "project"
+                ]
               }
             },
             "required": [
@@ -550,6 +644,245 @@
               "data": {
                 "type": "object",
                 "properties": {
+                  "schema": {
+                    "type": "string",
+                    "const": "agent-setup/1"
+                  },
+                  "server": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "product": {
+                        "type": "string"
+                      },
+                      "endpoint": {
+                        "type": "string"
+                      },
+                      "contractVersion": {
+                        "type": "string"
+                      },
+                      "catalog": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string"
+                          },
+                          "publishedAt": {
+                            "type": "string"
+                          },
+                          "sourceCommit": {
+                            "type": "string"
+                          },
+                          "toolCount": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "url",
+                          "publishedAt",
+                          "sourceCommit",
+                          "toolCount"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "name",
+                      "product",
+                      "endpoint",
+                      "contractVersion",
+                      "catalog"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "channel": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "ref": {
+                        "type": "string"
+                      },
+                      "sha": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "date": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "ref",
+                      "sha",
+                      "date"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "guide": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "target": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "current",
+                          "update",
+                          "install"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "url",
+                      "sha256",
+                      "target",
+                      "status"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "skills": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "product": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "number"
+                        },
+                        "sha256": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "$ref": "#/properties/data/properties/guide/properties/status"
+                        },
+                        "files": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "url": {
+                                "type": "string"
+                              },
+                              "sha256": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "path",
+                              "url",
+                              "sha256"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "product",
+                        "version",
+                        "sha256",
+                        "url",
+                        "target",
+                        "status",
+                        "files"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "drift": {
+                    "type": "boolean"
+                  },
+                  "nextAction": {
+                    "type": "string",
+                    "enum": [
+                      "continue",
+                      "install_skills",
+                      "update_skills",
+                      "human_upload"
+                    ]
+                  },
+                  "install": {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "agent_install",
+                          "human_upload"
+                        ]
+                      },
+                      "commands": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "mode",
+                      "commands"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "bodies": {
+                    "type": "object",
+                    "properties": {
+                      "guide": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "skills": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "guide",
+                      "skills"
+                    ],
+                    "additionalProperties": false
+                  },
                   "mode": {
                     "type": "string",
                     "enum": [
@@ -562,6 +895,14 @@
                   }
                 },
                 "required": [
+                  "schema",
+                  "server",
+                  "channel",
+                  "guide",
+                  "skills",
+                  "drift",
+                  "nextAction",
+                  "install",
                   "mode",
                   "nextStep"
                 ],
