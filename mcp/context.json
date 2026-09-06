@@ -3,6 +3,7 @@
   "server": {
     "key": "context",
     "name": "Context",
+    "product": "context",
     "endpoint": "https://mcp.onecontext.me/mcp",
     "purpose": "Context is the shared workspace for your goals and how agents execute them across every host you use. The Shared Space works the moment you sign in with Google; pairing your iPhone in the Context app unlocks Private Spaces and the Personal domains — memories, logs, people, health, calendar and skills — that live only on your phone.",
     "auth": {
@@ -16,10 +17,12 @@
     },
     "contractVersion": "3.0.0",
     "startingPrompt": "Nomi, get me started",
-    "generatedAt": "2026-09-05T13:01:53.231Z",
+    "generatedAt": "2026-09-06T03:00:14.720Z",
+    "publishedAt": "2026-09-06T03:00:14.720Z",
     "sourceRepo": "asaubhagya/meetly-macos",
     "sourcePath": "supabase/functions/mcp/tools_v3.ts",
-    "sourceCommit": "2a5d1c0e"
+    "sourceCommit": "6ccce3a7",
+    "docsUrl": "https://agents.onecontext.me/tools/context"
   },
   "connect": {
     "claude-ai": "Settings → Connectors → Add custom connector → name Context, URL https://mcp.onecontext.me/mcp → Connect",
@@ -66,9 +69,9 @@
       "access": "shared",
       "tools": [
         {
-          "name": "start_context",
-          "title": "Start a Context session",
-          "description": "Use this when you need to orient yourself in Context before doing anything else — at the top of a session, whenever you are unsure which tool fits, or when the user greets Nomi or says \"Nomi, get me started\". Read-only: it reports the signed-in account, whether an iPhone is paired, which Spaces and modules you can reach, the guide and `context` skill Resources (with version and sha256), an install plan for this host, and a `nextAction` (`continue | pair_phone | install_skill | update_skill | human_upload`). It never installs anything itself and never asks you to hand-edit your repository's agent config. Its `spaces` tell you what a Space argument may name next; `pair_phone` means the private half is unavailable until the user pairs.",
+          "name": "setup",
+          "title": "Set up this session",
+          "description": "Use this when you need to start — call it first in every session, before anything else, and again when the user greets Nomi or says \"Nomi, get me started\" or whenever account, pairing, Spaces or the Guide is unclear. Read-only (`agent-setup/1`): it reports the signed-in account, whether an iPhone is paired, which Spaces and modules you can reach, the skill channel it resolved (`latest` unless you pass `channel`), the Guide and every `context` skill with sha256 digests and a `status` computed from what you report holding (`skills_held`, `guide_held_sha256`), `drift`, an install plan for this host, and a `nextAction` (`continue | install_skills | update_skills | pair_phone | human_upload`). Pass `include: \"bodies\"` to get the Guide and SKILL.md text inline. It never installs anything itself and never asks you to hand-edit your repository's agent config. Its `spaces` tell you what a Space argument may name next; `pair_phone` means the private half is unavailable until the user pairs.",
           "readOnly": true,
           "destructive": false,
           "idempotent": true,
@@ -77,8 +80,12 @@
           ],
           "inputParams": [
             "host",
-            "environment",
+            "channel",
+            "include",
+            "skills_held",
+            "guide_held_sha256",
             "install_scope",
+            "environment",
             "installed_skill_version",
             "installed_skill_sha256"
           ],
@@ -97,10 +104,48 @@
                 ],
                 "description": "The host you are running in. Decides whether the install plan is `agent_install` (a local agent that can write files) or `human_upload` (a hosted chat surface). Omit to be treated as a hosted chat surface."
               },
-              "environment": {
+              "channel": {
                 "type": "string",
-                "maxLength": 100,
-                "description": "Optional free-form environment hint (for example `macos`, `linux`, `web`)."
+                "pattern": "^(latest|beta|v[1-9][0-9]*)$",
+                "default": "latest",
+                "description": "Skill channel to resolve: `latest` (newest immutable tag, default), `beta` (head of main) or a specific `vN` tag."
+              },
+              "include": {
+                "type": "string",
+                "enum": [
+                  "manifest",
+                  "bodies"
+                ],
+                "default": "manifest",
+                "description": "`manifest` (default) returns digests and URLs only; `bodies` also inlines the Guide and every SKILL.md text — for hosts that cannot fetch files."
+              },
+              "skills_held": {
+                "type": "array",
+                "maxItems": 50,
+                "description": "What you already have on disk: one entry per installed skill with the sha256 of its SKILL.md. Drives each skill's `status` and the overall `drift`.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]{64}$"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "sha256"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "guide_held_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{64}$",
+                "description": "SHA-256 of the Guide you already hold, if any."
               },
               "install_scope": {
                 "type": "string",
@@ -108,17 +153,22 @@
                   "user",
                   "project"
                 ],
-                "description": "Where a local install would land: the user's own skills directory or this repository."
+                "description": "Where a local install lands: `project` (this repository, default) or `user` (your own skills directory, `~/`)."
+              },
+              "environment": {
+                "type": "string",
+                "maxLength": 100,
+                "description": "Optional free-form environment hint (for example `macos`, `linux`, `web`)."
               },
               "installed_skill_version": {
                 "type": "integer",
                 "minimum": 1,
-                "description": "Version of the `context` skill you already have installed, if any. Drives `update_skill` vs `install_skill`."
+                "description": "Deprecated (`start_context`): version of the `context` skill you hold. Prefer `skills_held`."
               },
               "installed_skill_sha256": {
                 "type": "string",
                 "pattern": "^[0-9a-fA-F]{64}$",
-                "description": "SHA-256 of the installed SKILL.md, if any. A mismatch with the published digest yields `update_skill`."
+                "description": "Deprecated (`start_context`): SHA-256 of the held `context` SKILL.md. Treated as `skills_held: [{key: \"context\", sha256}]`."
               },
               "caller": {
                 "type": "object",
@@ -153,6 +203,75 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "schema": {
+                "type": "string",
+                "const": "agent-setup/1"
+              },
+              "server": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "product": {
+                    "type": "string"
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "catalog": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "key",
+                  "product",
+                  "endpoint",
+                  "contractVersion",
+                  "catalog"
+                ],
+                "additionalProperties": true
+              },
+              "channel": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "guide": {
+                "type": "object"
+              },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "drift": {
+                "type": "boolean"
+              },
+              "nextAction": {
+                "type": "string",
+                "enum": [
+                  "continue",
+                  "install_skills",
+                  "update_skills",
+                  "pair_phone",
+                  "human_upload"
+                ]
+              },
+              "install": {
+                "type": "object"
+              },
+              "bodies": {
+                "type": "object"
+              },
               "account": {
                 "type": "object"
               },
@@ -175,24 +294,272 @@
                   "type": "string"
                 }
               },
-              "nextAction": {
+              "contract": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string"
+                  },
+                  "limits": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "version",
+                  "limits"
+                ],
+                "additionalProperties": true
+              },
+              "endpoint": {
+                "type": "string"
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "schema",
+              "server",
+              "guide",
+              "skills",
+              "drift",
+              "nextAction",
+              "install",
+              "pairing",
+              "spaces",
+              "contract"
+            ],
+            "additionalProperties": true
+          }
+        },
+        {
+          "name": "start_context",
+          "title": "Start a Context session (deprecated alias of setup)",
+          "description": "Use this when you need to call `setup` on a host that still knows this name. Deprecated alias of `setup` — same handler, same arguments, same `agent-setup/1` response; prefer `setup`, this name goes away next release.",
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "scopes": [
+            "context:shared"
+          ],
+          "inputParams": [
+            "host",
+            "channel",
+            "include",
+            "skills_held",
+            "guide_held_sha256",
+            "install_scope",
+            "environment",
+            "installed_skill_version",
+            "installed_skill_sha256"
+          ],
+          "inputSchema": {
+            "properties": {
+              "host": {
                 "type": "string",
                 "enum": [
-                  "continue",
-                  "pair_phone",
-                  "install_skill",
-                  "update_skill",
-                  "human_upload"
+                  "claude-code",
+                  "codex",
+                  "cursor",
+                  "claude-ai",
+                  "chatgpt",
+                  "generic",
+                  "chat"
+                ],
+                "description": "The host you are running in. Decides whether the install plan is `agent_install` (a local agent that can write files) or `human_upload` (a hosted chat surface). Omit to be treated as a hosted chat surface."
+              },
+              "channel": {
+                "type": "string",
+                "pattern": "^(latest|beta|v[1-9][0-9]*)$",
+                "default": "latest",
+                "description": "Skill channel to resolve: `latest` (newest immutable tag, default), `beta` (head of main) or a specific `vN` tag."
+              },
+              "include": {
+                "type": "string",
+                "enum": [
+                  "manifest",
+                  "bodies"
+                ],
+                "default": "manifest",
+                "description": "`manifest` (default) returns digests and URLs only; `bodies` also inlines the Guide and every SKILL.md text — for hosts that cannot fetch files."
+              },
+              "skills_held": {
+                "type": "array",
+                "maxItems": 50,
+                "description": "What you already have on disk: one entry per installed skill with the sha256 of its SKILL.md. Drives each skill's `status` and the overall `drift`.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]{64}$"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "sha256"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "guide_held_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{64}$",
+                "description": "SHA-256 of the Guide you already hold, if any."
+              },
+              "install_scope": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "project"
+                ],
+                "description": "Where a local install lands: `project` (this repository, default) or `user` (your own skills directory, `~/`)."
+              },
+              "environment": {
+                "type": "string",
+                "maxLength": 100,
+                "description": "Optional free-form environment hint (for example `macos`, `linux`, `web`)."
+              },
+              "installed_skill_version": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Deprecated (`start_context`): version of the `context` skill you hold. Prefer `skills_held`."
+              },
+              "installed_skill_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{64}$",
+                "description": "Deprecated (`start_context`): SHA-256 of the held `context` SKILL.md. Treated as `skills_held: [{key: \"context\", sha256}]`."
+              },
+              "caller": {
+                "type": "object",
+                "description": "Required self-reported provenance for this call. It identifies the agent host and model for activity/audit display only; it never grants permission. Use the exact model id when exposed by the host, otherwise the literal `unknown`.",
+                "properties": {
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Calling agent or host product, for example ChatGPT, Codex, Claude Code, or Cursor."
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Exact model identifier when known; use `unknown` when the host does not expose it. Never guess."
+                  }
+                },
+                "required": [
+                  "agent",
+                  "model"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caller"
+            ]
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "const": "agent-setup/1"
+              },
+              "server": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "product": {
+                    "type": "string"
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "contractVersion": {
+                    "type": "string"
+                  },
+                  "catalog": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "key",
+                  "product",
+                  "endpoint",
+                  "contractVersion",
+                  "catalog"
+                ],
+                "additionalProperties": true
+              },
+              "channel": {
+                "type": [
+                  "object",
+                  "null"
                 ]
               },
               "guide": {
                 "type": "object"
               },
-              "skill": {
-                "type": "object"
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "drift": {
+                "type": "boolean"
+              },
+              "nextAction": {
+                "type": "string",
+                "enum": [
+                  "continue",
+                  "install_skills",
+                  "update_skills",
+                  "pair_phone",
+                  "human_upload"
+                ]
               },
               "install": {
                 "type": "object"
+              },
+              "bodies": {
+                "type": "object"
+              },
+              "account": {
+                "type": "object"
+              },
+              "pairing": {
+                "type": "string",
+                "enum": [
+                  "paired",
+                  "required"
+                ]
+              },
+              "spaces": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "modules": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "contract": {
                 "type": "object",
@@ -212,12 +579,24 @@
               },
               "endpoint": {
                 "type": "string"
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
+              "schema",
+              "server",
+              "guide",
+              "skills",
+              "drift",
+              "nextAction",
+              "install",
               "pairing",
               "spaces",
-              "nextAction",
               "contract"
             ],
             "additionalProperties": true
@@ -5326,8 +5705,8 @@
     }
   ],
   "counts": {
-    "total": 52,
-    "shared": 27,
+    "total": 53,
+    "shared": 28,
     "paired": 25
   }
 }
