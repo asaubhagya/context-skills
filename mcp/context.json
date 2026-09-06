@@ -17,11 +17,11 @@
     },
     "contractVersion": "3.0.0",
     "startingPrompt": "Nomi, get me started",
-    "generatedAt": "2026-09-06T03:00:14.720Z",
-    "publishedAt": "2026-09-06T03:00:14.720Z",
+    "generatedAt": "2026-09-06T03:14:52.661Z",
+    "publishedAt": "2026-09-06T03:14:52.661Z",
     "sourceRepo": "asaubhagya/meetly-macos",
     "sourcePath": "supabase/functions/mcp/tools_v3.ts",
-    "sourceCommit": "6ccce3a7",
+    "sourceCommit": "ef570a97",
     "docsUrl": "https://agents.onecontext.me/tools/context"
   },
   "connect": {
@@ -93,16 +93,9 @@
             "properties": {
               "host": {
                 "type": "string",
-                "enum": [
-                  "claude-code",
-                  "codex",
-                  "cursor",
-                  "claude-ai",
-                  "chatgpt",
-                  "generic",
-                  "chat"
-                ],
-                "description": "The host you are running in. Decides whether the install plan is `agent_install` (a local agent that can write files) or `human_upload` (a hosted chat surface). Omit to be treated as a hosted chat surface."
+                "minLength": 1,
+                "maxLength": 40,
+                "description": "The host you are running in. Known local agents: `claude-code`, `codex`, `cursor`, `opencode`, `gemini-cli`, `generic`; hosted chat surfaces: `claude-ai`, `chatgpt`, `chat`. Any other name is treated as a local agent with the generic `.claude/skills` layout (`agent_install`). Omit to be treated as a hosted chat surface (`human_upload`)."
               },
               "channel": {
                 "type": "string",
@@ -203,6 +196,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "schema": {
                 "type": "string",
                 "const": "agent-setup/1"
@@ -317,22 +339,12 @@
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
+                },
+                "description": "Degraded-mode notes, e.g. `skill_channel_unavailable: …` (then `channel` is null and `skills` empty; the account fields still answer)."
               }
             },
-            "required": [
-              "schema",
-              "server",
-              "guide",
-              "skills",
-              "drift",
-              "nextAction",
-              "install",
-              "pairing",
-              "spaces",
-              "contract"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -360,16 +372,9 @@
             "properties": {
               "host": {
                 "type": "string",
-                "enum": [
-                  "claude-code",
-                  "codex",
-                  "cursor",
-                  "claude-ai",
-                  "chatgpt",
-                  "generic",
-                  "chat"
-                ],
-                "description": "The host you are running in. Decides whether the install plan is `agent_install` (a local agent that can write files) or `human_upload` (a hosted chat surface). Omit to be treated as a hosted chat surface."
+                "minLength": 1,
+                "maxLength": 40,
+                "description": "The host you are running in. Known local agents: `claude-code`, `codex`, `cursor`, `opencode`, `gemini-cli`, `generic`; hosted chat surfaces: `claude-ai`, `chatgpt`, `chat`. Any other name is treated as a local agent with the generic `.claude/skills` layout (`agent_install`). Omit to be treated as a hosted chat surface (`human_upload`)."
               },
               "channel": {
                 "type": "string",
@@ -470,6 +475,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "schema": {
                 "type": "string",
                 "const": "agent-setup/1"
@@ -584,22 +618,12 @@
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
+                },
+                "description": "Degraded-mode notes, e.g. `skill_channel_unavailable: …` (then `channel` is null and `skills` empty; the account fields still answer)."
               }
             },
-            "required": [
-              "schema",
-              "server",
-              "guide",
-              "skills",
-              "drift",
-              "nextAction",
-              "install",
-              "pairing",
-              "spaces",
-              "contract"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         }
       ]
@@ -699,6 +723,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "results": {
                 "type": "array",
                 "items": {
@@ -723,10 +776,8 @@
                 ]
               }
             },
-            "required": [
-              "results"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         }
       ]
@@ -782,6 +833,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "spaces": {
                 "type": "array",
                 "items": {
@@ -807,10 +887,8 @@
                 ]
               }
             },
-            "required": [
-              "spaces"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         }
       ]
@@ -905,6 +983,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "epics": {
                 "type": "array",
                 "items": {
@@ -929,10 +1036,8 @@
                 ]
               }
             },
-            "required": [
-              "epics"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -988,8 +1093,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -1138,8 +1274,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -1224,8 +1391,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -1286,8 +1484,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -1402,6 +1631,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "issues": {
                 "type": "array",
                 "items": {
@@ -1426,10 +1684,8 @@
                 ]
               }
             },
-            "required": [
-              "issues"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -1484,8 +1740,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -1623,8 +1910,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -1778,8 +2096,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -1879,8 +2228,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -1945,8 +2325,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -2069,8 +2480,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -2170,8 +2612,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -2293,8 +2766,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -2474,8 +2978,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -2574,6 +3109,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "artifacts": {
                 "type": "array",
                 "items": {
@@ -2598,10 +3162,8 @@
                 ]
               }
             },
-            "required": [
-              "artifacts"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -2667,8 +3229,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -2792,8 +3385,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -2886,8 +3510,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -2972,8 +3627,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -3038,8 +3724,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -3095,8 +3812,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -3174,6 +3922,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "changes": {
                 "type": "array",
                 "items": {
@@ -3187,11 +3964,8 @@
                 "type": "integer"
               }
             },
-            "required": [
-              "changes",
-              "next_cursor"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -3284,6 +4058,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "receipts": {
                 "type": "array",
                 "items": {
@@ -3308,10 +4111,8 @@
                 ]
               }
             },
-            "required": [
-              "receipts"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         }
       ]
@@ -3385,8 +4186,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -3447,8 +4279,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -3545,6 +4408,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "memories": {
                 "type": "array",
                 "items": {
@@ -3568,10 +4460,8 @@
                 ]
               }
             },
-            "required": [
-              "memories"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -3626,8 +4516,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -3756,8 +4677,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -3822,8 +4774,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -3921,6 +4904,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "logs": {
                 "type": "array",
                 "items": {
@@ -3944,10 +4956,8 @@
                 ]
               }
             },
-            "required": [
-              "logs"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -4068,8 +5078,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -4206,8 +5247,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -4290,8 +5362,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -4374,6 +5477,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "people": {
                 "type": "array",
                 "items": {
@@ -4397,10 +5529,8 @@
                 ]
               }
             },
-            "required": [
-              "people"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -4467,8 +5597,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -4583,8 +5744,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -4712,8 +5904,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -4778,8 +6001,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -4863,8 +6117,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -4965,6 +6250,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "samples": {
                 "type": "array",
                 "items": {
@@ -4990,7 +6304,8 @@
                 "type": "object"
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -5107,6 +6422,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "buckets": {
                 "type": "array",
                 "items": {
@@ -5135,7 +6479,8 @@
                 ]
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         }
       ]
@@ -5235,6 +6580,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "events": {
                 "type": "array",
                 "items": {
@@ -5258,10 +6632,8 @@
                 ]
               }
             },
-            "required": [
-              "events"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -5316,8 +6688,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -5392,6 +6795,35 @@
           "outputSchema": {
             "type": "object",
             "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              },
               "skills": {
                 "type": "array",
                 "items": {
@@ -5415,10 +6847,8 @@
                 ]
               }
             },
-            "required": [
-              "skills"
-            ],
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent."
           }
         },
         {
@@ -5473,8 +6903,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -5555,8 +7016,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]
@@ -5641,8 +7133,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         },
         {
@@ -5697,8 +7220,39 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients.",
-            "additionalProperties": true
+            "description": "v3 result. Success carries the named collections below plus `space`; a business failure carries `{ok:false, error:{code, message, retryable, next_action?}}` (spec §4). `content` remains available to text-oriented clients. On failure the object is {ok:false, error:{code, message, retryable, next_action?}} and the success fields are absent.",
+            "additionalProperties": true,
+            "properties": {
+              "ok": {
+                "type": "boolean",
+                "description": "true on success; false when `error` is present."
+              },
+              "error": {
+                "type": "object",
+                "description": "Present only when ok is false (spec §4). Strict clients validate structuredContent against this schema, so every failure — validation included — must fit it.",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "next_action": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": true
+              }
+            }
           }
         }
       ]

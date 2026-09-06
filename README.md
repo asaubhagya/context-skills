@@ -7,9 +7,10 @@ chart a map of Epics and Issues, work them to done with review gates, and — fo
 Context Blog — draft and publish content with approvals recorded in Context.
 
 This repository is the **source of truth**. Nothing here is copied into a
-database: the Context MCP, the Context Blog MCP and the Skills hub read
-`manifest.json` from a pinned git tag through the jsDelivr CDN
-(`https://cdn.jsdelivr.net/gh/asaubhagya/context-skills@<tag>/…`) and verify
+database: the Context MCP, the Context Sites MCP and agents.onecontext.me
+resolve a channel (`latest` / `beta`) from `channels.json` on `main`, read
+`manifest.json` at that commit through the jsDelivr CDN
+(`https://cdn.jsdelivr.net/gh/asaubhagya/context-skills@<sha>/…`) and verify
 every file against its sha256 before serving it.
 
 ## The Guide and the base skill
@@ -98,25 +99,31 @@ does this for you. Every skill's `metadata.depends` must be installed too
 (`rules-blog` depends on `context`; `blog-agent` on `rules-blog`,
 `wayfinder`, `grill-me`, …).
 
-The **Skills hub** — `https://app.onecontext.me/skills` — is the stable
-distribution front for all of this: an index (`/skills`, `/skills.md`,
-`/skills.json`), one folder per skill (`/skills/<key>/`, every file fetchable
-verbatim), `/skills/<key>.md` as the shortcut to `SKILL.md`, and zips
-(`/skills/<key>.zip`, `/skills.zip`). It serves exactly the tag both MCPs are
-pinned to.
+The **agent home** — `https://agents.onecontext.me` — is the distribution
+front for all of this: the Guide as the home page (`/`, `/index.md`, raw
+`/GUIDE.md`), `/skills` with every version at `/skills/<key>@vN.md` and
+`@beta.md`, `/tools` with each server's registered catalog, and
+`/extensions/<slug>/` for extension products. `llms.txt` per product,
+`llms-full.txt`, and `.well-known/skills/index.json` for `npx skills add`.
 
-## Versions and rollback
+## Channels, versions and rollback
 
-Releases are git tags: `v1`, `v2`, … Both MCPs and the hub pin one tag
-(`SKILLS_REF`); moving them to a new tag is a config change, rolling back is
-pointing at the previous tag. `manifest.json` carries a `version` per skill
-(frontmatter `version:`, default `1`) — bump it when a skill's behaviour changes
-so hosts that pinned a specific skill version notice. Tags are never moved or
-deleted (jsDelivr caches them permanently).
+Releases are git tags `v1`, `v2`, … (immutable). Two moving tags, written only
+by CI (`.github/workflows/channels.yml`): `latest` = the newest `vN`, `beta` =
+the head of `main`. `channels.json` on `main` is the committed projection both
+MCPs read (`raw.githubusercontent.com/…/main/channels.json`), then they fetch
+`manifest.json` and files from jsDelivr at the resolved commit sha. Nothing is
+pinned in server config any more; an agent that wants a pin passes
+`channel: "vN"` to `setup`. Rolling back is tagging the previous content as a
+new `vN`. `metadata.version` per skill bumps when the body changes so agents
+holding an older copy see `update` from `setup`.
 
-Release: edit skills → `pnpm check-skills && pnpm build-manifest --ref vN` →
-commit → PR → merge → `git tag vN && git push --tags` → set `SKILLS_REF=vN` on
-both MCPs.
+Release: edit skills → `pnpm check` → commit → PR → merge (beta moves) →
+`git tag vN && git push origin vN` (latest moves, site redeploys).
+
+Tool catalogs (`mcp/<key>.json`) are never edited by hand: each MCP serves its
+own card at `/.well-known/mcp/server-card.json` and `register-catalog.yml`
+commits it here (`pnpm register-catalog all`).
 
 ## Proposing a change
 

@@ -82,10 +82,12 @@ const ref = refIdx >= 0 ? argv[refIdx + 1] : undefined;
 
 const toPosix = (p: string) => p.split(sep).join("/");
 
-function readChecked(abs: string): Buffer {
+/** Registered tool catalogs carry every input/output schema; they are not served as skill files, so they get their own cap. */
+const MAX_CATALOG_BYTES = 1024 * 1024;
+function readChecked(abs: string, max = MAX_FILE_BYTES): Buffer {
   const buf = readFileSync(abs);
-  if (buf.byteLength === 0 || buf.byteLength > MAX_FILE_BYTES) {
-    throw new Error(`${toPosix(relative(ROOT, abs))}: ${buf.byteLength} bytes (must be 1..${MAX_FILE_BYTES})`);
+  if (buf.byteLength === 0 || buf.byteLength > max) {
+    throw new Error(`${toPosix(relative(ROOT, abs))}: ${buf.byteLength} bytes (must be 1..${max})`);
   }
   return buf;
 }
@@ -168,7 +170,7 @@ export function collectMcp(): ManifestMcp[] {
     const abs = join(MCP_DIR, f);
     const key = basename(f, ".json");
     const rel = `mcp/${f}`;
-    const buf = readChecked(abs);
+    const buf = readChecked(abs, MAX_CATALOG_BYTES);
     const catalog = JSON.parse(buf.toString("utf8")) as McpCatalog;
     if (catalog.schema !== MCP_CATALOG_SCHEMA) continue;
     const problems = validateCatalog(rel, key, catalog);

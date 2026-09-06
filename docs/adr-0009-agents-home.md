@@ -44,4 +44,17 @@ Honest caveats: `agents.<domain>` is a convention we chose, not a standard — A
 - New CI surfaces: `channels.yml` (tag mover), `register-catalog.yml`, `build-deploy.yml` (reusable), `deploy-mcp.yml` in meetly-macos (ready for `SUPABASE_ACCESS_TOKEN`), a register step in context-blog CI (ready for `CONTEXT_SKILLS_TOKEN`).
 - Evidence: the end-to-end trace on epic `841aa1de` — a fresh project on Claude Code and Codex calls `setup`, installs, then detects a bumped skill and a new tool on the next session and refreshes both.
 
-<!-- e2e: filled in when the run completes -->
+## Evidence — the end-to-end trace (2026-09-06, epic `841aa1de`, issue `37aaa93c`)
+
+| Step | What | Result |
+|---|---|---|
+| 0 | Baseline, Claude Code headless, before v2 | `start_context` installs 1 file, no guide on disk, no drift concept |
+| 1 | Sites MCP deploys; `register-catalog` runs | card fetched, `mcp/context-blog.json` committed, site rebuilt: `published … from 5c4f325 · registered 59a92ea` |
+| 2 | Fresh install through the extension server | 46 files, every skill hash verified; **found**: guide hash could not match the hydrated page → raw `/GUIDE.md` added |
+| 3 | Context MCP deploys `setup`; registers; fresh install | 53 tools on the page incl. `setup`; 13 files written, 13 hashes verified |
+| 4 | One skill bumped on `main` | site shows beta v4 in ~80 s; next session on beta: 1 file `update`, 12 `current`; **found**: beta handed out the latest URL → channel-aware URLs |
+| 5 | Second host, OpenCode | **found**: strict client rejected the error envelope against the output schema; unknown host name → any host accepted, all 53 + 44 schemas admit the envelope |
+| 6 | Tag v15 | `latest` moves; next session on latest: 1 file `update`, 12 verified unchanged |
+| 7–8 | Fixes deployed; OpenCode fresh install; beta again | 13 files, same hashes as Claude Code; beta update through `@beta.md`, no fallback |
+
+Three defects were found by agents doing the loop, none by reading code. Each fix landed through the same CI that gates beta.
