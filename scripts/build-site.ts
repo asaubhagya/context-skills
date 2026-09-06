@@ -80,7 +80,8 @@ for (const key of skillKeys) {
   history.set(key, versions);
 }
 const skillAt = (ref: string, key: string) => refs.find((r) => r.name === ref)?.manifest.skills.find((s) => s.key === key) ?? null;
-const current = (key: string) => skillAt(latest.name, key) ?? skillAt("main", key)!;      // what the channel index describes
+const lastSeen = (key: string) => [...refs].reverse().map((r) => r.manifest.skills.find((s) => s.key === key)).find(Boolean)!;
+const current = (key: string) => skillAt(latest.name, key) ?? skillAt("main", key) ?? lastSeen(key);   // channel view; retired keys fall back to their last tag
 const skillProduct = new Map(skillKeys.map((k) => [k, productOf(current(k))]));
 const retired = (beta.manifest.retired ?? []).filter((r) => !skillAt("main", r.key));
 const activeKeys = skillKeys.filter((k) => skillAt(latest.name, k) || skillAt("main", k));
