@@ -1,0 +1,85 @@
+name: Register MCP catalogs
+
+# Registration (contract §6): fetch each MCP server's own card
+# (/.well-known/mcp/server-card.json), rewrite mcp/<key>.json when it changed,
+# rebuild manifest.json, commit `chore(mcp): register <key> catalog <sha>`,
+# then move the channels and build+deploy the site — chained here directly,
+# because a GITHUB_TOKEN push never triggers other workflows.
+#
+# Triggered by each MCP repo after its deploy:
+#   gh workflow run register-catalog.yml -R asaubhagya/context-skills -f server=<key>
+# (secret CONTEXT_SKILLS_TOKEN there: fine-grained PAT, Actions: write on this
+# repo). The 6-hourly schedule is the safety net. A server that does not serve
+# its card FAILS this run — never a silent success.
+on:
+  workflow_dispatch:
+    inputs:
+      server:
+        description: Which server card to register
+        type: choice
+        options: [all, context, context-blog]
+        default: all
+  schedule:
+    - cron: "17 */6 * * *"
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.register.outputs.changed }}
+    env:
+      SERVER: ${{ inputs.server || 'all' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Git identity
+        run: |
+          git config user.name "context-skills-ci"
+          git config user.email "context-skills-ci@users.noreply.github.com"
+
+      # Writes + commits what it could register, then exits 1 for any server it
+      # could not — the outcome is checked in the last step so a partial
+      # registration still gets pushed and deployed.
+      - name: Register server cards
+        id: register
+        continue-on-error: true
+        run: pnpm register-catalog "$SERVER" --commit
+
+      - name: Push
+        if: steps.register.outputs.changed == 'true'
+        run: git push origin HEAD:main
+
+      - name: Fail when a server could not be registered
+        if: steps.register.outcome == 'failure'
+        run: |
+          echo "::error::register-catalog: at least one server card could not be registered (see the step above)."
+          exit 1
+
+  channels:
+    needs: register
+    if: ${{ !cancelled() && needs.register.outputs.changed == 'true' }}
+    uses: ./.github/workflows/channels.yml
+    secrets: inherit
+
+  deploy:
+    needs: channels
+    if: ${{ !cancelled() && needs.channels.result == 'success' }}
+    uses: ./.github/workflows/build-deploy.yml
+    secrets: inherit

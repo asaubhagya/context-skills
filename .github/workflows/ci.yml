@@ -13,10 +13,12 @@ concurrency:
 
 jobs:
   skills:
-    name: check-skills + manifest is committed
+    name: check-skills + manifest + channels + catalogs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # check-channels reads every tag and origin/main
 
       # Version comes from the `packageManager` field in package.json.
       - uses: pnpm/action-setup@v4
@@ -37,6 +39,17 @@ jobs:
       # skill without running `pnpm build-manifest`.
       - name: manifest.json matches the tree
         run: pnpm check-manifest
+
+      # Soft here on purpose: on a PR the branch's channels.json is a snapshot
+      # of main, and on main this run races the tag mover in deploy-site.yml.
+      # The strict gate (`pnpm check`) runs in build-deploy.yml after the move.
+      - name: channels.json + latest/beta tags (soft)
+        run: pnpm check-channels --soft
+
+      # Gate 4: committed mcp/<key>.json == the server's live card. Warning on
+      # PRs (the server may be unreachable), hard failure on main and tags.
+      - name: Committed catalogs match the live server cards
+        run: pnpm check-catalogs-live ${{ github.event_name == 'pull_request' && '--soft' || '' }}
 
       - name: Typecheck scripts
         run: pnpm exec tsc --noEmit
