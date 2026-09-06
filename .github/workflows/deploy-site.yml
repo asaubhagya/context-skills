@@ -1,53 +1,30 @@
 name: Deploy agents.onecontext.me
 
-# main = beta channel, tags v* = latest. Either event rebuilds the whole site
-# from git history (all tags + main) and deploys it as production.
+# main = beta channel, tags v* = latest. Either event first moves the
+# latest/beta tags and commits channels.json (channels.yml), THEN rebuilds the
+# whole site from git history and deploys it (build-deploy.yml). One workflow,
+# `needs`-chained, so the site can never be built before the tags moved.
 on:
   push:
     branches: [main]
     tags: ["v*"]
   workflow_dispatch:
 
+# Queue rather than cancel: a cancelled run could stop between the tag push
+# and the channels.json commit. register-catalog.yml shares this group.
 concurrency:
   group: deploy-site
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
-  site:
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0          # build-site reads every tag
-          ref: main               # beta = main; tags are read from history
+  channels:
+    uses: ./.github/workflows/channels.yml
+    secrets: inherit
 
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm check
-      - run: pnpm build-site
-
-      # Without the token the build is still verified; the deploy is skipped
-      # (not failed) and the summary says so. Add VERCEL_TOKEN as a repo secret
-      # to turn this into a real deploy.
-      - name: Deploy to Vercel (production)
-        if: env.VERCEL_TOKEN != ''
-        run: npx vercel@latest deploy site --prod --yes --token "$VERCEL_TOKEN"
-
-      - name: Summary
-        run: |
-          echo "### agents.onecontext.me" >> "$GITHUB_STEP_SUMMARY"
-          if [ -z "$VERCEL_TOKEN" ]; then echo "> ⚠️ Built but **not deployed**: repo secret \`VERCEL_TOKEN\` is not set. Deploy by hand: \`pnpm build-site && vercel deploy site --prod\`." >> "$GITHUB_STEP_SUMMARY"; fi
-          python3 - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
-          import json; c=json.load(open('site/channels.json'))
-          print(f"- latest: `{c['latest']}`  beta: `{c['beta']}`")
-          print("- skills:", ", ".join(f"{k} v{v['latest']}" for k,v in c['skills'].items() if v['latest']))
-          EOF
+  deploy:
+    needs: channels
+    uses: ./.github/workflows/build-deploy.yml
+    secrets: inherit

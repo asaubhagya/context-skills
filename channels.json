@@ -1,0 +1,96 @@
+{
+  "schema": "context-skills-channels/1",
+  "generatedAt": "2026-09-06T02:29:24.210Z",
+  "latest": {
+    "ref": "v13",
+    "sha": "6aaa9b84d351e1fe43ceee80a7dab5e82914e133",
+    "date": "2026-09-06T06:39:55+08:00"
+  },
+  "beta": {
+    "ref": "main",
+    "sha": "0c1777f9fbe0ccab9d3481d9d68924721f6ab431",
+    "date": "2026-09-06T08:46:06+08:00"
+  },
+  "source": {
+    "repo": "asaubhagya/context-skills",
+    "manifest": "https://cdn.jsdelivr.net/gh/asaubhagya/context-skills@{sha}/manifest.json",
+    "raw": "https://raw.githubusercontent.com/asaubhagya/context-skills/main/channels.json"
+  },
+  "skills": {
+    "blog-agent": {
+      "latest": 7,
+      "beta": 7,
+      "product": null
+    },
+    "blog-assessment": {
+      "latest": 2,
+      "beta": 2,
+      "product": null
+    },
+    "blog-checker": {
+      "latest": 5,
+      "beta": 5,
+      "product": null
+    },
+    "blog-drafter": {
+      "latest": 7,
+      "beta": 7,
+      "product": null
+    },
+    "blog-publisher": {
+      "latest": 4,
+      "beta": 4,
+      "product": null
+    },
+    "context": {
+      "latest": 1,
+      "beta": 1,
+      "product": null
+    },
+    "daily-brief": {
+      "latest": 3,
+      "beta": 3,
+      "product": null
+    },
+    "grill-me": {
+      "latest": 1,
+      "beta": 1,
+      "product": null
+    },
+    "instagram-drafter": {
+      "latest": 4,
+      "beta": 4,
+      "product": null
+    },
+    "instagram-publisher": {
+      "latest": 3,
+      "beta": 3,
+      "product": null
+    },
+    "rules": {
+      "latest": 1,
+      "beta": 1,
+      "product": null
+    },
+    "rules-blog": {
+      "latest": 5,
+      "beta": 5,
+      "product": null
+    },
+    "setup-context": {
+      "latest": 1,
+      "beta": 1,
+      "product": null
+    },
+    "site-builder": {
+      "latest": 2,
+      "beta": 2,
+      "product": null
+    },
+    "wayfinder": {
+      "latest": 1,
+      "beta": 1,
+      "product": null
+    }
+  }
+}

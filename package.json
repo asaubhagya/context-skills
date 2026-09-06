@@ -13,10 +13,14 @@
     "build-manifest": "tsx scripts/build-manifest.ts",
     "build-site": "tsx scripts/build-site.ts",
     "check-manifest": "tsx scripts/build-manifest.ts --check",
-    "check": "pnpm check-skills && pnpm check-manifest",
+    "channels": "tsx scripts/channels.ts",
+    "check-channels": "tsx scripts/channels.ts check",
+    "check-catalogs-live": "tsx scripts/check-catalogs-live.ts",
+    "register-catalog": "tsx scripts/register-catalog.ts",
     "check-site-links": "tsx scripts/check-site-links.ts",
+    "check-tool-names": "tsx scripts/check-tool-names.ts",
     "check-site": "pnpm build-site && pnpm check-site-links",
-    "check-tool-names": "tsx scripts/check-tool-names.ts"
+    "check": "pnpm check-skills && pnpm check-manifest && pnpm check-tool-names && pnpm check-channels"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
