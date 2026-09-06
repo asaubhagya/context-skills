@@ -31,8 +31,11 @@ type SkillVersion = { ref: string; version: number; date: string; sha256: string
 type Guide = { product: string; title: string; description: string; updated: string; body: string; raw: string; path: string; ref: string; betaDiffers: boolean };
 type Server = { key: string; product: string; cat: Catalog; path: string; tools: Tool[] };
 
+/** `beta` is main. Locally, SITE_BETA_REF=HEAD builds the current branch as beta (CI never sets it). */
+const MAIN_REF = process.env.SITE_BETA_REF || "main";
+const gitRef = (ref: string) => (ref === "main" ? MAIN_REF : ref);
 const git = (cmd: string) => execSync(`git ${cmd}`, { cwd: ROOT, encoding: "utf8" }).trim();
-const show = (ref: string, path: string) => { try { return execSync(`git show ${ref}:${path}`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }); } catch { return null; } };
+const show = (ref: string, path: string) => { try { return execSync(`git show ${gitRef(ref)}:${path}`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }); } catch { return null; } };
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const rel = (iso: string) => { const d = (Date.now() - Date.parse(iso)) / 864e5; return d < 1 ? "today" : d < 2 ? "yesterday" : d < 30 ? `${Math.floor(d)}d ago` : d < 365 ? `${Math.floor(d / 30)}mo ago` : `${Math.floor(d / 365)}y ago`; };
 const time = (iso: string) => `<time datetime="${iso}" title="${iso.slice(0, 10)}">${rel(iso)}</time>`;
@@ -47,7 +50,7 @@ const tags = git("tag --list 'v*' --sort=v:refname").split("\n").filter(Boolean)
 const refs: Ref[] = [];
 for (const name of [...tags, "main"]) {
   const raw = show(name, "manifest.json"); if (!raw) continue;
-  refs.push({ name, sha: git(`rev-parse --short ${name}`), full: git(`rev-parse ${name}`), date: git(`log -1 --format=%cI ${name}`), manifest: JSON.parse(raw) });
+  refs.push({ name, sha: git(`rev-parse --short ${gitRef(name)}`), full: git(`rev-parse ${gitRef(name)}`), date: git(`log -1 --format=%cI ${gitRef(name)}`), manifest: JSON.parse(raw) });
 }
 const latest = refs.filter((r) => r.name !== "main").at(-1)!;
 const beta = refs.find((r) => r.name === "main")!;
@@ -67,7 +70,7 @@ for (const key of skillKeys) {
       const primary = s.files.find((f) => f.src === s.primary) ?? s.files[0];
       const changed = !prev || prev.manifest.skills.find((x) => x.key === key)?.files.find((f) => f.src === s.primary)?.sha256 !== primary.sha256;
       if (changed) {
-        const range = prev ? `${prev.name}..${r.name}` : r.name;
+        const range = prev ? `${gitRef(prev.name)}..${gitRef(r.name)}` : gitRef(r.name);
         const changes = git(`log --format=%s ${range} -- skills/${key}`).split("\n").filter(Boolean).slice(0, 8);
         versions.push({ ref: r.name, version: s.version, date: r.date, sha256: primary.sha256, changes });
       }
@@ -83,15 +86,15 @@ const retired = (beta.manifest.retired ?? []).filter((r) => !skillAt("main", r.k
 const activeKeys = skillKeys.filter((k) => skillAt(latest.name, k) || skillAt("main", k));
 
 // ---------- collect: tool catalogs (registered on main) ----------
-const catalogPaths = git("ls-tree --name-only main mcp/").split("\n").filter((p) => p.endsWith(".json"));
+const catalogPaths = git(`ls-tree --name-only ${MAIN_REF} mcp/`).split("\n").filter((p) => p.endsWith(".json"));
 const servers: Server[] = catalogPaths.map((path) => {
   const cat = JSON.parse(show("main", path)!) as Catalog;
   const key = cat.server.key ?? path.replace(/^mcp\//, "").replace(/\.json$/, "");
   const product = cat.server.product ?? (key === CORE ? CORE : "context-sites");
   return { key, product, cat, path, tools: cat.toolGroups.flatMap((g) => g.tools) };
 }).sort((a, b) => (a.product === CORE ? -1 : b.product === CORE ? 1 : a.key.localeCompare(b.key)));
-const catalogSha = (path: string) => git(`log -1 --format=%h main -- ${path}`);
-const catalogDate = (path: string) => git(`log -1 --format=%cI main -- ${path}`);
+const catalogSha = (path: string) => git(`log -1 --format=%h ${MAIN_REF} -- ${path}`);
+const catalogDate = (path: string) => git(`log -1 --format=%cI ${MAIN_REF} -- ${path}`);
 
 // ---------- collect: guides (GUIDE.md at latest tag, else main; transitional: guides/<x>.md) ----------
 function loadGuide(product: string): Guide | null {
@@ -206,7 +209,7 @@ for (const key of skillKeys) {
     write(W(skillUrl(key, `@${v.ref}.html`)), skillPage(key, ref, v.ref === latest.name ? "latest" : "pinned"));
     write(W(skillUrl(key, `@${v.ref}.md`)), show(v.ref, skillAt(v.ref, key)!.primary)!);
   }
-  write(W(skillUrl(key, "/versions.json")), JSON.stringify({ key, product: skillProduct.get(key), generatedAt, latest: skillAt(latest.name, key)?.version ?? null, beta: skillAt("main", key)?.version ?? null, versions: [...versions].reverse().map((v) => ({ version: v.version, ref: v.ref, date: v.date, sha256: v.sha256, url: `${HOST}${skillUrl(key, `@${v.ref}.md`)}`, changes: v.changes })) }, null, 2));
+  write(W(skillUrl(key, "/versions.json")), JSON.stringify({ key, product: skillProduct.get(key), generatedAt, latest: skillAt(latest.name, key)?.version ?? null, beta: skillAt("main", key)?.version ?? null, versions: [...versions].reverse().map((v) => ({ version: v.version, ref: v.ref, date: v.date, sha256: v.sha256, url: `${HOST}${skillUrl(key, `@${v.ref === "main" ? "beta" : v.ref}.md`)}`, changes: v.changes })) }, null, 2));
 }
 
 const firstSentence = (s: string) => s.split(/(?<=\.)\s/)[0];

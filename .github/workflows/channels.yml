@@ -36,7 +36,7 @@ jobs:
 
       # beta only moves when green.
       - name: Gate (skills, manifest, typecheck)
-        run: pnpm check-skills && pnpm check-manifest && pnpm exec tsc --noEmit
+        run: pnpm check-skills && pnpm check-manifest && pnpm check-tool-names && pnpm exec tsc --noEmit
 
       # Force-pushes ONLY refs/tags/latest and refs/tags/beta; vN tags are never touched.
       - name: Move the latest/beta tags
