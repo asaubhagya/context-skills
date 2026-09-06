@@ -1,6 +1,6 @@
 {
   "schema": "context-skills-channels/1",
-  "generatedAt": "2026-09-06T03:01:33.967Z",
+  "generatedAt": "2026-09-06T03:04:55.541Z",
   "latest": {
     "ref": "v14",
     "sha": "59a92ea7f9371a3fcc6454f6891ef5a93c06cac1",
@@ -8,8 +8,8 @@
   },
   "beta": {
     "ref": "main",
-    "sha": "0f055966688527cfcd221a9470ff1447521cd89a",
-    "date": "2026-09-06T03:01:17Z"
+    "sha": "3f877dde8269aaa211634b1d864c303de7b53d85",
+    "date": "2026-09-06T11:04:33+08:00"
   },
   "source": {
     "repo": "asaubhagya/context-skills",
@@ -49,7 +49,7 @@
     },
     "daily-brief": {
       "latest": 3,
-      "beta": 3,
+      "beta": 4,
       "product": "context"
     },
     "grill-me": {
