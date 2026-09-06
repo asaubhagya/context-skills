@@ -10,7 +10,7 @@ description: >-
 license: MIT
 metadata:
   product: context
-  version: 4
+  version: 5
   depends: [context]
 ---
 
@@ -126,4 +126,4 @@ briefs:
 
 ## Drift note (v4)
 
-If `setup` reports this skill as `update`, refresh it before posting the brief; the brief must name the skill version it ran with (`daily-brief@4`) in `work_stats`.
+If `setup` reports this skill as `update`, refresh it before posting the brief; the brief must name the skill version it ran with (`daily-brief@4`) in `work_stats`. v5: the brief also lists the tools it called.
