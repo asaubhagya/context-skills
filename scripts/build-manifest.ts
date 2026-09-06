@@ -9,13 +9,19 @@
  *   pnpm build-manifest --ref v3   # stamp the ref you are about to tag
  *
  * Per skill: key = directory name (`skills/<key>/` or `skills/third-party/<key>/`),
- * kind (`rules` for `rules` and `rules-*`, else `skill`), title/description/
- * version/deps/license/source_url from SKILL.md frontmatter, and `files[]` =
- * SKILL.md first, then every file under the skill directory (subfolders
- * included), then any `attach:` entries — paths relative to the skill dir
- * (`path`, what a host installs) plus the repo path to fetch (`src`), a
- * sha256 and the byte size. Loaders verify each downloaded file against
- * `sha256` before serving it. `depends` must resolve to a skill in this tree.
+ * kind (`rules` for `rules-*`, else `skill`), product (`metadata.product`:
+ * `context` | `context-sites`), title/description/version/deps/license/
+ * source_url from SKILL.md frontmatter (`version`, `depends`, `attach`,
+ * `source` live under `metadata:`; the manifest keeps its flat field names so
+ * MCP consumers do not break), and `files[]` = SKILL.md first, then every file
+ * under the skill directory (subfolders included), then any `attach` entries —
+ * paths relative to the skill dir (`path`, what a host installs) plus the repo
+ * path to fetch (`src`), a sha256 and the byte size. Loaders verify each
+ * downloaded file against `sha256` before serving it. `depends` must resolve
+ * to a skill in this tree.
+ *
+ * Top-level `retired[]` lists keys that no longer exist and what replaced
+ * them, so consumers and the site can redirect (`{key, replacedBy}`).
  *
  * Also walks `mcp/*.json` and emits a top-level `mcp[]` for every file whose
  * `schema` is `"context-mcp-catalog/1"` — one entry per MCP tool catalog
@@ -30,7 +36,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseFrontmatter, walkSkillDirs, KEY_RE, MAX_FILE_BYTES } from "./check-skills";
+import { parseFrontmatter, walkSkillDirs, KEY_RE, MAX_FILE_BYTES, PRODUCTS } from "./check-skills";
 import { MCP_CATALOG_SCHEMA, validateCatalog, type McpCatalog } from "./check-mcp-catalogs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -42,6 +48,7 @@ export type ManifestFile = { path: string; src: string; sha256: string; bytes: n
 export type ManifestSkill = {
   key: string;
   kind: "rules" | "skill";
+  product: string;
   title: string;
   description: string;
   version: number;
@@ -51,6 +58,7 @@ export type ManifestSkill = {
   primary: string;
   files: ManifestFile[];
 };
+export type ManifestRetired = { key: string; replacedBy: string };
 export type ManifestMcp = {
   key: string;
   path: string;
@@ -59,7 +67,13 @@ export type ManifestMcp = {
   server: { name: string; endpoint: string; contractVersion: string };
   toolCount: number;
 };
-export type Manifest = { generatedAt: string; ref?: string; skills: ManifestSkill[]; mcp: ManifestMcp[] };
+export type Manifest = { generatedAt: string; ref?: string; skills: ManifestSkill[]; retired: ManifestRetired[]; mcp: ManifestMcp[] };
+
+/** Keys that were removed from the tree; `replacedBy` is where their content now lives. */
+export const RETIRED: ManifestRetired[] = [
+  { key: "rules", replacedBy: "context" },
+  { key: "setup-context", replacedBy: "context" },
+];
 
 const argv = process.argv.slice(2);
 const check = argv.includes("--check");
@@ -100,8 +114,9 @@ export function collect(): ManifestSkill[] {
     const fm = parseFrontmatter(readFileSync(skillMd, "utf8"));
     if (fm.name && fm.name !== key) throw new Error(`${key}/SKILL.md: frontmatter name "${fm.name}" must equal the directory name`);
     if (!fm.description) throw new Error(`${key}/SKILL.md: frontmatter description is required`);
+    if (!fm.product || !PRODUCTS.has(fm.product)) throw new Error(`${key}/SKILL.md: metadata.product must be one of ${[...PRODUCTS].join(" | ")}`);
     const version = fm.version === undefined ? 1 : Number(fm.version);
-    if (!Number.isSafeInteger(version) || version < 1) throw new Error(`${key}/SKILL.md: version must be a positive integer`);
+    if (!Number.isSafeInteger(version) || version < 1) throw new Error(`${key}/SKILL.md: metadata.version must be a positive integer`);
 
     const files: ManifestFile[] = [fileEntry("SKILL.md", skillMd)];
     for (const rel of walkFiles(dir)) {
@@ -122,7 +137,8 @@ export function collect(): ManifestSkill[] {
 
     skills.push({
       key,
-      kind: key === "rules" || key.startsWith("rules-") ? "rules" : "skill",
+      kind: key.startsWith("rules-") ? "rules" : "skill",
+      product: fm.product,
       title: fm.name ?? key,
       description: fm.description,
       version,
@@ -136,6 +152,10 @@ export function collect(): ManifestSkill[] {
   const keys = new Set(skills.map((s) => s.key));
   for (const s of skills) {
     for (const dep of s.deps) if (!keys.has(dep)) throw new Error(`${s.key} depends on unknown skill "${dep}"`);
+  }
+  for (const r of RETIRED) {
+    if (keys.has(r.key)) throw new Error(`retired key "${r.key}" still exists in the tree`);
+    if (!keys.has(r.replacedBy)) throw new Error(`retired key "${r.key}" is replaced by unknown skill "${r.replacedBy}"`);
   }
   return skills;
 }
@@ -170,7 +190,7 @@ export function collectMcp(): ManifestMcp[] {
 }
 
 function main() {
-  const manifest: Manifest = { generatedAt: new Date().toISOString(), ...(ref ? { ref } : {}), skills: collect(), mcp: collectMcp() };
+  const manifest: Manifest = { generatedAt: new Date().toISOString(), ...(ref ? { ref } : {}), skills: collect(), retired: RETIRED, mcp: collectMcp() };
   const next = JSON.stringify(manifest, null, 2) + "\n";
   if (check) {
     if (!existsSync(MANIFEST)) { console.error("manifest.json is missing — run `pnpm build-manifest`"); process.exit(1); }
