@@ -1,10 +1,10 @@
 {
   "schema": "context-skills-channels/1",
-  "generatedAt": "2026-09-06T04:28:53.479Z",
+  "generatedAt": "2026-09-06T04:32:08.402Z",
   "latest": {
-    "ref": "v15",
-    "sha": "3f877dde8269aaa211634b1d864c303de7b53d85",
-    "date": "2026-09-06T11:04:33+08:00"
+    "ref": "v16",
+    "sha": "8ba9caa9569d4f00d957dd9fb871717c6c2a7052",
+    "date": "2026-09-06T12:28:27+08:00"
   },
   "beta": {
     "ref": "main",
@@ -48,7 +48,7 @@
       "product": "context"
     },
     "daily-brief": {
-      "latest": 4,
+      "latest": 5,
       "beta": 5,
       "product": "context"
     },
