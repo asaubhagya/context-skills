@@ -1,0 +1,58 @@
+name: Channels (move latest/beta, commit channels.json)
+
+# The only writer of the moving tags (contract §3). Runs as the first job of
+# deploy-site.yml (push main / tags v*) and register-catalog.yml, so the site
+# is always built after the tags moved:
+#   push main  → beta := main HEAD
+#   push vN    → latest := that tag (and beta follows when main == it)
+# then channels.json is regenerated and committed with "[skip ci]".
+#
+# No loops: the tags pushed here are `latest`/`beta`, which never match the
+# `v*` filter; the commit carries [skip ci]; and a GITHUB_TOKEN push does not
+# trigger other workflows anyway.
+on:
+  workflow_call:
+  workflow_dispatch:   # manual repair: re-derive the tags + channels.json from git
+
+permissions:
+  contents: write
+
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # every tag + origin/main
+          ref: main               # channels.json lives on main, whatever event called us
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # beta only moves when green.
+      - name: Gate (skills, manifest, typecheck)
+        run: pnpm check-skills && pnpm check-manifest && pnpm exec tsc --noEmit
+
+      # Force-pushes ONLY refs/tags/latest and refs/tags/beta; vN tags are never touched.
+      - name: Move the latest/beta tags
+        run: pnpm channels move --push
+
+      - name: Regenerate + commit channels.json
+        run: |
+          if pnpm channels check; then echo "channels.json already matches the tags"; exit 0; fi
+          pnpm channels write
+          git config user.name "context-skills-ci"
+          git config user.email "context-skills-ci@users.noreply.github.com"
+          LATEST=$(python3 -c "import json;print(json.load(open('channels.json'))['latest']['ref'])")
+          BETA=$(python3 -c "import json;print(json.load(open('channels.json'))['beta']['sha'][:7])")
+          git add channels.json
+          git commit -m "chore(channels): latest $LATEST, beta $BETA [skip ci]"
+          git push origin HEAD:main
+
+      - name: Verify (strict check-channels gate)
+        run: pnpm check-channels
