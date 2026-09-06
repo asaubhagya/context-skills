@@ -17,11 +17,11 @@
     },
     "contractVersion": "3.0.0",
     "startingPrompt": "Nomi, get me started",
-    "generatedAt": "2026-09-06T03:14:52.661Z",
-    "publishedAt": "2026-09-06T03:14:52.661Z",
+    "generatedAt": "2026-09-06T04:21:17.432Z",
+    "publishedAt": "2026-09-06T04:21:17.432Z",
     "sourceRepo": "asaubhagya/meetly-macos",
     "sourcePath": "supabase/functions/mcp/tools_v3.ts",
-    "sourceCommit": "ef570a97",
+    "sourceCommit": "3ef96e2",
     "docsUrl": "https://agents.onecontext.me/tools/context"
   },
   "connect": {
@@ -34,17 +34,7 @@
     {
       "key": "context",
       "role": "base",
-      "description": "The interface — how you talk to Context: primitives, vocabulary, and when to call which tool."
-    },
-    {
-      "key": "rules",
-      "role": "harness",
-      "description": "Execution discipline — how a work unit runs end to end, from plan through verification to handoff."
-    },
-    {
-      "key": "setup-context",
-      "role": "harness",
-      "description": "Chart a map — turns a goal into an Epic, its Issues and a spec before any work starts."
+      "description": "The interface — primitives, vocabulary, when to call which tool, the execution discipline and the charting playbook (references/charting.md). Absorbs the retired rules and setup-context skills."
     },
     {
       "key": "daily-brief",

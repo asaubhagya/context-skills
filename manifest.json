@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T04:18:03.505Z",
+  "generatedAt": "2026-09-06T04:22:04.360Z",
   "skills": [
     {
       "key": "blog-agent",
@@ -514,8 +514,8 @@
     {
       "key": "context",
       "path": "mcp/context.json",
-      "sha256": "8d48c84134b9c6a11a1331e3fde8c770a6a8b11cbc54f099a5ac48a3e103a7ec",
-      "bytes": 293021,
+      "sha256": "2c83fd9dc4b674f2dea9085a78600a46fe63296c3d2195173ee35a006c349252",
+      "bytes": 292756,
       "server": {
         "name": "Context",
         "endpoint": "https://mcp.onecontext.me/mcp",
