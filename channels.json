@@ -1,6 +1,6 @@
 {
   "schema": "context-skills-channels/1",
-  "generatedAt": "2026-09-06T02:29:24.210Z",
+  "generatedAt": "2026-09-06T02:43:24.536Z",
   "latest": {
     "ref": "v13",
     "sha": "6aaa9b84d351e1fe43ceee80a7dab5e82914e133",
@@ -8,8 +8,8 @@
   },
   "beta": {
     "ref": "main",
-    "sha": "0c1777f9fbe0ccab9d3481d9d68924721f6ab431",
-    "date": "2026-09-06T08:46:06+08:00"
+    "sha": "04b85b0604d498bc54e3d12e08a7dc98d056364a",
+    "date": "2026-09-06T10:43:00+08:00"
   },
   "source": {
     "repo": "asaubhagya/context-skills",
@@ -19,78 +19,78 @@
   "skills": {
     "blog-agent": {
       "latest": 7,
-      "beta": 7,
-      "product": null
+      "beta": 8,
+      "product": "context-sites"
     },
     "blog-assessment": {
       "latest": 2,
       "beta": 2,
-      "product": null
+      "product": "context-sites"
     },
     "blog-checker": {
       "latest": 5,
       "beta": 5,
-      "product": null
+      "product": "context-sites"
     },
     "blog-drafter": {
       "latest": 7,
       "beta": 7,
-      "product": null
+      "product": "context-sites"
     },
     "blog-publisher": {
       "latest": 4,
       "beta": 4,
-      "product": null
+      "product": "context-sites"
     },
     "context": {
       "latest": 1,
-      "beta": 1,
-      "product": null
+      "beta": 2,
+      "product": "context"
     },
     "daily-brief": {
       "latest": 3,
       "beta": 3,
-      "product": null
+      "product": "context"
     },
     "grill-me": {
       "latest": 1,
       "beta": 1,
-      "product": null
+      "product": "context"
     },
     "instagram-drafter": {
       "latest": 4,
       "beta": 4,
-      "product": null
+      "product": "context-sites"
     },
     "instagram-publisher": {
       "latest": 3,
       "beta": 3,
-      "product": null
+      "product": "context-sites"
     },
     "rules": {
       "latest": 1,
-      "beta": 1,
+      "beta": null,
       "product": null
     },
     "rules-blog": {
       "latest": 5,
-      "beta": 5,
-      "product": null
+      "beta": 6,
+      "product": "context-sites"
     },
     "setup-context": {
       "latest": 1,
-      "beta": 1,
+      "beta": null,
       "product": null
     },
     "site-builder": {
       "latest": 2,
-      "beta": 2,
-      "product": null
+      "beta": 3,
+      "product": "context-sites"
     },
     "wayfinder": {
       "latest": 1,
       "beta": 1,
-      "product": null
+      "product": "context"
     }
   }
 }
