@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T03:01:17.895Z",
+  "generatedAt": "2026-09-06T03:04:32.513Z",
   "skills": [
     {
       "key": "blog-agent",
@@ -298,7 +298,7 @@
       "product": "context",
       "title": "daily-brief",
       "description": "Daily heartbeat for any recurring agent workflow tracked in Context: once a day, post one comment on the workflow's designated Daily Brief issue saying what published, what awaits approval, what failed and what is next, and rebuild the epic's `## Runs` block (schedule · next slots · routine health · last 7 briefs) so the owner sees it on the epic. A missing brief is the outage alert.",
-      "version": 3,
+      "version": 4,
       "deps": [
         "context"
       ],
@@ -309,8 +309,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/daily-brief/SKILL.md",
-          "sha256": "4bf2039ab2175006ea7c24db56d2d2a42fc47f95857f65dd0f9321fc2f62da6e",
-          "bytes": 6265
+          "sha256": "7ee30fd90763582262ba3cdc8969e7c5e8dc14057f1099a4caa95e0d75d633db",
+          "bytes": 6451
         }
       ]
     },

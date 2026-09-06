@@ -10,7 +10,7 @@ description: >-
 license: MIT
 metadata:
   product: context
-  version: 3
+  version: 4
   depends: [context]
 ---
 
@@ -123,3 +123,7 @@ briefs:
 - Read-only towards other systems; the brief never publishes or approves.
 - If the routine cannot run (host down, key missing), say so on the Daily
   Brief issue as soon as you can, with the key **name** that is missing.
+
+## Drift note (v4)
+
+If `setup` reports this skill as `update`, refresh it before posting the brief; the brief must name the skill version it ran with (`daily-brief@4`) in `work_stats`.
