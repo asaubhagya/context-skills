@@ -15,7 +15,8 @@
     "check-manifest": "tsx scripts/build-manifest.ts --check",
     "check": "pnpm check-skills && pnpm check-manifest",
     "check-site-links": "tsx scripts/check-site-links.ts",
-    "check-site": "pnpm build-site && pnpm check-site-links"
+    "check-site": "pnpm build-site && pnpm check-site-links",
+    "check-tool-names": "tsx scripts/check-tool-names.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

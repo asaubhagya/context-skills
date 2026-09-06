@@ -1,0 +1,12 @@
+# Backticked snake_case identifiers that share a prefix with a tool name but are fields, not tools.
+# check-tool-names skips these. Keep it short; a real stale tool name must never be added here.
+tenant_slug
+preview_url
+check_id
+search_console
+publish_events
+publish_at
+instagram_post
+article_id
+ai_share
+ai_engines
