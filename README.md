@@ -12,24 +12,30 @@ database: the Context MCP, the Context Blog MCP and the Skills hub read
 (`https://cdn.jsdelivr.net/gh/asaubhagya/context-skills@<tag>/…`) and verify
 every file against its sha256 before serving it.
 
-## The base skill
+## The Guide and the base skill
+
+[`GUIDE.md`](GUIDE.md) is the **Agent guide** — the standing instruction for
+any agent working through Context (connect, call `setup`, the loop, the rules
+that bite, the skills and tools map). It is what `https://agents.onecontext.me/`
+renders and what `setup` points to. The Context Sites extension has its own at
+[`extensions/context-sites/GUIDE.md`](extensions/context-sites/GUIDE.md).
 
 [`context`](skills/context/SKILL.md) teaches the Context MCP interface itself
 — the primitives (Account, Space, Epic, Issue, Artifact), Shared vs Private
-provenance and pairing, the read → act → verify loop, and the review
-discipline (`request_review` / `claim_issue` / `verify_issue`). Every other
-skill in this repo builds on it. Load `context` first, or let `start_context`
-install it for you (see below).
+provenance and pairing, the read → act → verify loop, the review discipline
+(`request_review` / `claim_issue` / `verify_issue`) and the discipline for
+using the tools. Its `references/` carry the charting playbook, the spec
+template and worked examples. Every other skill in this repo builds on it.
+The former `rules` and `setup-context` skills are retired into it
+(`manifest.json` lists them under `retired`).
 
 ## What is here
 
 | skill | kind | description | served by |
 |---|---|---|---|
-| [`context`](skills/context/SKILL.md) | skill | The Context MCP interface: vocabulary, provenance, the read → act → verify loop. Ships `references/`. | Context MCP |
-| [`rules`](skills/rules/SKILL.md) | rules | The Context harness: the execution discipline any agent follows when a task needs a plan, built on `context`. Ships `agents-block.md` (appended to AGENTS.md / CLAUDE.md) and [`spec-template.md`](skills/spec-template.md). | Context MCP |
-| [`setup-context`](skills/setup-context/SKILL.md) | skill | Chart a piece of work as a Context map (Epic + linked Issues) and work it to done with review gates. | Context MCP |
+| [`context`](skills/context/SKILL.md) | skill | The Context MCP interface: vocabulary, provenance, the read → act → verify loop, tool discipline. Ships `references/` (charting, spec template, examples, agents-block). | Context MCP |
 | [`daily-brief`](skills/daily-brief/SKILL.md) | skill | Daily heartbeat for any recurring agent workflow tracked in Context. | Context MCP · Context Blog MCP |
-| [`rules-blog`](skills/rules-blog/SKILL.md) | rules | Rules for every Context Blog workflow, layered on `rules`. | Context Blog MCP |
+| [`rules-blog`](skills/rules-blog/SKILL.md) | rules | Rules for every Context Blog workflow, layered on `context`. | Context Blog MCP |
 | [`blog-agent`](skills/blog-agent/SKILL.md) | skill | "Set up blog": interview the owner, chart a tenant epic, install the routines. Ships `templates/` and `routines/`. | Context Blog MCP |
 | [`blog-assessment`](skills/blog-assessment/SKILL.md) | skill | Weekly performance and AI-visibility report for a tenant: reads the Blog MCP stats, runs the agent-side citation probe with the host's own keys (by NAME, cost-capped), ingests the results and posts one report under the Performance Report lane. |
 | [`blog-checker`](skills/blog-checker/SKILL.md) | skill | Independent quality gate between the maker and the human: MACHINE checks via the Blog MCP (`content_lint`, `preview_render`), JUDGEMENT checks + fact-check, verdict `pass · bounce · escalate` recorded on the Context issue (`check_record`); raises `request_review` only on pass (locale variants cascade without one). Ships `templates/`. | Context Blog MCP |
@@ -38,27 +44,29 @@ install it for you (see below).
 | [`instagram-drafter`](skills/instagram-drafter/SKILL.md) | skill | Instagram maker: slides from the paper-cards template, assets + `instagram_post_upsert`, hand-off to `blog-checker`; runs inside the drafter routine after the blog pass. | Context Blog MCP |
 | [`instagram-publisher`](skills/instagram-publisher/SKILL.md) | skill | Schedules approved Instagram posts through Postiz (`POSTIZ_API_KEY` by name) only when the issue is `done`, dedupe guard; runs inside the publisher routine. | Context Blog MCP |
 | [`site-builder`](skills/site-builder/SKILL.md) | skill | One-time site / landing page — one-round interview (goal, audience, sections, CTA, design tokens), `page_upsert` honouring the lint, `preview_render`, `blog-checker` in a separate call, one `gate:artifact` review in Context, `publish` only after approval. Ships `templates/page-brief.md`. | Context Blog MCP |
-| [`wayfinder`](skills/third-party/wayfinder/SKILL.md) | skill (third-party) | Plan a huge chunk of work as a shared map of decision tickets. | dependency of `setup-context` / `blog-agent` |
-| [`grill-me`](skills/third-party/grill-me/SKILL.md) | skill (third-party) | Grill the user relentlessly about a plan, decision, or idea. | dependency of `setup-context` / `blog-agent` |
+| [`wayfinder`](skills/third-party/wayfinder/SKILL.md) | skill (third-party) | Plan a huge chunk of work as a shared map of decision tickets. | used by `context` (charting) / `blog-agent` |
+| [`grill-me`](skills/third-party/grill-me/SKILL.md) | skill (third-party) | Grill the user relentlessly about a plan, decision, or idea. | used by `context` (charting) / `blog-agent` |
 
-Layout: `skills/<key>/SKILL.md` (first-party), `skills/third-party/<key>/SKILL.md`
-(verbatim upstream skills), `skills/spec-template.md` (attached to `rules`),
-`manifest.json` (generated, committed), `scripts/` (checks + manifest builder).
+Layout: `GUIDE.md` (core Agent guide), `extensions/<slug>/GUIDE.md`
+(extension guides), `skills/<key>/SKILL.md` (first-party),
+`skills/third-party/<key>/SKILL.md` (verbatim upstream skills),
+`manifest.json` (generated, committed), `mcp/<key>.json` (tool catalogs),
+`scripts/` (checks + manifest builder).
 
 ## The entry points
 
 - **Context MCP** — a single endpoint, `https://mcp.onecontext.me/mcp`, for
   the iPhone app and the web (sign in with Google, pair your iPhone for
-  Private Spaces). Its `start_context` tool is the one model-callable
-  onboarding call: it reports account, pairing, Space state and a
-  `nextAction`, and returns an install plan for the `context` skill and the
-  workflow skills it recommends (`rules`, `setup-context`, `daily-brief` and
-  their dependencies `wayfinder` / `grill-me`) — either `agent_install`
-  (target directory, download URL, sha256, for a host with its own file
-  tools) or `human_upload` (a ZIP + host-native upload steps, for a hosted
-  agent with no filesystem). `start_context` never writes files itself and
-  never edits `AGENTS.md`/`CLAUDE.md` as a side effect — the agent (or the
-  human) carries out the plan with its own tools.
+  Private Spaces). Its `setup` tool (`start_context` is the deprecated
+  alias) is the one model-callable onboarding call: it reports account,
+  pairing, Space state and a `nextAction`, and returns the Guide plus the
+  skills of product `context` (`context`, `daily-brief`, `wayfinder`,
+  `grill-me`) with a `status` each — either `agent_install` (target
+  directory, download URL, sha256, for a host with its own file tools) or
+  `human_upload` (a ZIP + host-native upload steps, for a hosted agent with
+  no filesystem). `setup` never writes files itself and never edits
+  `AGENTS.md`/`CLAUDE.md` as a side effect — the agent (or the human)
+  carries out the plan with its own tools.
 - **Context Blog MCP** (`sites.onecontext.me/api/mcp`) — a separate,
   independently versioned server for tenants, drafts, preview render,
   publishing and analytics. It keeps its own tool names (`article_upsert`,
@@ -83,11 +91,12 @@ Copy a skill's folder so that `SKILL.md` lands at:
 | ChatGPT / claude.ai | add the files to the skills / project-knowledge surface |
 
 Attached files keep their relative paths (`blog-agent/templates/…`,
-`rules/spec-template.md`). Append `skills/rules/agents-block.md` to the repo's
-`AGENTS.md` (or `CLAUDE.md`) yourself if you want the harness summarized
-there — `start_context` never does this for you. Every skill's `depends`
-must be installed too (`rules` depends on `context`; `setup-context` depends
-on `context`, `rules`, `wayfinder`, `grill-me`; and so on).
+`context/references/spec-template.md`). Append
+`skills/context/references/agents-block.md` to the repo's `AGENTS.md` (or
+`CLAUDE.md`) yourself if you want Context summarized there — `setup` never
+does this for you. Every skill's `metadata.depends` must be installed too
+(`rules-blog` depends on `context`; `blog-agent` on `rules-blog`,
+`wayfinder`, `grill-me`, …).
 
 The **Skills hub** — `https://app.onecontext.me/skills` — is the stable
 distribution front for all of this: an index (`/skills`, `/skills.md`,
@@ -111,16 +120,32 @@ both MCPs.
 
 ## Proposing a change
 
-Open a pull request. CI runs `pnpm check-skills` (frontmatter `name` = directory
-name, `description` present, `version` a positive integer, `depends` and
-`attach` resolve, files 1–256 KB) and `pnpm check-manifest` (the committed
+Open a pull request. CI runs `pnpm check-skills` (top-level frontmatter keys
+⊆ the Agent Skills spec, `name` = directory name, `description` present,
+`metadata.product` ∈ {`context`, `context-sites`}, `metadata.version` a
+positive integer, `depends` and `attach` resolve, body < 500 lines and
+< 20,000 chars, files 1–256 KB) and `pnpm check-manifest` (the committed
 `manifest.json` matches the tree — run `pnpm build-manifest` and commit it).
 Third-party skills are updated by re-fetching upstream and recording the new
 pinned commit + sha256 in the frontmatter, never by editing them.
 
-Frontmatter fields: `name`, `description`, `depends: [..]`, `version`,
-`license`, `source` (upstream URL, marks a skill as third-party),
-`attach: [..]` (extra files outside the walk, e.g. `../spec-template.md`).
+Frontmatter (Agent Skills spec + our `metadata`):
+
+```yaml
+name: blog-drafter            # == directory name
+description: >-               # <= 1024 chars
+  ...
+license: MIT
+metadata:
+  product: context-sites      # required: context | context-sites
+  version: 7                  # bumps when the SKILL.md body changes
+  depends: [rules-blog]       # optional
+  attach: [templates/x.md]    # optional, files shipped with the skill
+  source: https://...         # third-party only: upstream URL (+ source_commit, source_sha256, fetched)
+```
+
+`manifest.json` keeps its flat field names (`version`, `deps`, `files`, …),
+adds `product` per skill and a top-level `retired: [{key, replacedBy}]`.
 
 ## MCP catalogs
 
@@ -135,5 +160,6 @@ the schema and how to refresh a catalog. These catalogs are rendered at
 MIT — see [LICENSE](LICENSE). `wayfinder` and `grill-me` are Matt Pocock's
 skills (https://github.com/mattpocock/skills, MIT), redistributed verbatim from
 commit `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76`; each file's frontmatter
-records `source`, `source_commit` and `source_sha256`. `setup-context` is an
-independent rewrite inspired by them.
+records `source`, `source_commit` and `source_sha256` under `metadata`. The
+`context` skill's `references/charting.md` is an independent rewrite inspired
+by them.
