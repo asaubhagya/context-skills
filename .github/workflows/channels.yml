@@ -21,10 +21,15 @@ jobs:
   move:
     runs-on: ubuntu-latest
     steps:
+      # GITHUB_TOKEN may not move a tag onto a commit whose workflow files differ
+      # from main's (GitHub's "workflows" permission). CONTEXT_SKILLS_TOKEN (a
+      # fine-grained PAT: contents + workflows + actions) lifts that; without it
+      # the default token is used and the move can fail on such a tag.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0          # every tag + origin/main
           ref: main               # channels.json lives on main, whatever event called us
+          token: ${{ secrets.CONTEXT_SKILLS_TOKEN || github.token }}
 
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
