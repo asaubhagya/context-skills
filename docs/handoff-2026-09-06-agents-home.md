@@ -23,3 +23,9 @@ One agent-facing host for both products (Context, Context Sites): skills, MCP ca
 
 ## Verification run
 `curl -sI https://agents.onecontext.me/channels.json` → 200 · `curl -sI https://app.onecontext.me/mcp` → 308 agents · `curl -sI https://sites.onecontext.me/skills/rules-blog.md` → 308 agents · POST initialize `https://mcp.onecontext.me/mcp` → 200 · `gh run list --repo asaubhagya/context-skills` → both workflows green on `0e8e461`.
+
+## Update 2026-09-06 00:50Z — items 1–4 closed
+- CI token set; `deploy-site` deploys on tag/main (run 34001454236 green).
+- Context MCP deployed from `work/CONT-501-unify-server` @ `ec148510`: `start_context` → agents.onecontext.me links; CPU fix `8fea42dc` (one rollup pass per read-model load, O(n) epic rollups, request-scoped memo). Before: writes ~2,000 ms CPU → 546. After: ~90–140 ms CPU, `readmodel.load` 0.5–1.3 s wall at 55 overlay rows / 788 tasks / 59 epics.
+- Staged Context writes replayed: handoff issue `134c9be5`, updates to `516a26b6` + `acc2c8cc`, new "retire old hubs" issue `def0ae51`.
+- Remaining CPU is decrypt + JSON.parse of the 3.7 MB manifest per request; the overlay window shrinks when the phone uploads a fresh manifest (open the Context app). Next lever if needed: cache the parsed manifest per isolate keyed on `manifest.updated_at`.
