@@ -1,10 +1,10 @@
 {
   "schema": "context-skills-channels/1",
-  "generatedAt": "2026-09-06T02:47:20.101Z",
+  "generatedAt": "2026-09-06T02:49:12.394Z",
   "latest": {
-    "ref": "v13",
-    "sha": "6aaa9b84d351e1fe43ceee80a7dab5e82914e133",
-    "date": "2026-09-06T06:39:55+08:00"
+    "ref": "v14",
+    "sha": "59a92ea7f9371a3fcc6454f6891ef5a93c06cac1",
+    "date": "2026-09-06T02:47:00Z"
   },
   "beta": {
     "ref": "main",
@@ -18,7 +18,7 @@
   },
   "skills": {
     "blog-agent": {
-      "latest": 7,
+      "latest": 8,
       "beta": 8,
       "product": "context-sites"
     },
@@ -43,7 +43,7 @@
       "product": "context-sites"
     },
     "context": {
-      "latest": 1,
+      "latest": 2,
       "beta": 2,
       "product": "context"
     },
@@ -67,23 +67,13 @@
       "beta": 3,
       "product": "context-sites"
     },
-    "rules": {
-      "latest": 1,
-      "beta": null,
-      "product": null
-    },
     "rules-blog": {
-      "latest": 5,
+      "latest": 6,
       "beta": 6,
       "product": "context-sites"
     },
-    "setup-context": {
-      "latest": 1,
-      "beta": null,
-      "product": null
-    },
     "site-builder": {
-      "latest": 2,
+      "latest": 3,
       "beta": 3,
       "product": "context-sites"
     },
