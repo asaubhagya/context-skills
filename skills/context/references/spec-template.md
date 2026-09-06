@@ -2,8 +2,9 @@
 
 Use this for any Context ticket that changes code. Copy the headings verbatim;
 every section must exist — write "N/A — <reason>" rather than deleting one.
-Attach the finished spec to the map's epic with `attach_artifact {docKind:
-"spec"}` and raise the combined map + spec `request_review` (see `rules`).
+Attach the finished spec to the map's Epic with `attach_artifact {target:
+{kind: "epic", id}, title: "Spec", mime: "text/markdown", content}` and raise
+the combined map + spec `request_review` (see `charting.md`).
 
 ---
 
