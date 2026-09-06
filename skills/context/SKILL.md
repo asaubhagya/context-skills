@@ -12,7 +12,7 @@ description: >-
 license: MIT
 metadata:
   product: context
-  version: 2
+  version: 3
 ---
 
 # Context
@@ -36,7 +36,8 @@ Artifact, or explain to the user what Context is.
    the first write — it reports account, pairing, Spaces, the Guide and
    skills you should hold and their `status`. Never work from memory of a
    prior session's state. If it says `update` or `install`, refresh your
-   copy first (Guide §4, drift rule).
+   copy first (Guide §4, drift rule), then call `setup` again with the new
+   hashes and confirm `drift: false` before your first write.
 2. **`caller {agent, model}` on every call** — the exact model id,
    lower-case, or the literal `unknown`. Missing it is `VALIDATION_FAILED`.
 3. **Credentials by name.** Never solicit, store or echo a secret value.

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T04:28:15.831Z",
+  "generatedAt": "2026-09-06T07:43:29.340Z",
   "skills": [
     {
       "key": "blog-agent",
@@ -230,7 +230,7 @@
       "product": "context",
       "title": "context",
       "description": "The Context MCP interface — vocabulary, provenance, the read → act → verify loop and the discipline for using its tools: setup first, caller and expected_version on every write, claim → verify → review, work_stats on completion, handoff before stopping. Use whenever an agent is signed in to Context (https://app.onecontext.me) and about to call any of its tools: charting Epics/Issues, attaching Artifacts, posting comments, requesting review, or reading Shared/Private Space data. Ships references for charting a job, the spec template and worked examples.",
-      "version": 2,
+      "version": 3,
       "deps": [],
       "license": "MIT",
       "source_url": null,
@@ -239,8 +239,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/context/SKILL.md",
-          "sha256": "54697b343c2059dd8ec52d72fe53721964a2a0fa2ab42448d1a3a257d459d096",
-          "bytes": 11785
+          "sha256": "aebd0c0f5296f611eb237a809b9d1ff53419c820c3e0fda74c72541a2ec49924",
+          "bytes": 11884
         },
         {
           "path": "references/agents-block.md",
