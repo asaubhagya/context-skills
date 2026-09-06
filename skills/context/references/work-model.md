@@ -19,8 +19,9 @@ piece of work needs to be broken down, create child Issues under it with
 
 Wire values, in order: `open → in_progress → in_review → done`.
 
-- Move an Issue forward with `update_issues {ids, state}` — batch-capable,
-  so update several Issues in one call when they share a transition.
+- Move an Issue forward with `update_issues {issues: [{issue_id, state,
+  expected_version}]}` — batch-capable, so update several Issues in one
+  call when they share a transition.
 - `in_review` is where a human gate lives: pair it with `request_review`
   (see `references/reviews.md`) rather than just flipping state — a state
   change alone does not notify anyone.
@@ -31,8 +32,8 @@ Wire values, in order: `open → in_progress → in_review → done`.
 
 ## `blocked` is derived
 
-Set dependencies with `update_issues {ids: [issueId], blocked_by:
-[otherIssueId, ...]}`. The Issue's `blocked` flag is then computed by the
+Set dependencies with `update_issues {issues: [{issue_id, blocked_by:
+[otherIssueId, ...], expected_version}]}`. The Issue's `blocked` flag is then computed by the
 server: true whenever any id in `blocked_by` is not `done`. You never write
 `blocked` directly, and you never read it as a promise — re-fetch
 (`get_issue` / `list_issues`) after the blocking Issue changes state rather
@@ -52,6 +53,6 @@ own fields: title, description, labels, and similar metadata.
 ## Artifacts on Epics and Issues
 
 Either an Epic or any Issue can carry Artifacts (`attach_artifact
-{parent_id: <epic-or-issue-id>, ...}`). Attach the plan/spec-shaped
+{target: {kind: "epic" | "issue", id}, ...}`). Attach the plan/spec-shaped
 document to the Epic; attach per-ticket deliverables (mini-spec, acceptance
 tests, release notes) to the Issue that produced them.

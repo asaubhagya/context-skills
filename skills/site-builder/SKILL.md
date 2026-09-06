@@ -8,10 +8,12 @@ description: >-
   the draft to `blog-checker` in a separate call, leave the Context issue
   behind one `gate:artifact` review, and `publish` only after the owner
   approved it there. Never publishes unapproved; never a second CTA.
-depends: [rules-blog, rules, blog-checker, grill-me]
 license: MIT
-version: 2
-attach: [templates/page-brief.md]
+metadata:
+  product: context-sites
+  version: 3
+  depends: [rules-blog, blog-checker, grill-me]
+  attach: [templates/page-brief.md]
 ---
 
 # Site builder — one page, one gate
@@ -21,7 +23,7 @@ at this skill when the tenant's products are `[site]`). You build **one
 page** (a landing page, a pricing or about page) for **one tenant**, once.
 There is no
 routine, no buffer and no cadence: interview → brief → draft → lint →
-preview → checker → owner → publish. `rules` and `rules-blog` apply in
+preview → checker → owner → publish. `context` and `rules-blog` apply in
 full; `blog-checker` judges the draft in a separate call; the owner
 approves in Context; you (or the driver session) call `publish` after that
 and never before.

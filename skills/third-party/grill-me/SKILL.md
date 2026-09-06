@@ -1,12 +1,13 @@
 ---
 name: grill-me
 description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
-depends: []
 license: MIT
-source: https://github.com/mattpocock/skills/blob/6654f6b60cd9d5be8b54c6fafe44346dabeb3b76/skills/productivity/grilling/SKILL.md
-source_commit: 6654f6b60cd9d5be8b54c6fafe44346dabeb3b76
-source_sha256: 10ff989e7498b23b5acb49d5048f11dcd906757d2f79c5cdf8a00001381296f2
-fetched: 2026-09-02
+metadata:
+  product: context
+  source: https://github.com/mattpocock/skills/blob/6654f6b60cd9d5be8b54c6fafe44346dabeb3b76/skills/productivity/grilling/SKILL.md
+  source_commit: 6654f6b60cd9d5be8b54c6fafe44346dabeb3b76
+  source_sha256: 10ff989e7498b23b5acb49d5048f11dcd906757d2f79c5cdf8a00001381296f2
+  fetched: 2026-09-02
 ---
 <!--
   Third-party skill, used verbatim under the MIT licence.

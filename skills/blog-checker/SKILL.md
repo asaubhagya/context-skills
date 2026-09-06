@@ -6,10 +6,12 @@ description: >-
   preview_render), do the JUDGEMENT checks and the fact-check yourself, record
   a pass / bounce / escalate verdict on the Context issue (review doc +
   rendered preview + models), and raise the request_review only on pass.
-depends: [rules-blog, rules]
 license: MIT
-version: 5
-attach: [templates/verdict.md, templates/checklist.md]
+metadata:
+  product: context-sites
+  version: 5
+  depends: [rules-blog]
+  attach: [templates/verdict.md, templates/checklist.md]
 ---
 
 # Blog checker — maker → checker → human

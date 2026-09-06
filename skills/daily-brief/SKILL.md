@@ -7,9 +7,11 @@ description: >-
   rebuild the epic's `## Runs` block (schedule · next slots · routine health
   · last 7 briefs) so the owner sees it on the epic. A missing brief is the
   outage alert.
-depends: [context, rules]
 license: MIT
-version: 3
+metadata:
+  product: context
+  version: 3
+  depends: [context]
 ---
 
 # Daily brief

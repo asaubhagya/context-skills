@@ -9,10 +9,12 @@ description: >-
   standing issues, then install and verify the routines on this machine
   (daily brief first) and raise one combined map + spec review. Blog · site ·
   Instagram, once or recurring, Artifact · Review · Hosted.
-depends: [rules-blog, rules, setup-context, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher, site-builder, blog-assessment]
 license: MIT
-version: 7
-attach: [templates/brand-guide.md, templates/audience.md, templates/design-tokens.json, templates/design-tokens.md, templates/decision-record.md, templates/brief.md, templates/lanes.md, routines/launchd.plist.template, routines/crontab.txt, routines/chat-routines.md, routines/no-machine.md]
+metadata:
+  product: context-sites
+  version: 8
+  depends: [rules-blog, wayfinder, grill-me, daily-brief, blog-drafter, blog-checker, blog-publisher, instagram-drafter, instagram-publisher, site-builder, blog-assessment]
+  attach: [templates/brand-guide.md, templates/audience.md, templates/design-tokens.json, templates/design-tokens.md, templates/decision-record.md, templates/brief.md, templates/lanes.md, routines/launchd.plist.template, routines/crontab.txt, routines/chat-routines.md, routines/no-machine.md]
 ---
 
 # Blog agent — Context Blog setup
@@ -20,10 +22,10 @@ attach: [templates/brand-guide.md, templates/audience.md, templates/design-token
 This skill is a **thin wrapper**. It fixes the goal, the opening, the shape
 of the interview tree, the artifact templates, the chart step and the
 routines. Everything about *how to interview* is `grill-me`; everything
-about *how to chart a map* is `wayfinder` + `setup-context`; everything
-about *how to behave in Context* is `rules` + `rules-blog` (which build on
-`context`). Load all of them before you start; do not re-implement them
-here.
+about *how to chart a map* is `wayfinder` + the `context` skill's
+`references/charting.md`; everything about *how to behave in Context* is
+`context` + `rules-blog`. Load all of them before you start; do not
+re-implement them here.
 
 ## Goal
 
@@ -109,8 +111,8 @@ hubs, comparison pages, IG cadence); what the host can install (launchd/cron/
 scheduled prompts) — verified. If you cannot browse, say so in one line and
 ask only for the pastes you truly need.
 
-Fetch every skill you intend to recommend now (see `setup-context`
-Conventions) and read it, so you can say what it does in one line; you
+Fetch every skill you intend to recommend now (see `charting.md`,
+Research) and read it, so you can say what it does in one line; you
 store it at chart time.
 
 ### Round 2 — brand ambassador
@@ -172,7 +174,7 @@ Exact payload shapes are in `templates/lanes.md`; document templates in
    both `templates/design-tokens.md` and `.json`) · Decision record
    (`decisions`, `templates/decision-record.md`) · Context brief (`brief`,
    `templates/brief.md`). Store every skill the owner accepted as
-   `docKind: "skill"` per `setup-context`.
+   `docKind: "skill"` per `charting.md`.
 3. **Channel parents + standing issues** — children of the epic, in this
    order, `Daily Brief` first: `Daily Brief` · one parent per channel the
    owner chose — `Blog` (`lane:blog`), `Instagram` (`lane:instagram`),

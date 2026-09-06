@@ -11,10 +11,12 @@ description: >-
   leave one blocking
   request_review. Degrades to copy-only when the host has no renderer. Never
   publishes, never schedules.
-depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 4
-attach: [templates/paper-cards.html, templates/motifs.html, templates/instagram-preview.html, scripts/render-cards.sh, scripts/attach-artifact.sh]
+metadata:
+  product: context-sites
+  version: 4
+  depends: [rules-blog, blog-checker]
+  attach: [templates/paper-cards.html, templates/motifs.html, templates/instagram-preview.html, scripts/render-cards.sh, scripts/attach-artifact.sh]
 ---
 
 # Instagram drafter — the maker

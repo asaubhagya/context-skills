@@ -43,8 +43,8 @@ plainly what you couldn't do and why.
 
 ## What "unavailable" vs "pairing required" means
 
-`start_context` reports `phonePairing.status`: `paired | not_paired |
-unavailable`. `not_paired` is the case above — pairing is possible, just not
+`setup` reports the pairing state: `paired | not_paired | unavailable`.
+`not_paired` is the case above — pairing is possible, just not
 done yet. `unavailable` means this host/product surface doesn't support
 phone pairing at all (rare) — don't tell the user to pair a phone that
 can't help here; say plainly that Private-Space features aren't reachable

@@ -34,9 +34,9 @@ description/labels/etc. via `update_epic`.
 Tools: `list_epics`, `get_epic`, `create_epic` (optionally with a first
 batch of Issues), `update_epic`, `delete_epic`.
 
-Hard cap: a small number of active Epics per Account (check `start_context`
-or the error message for the current limit) — finish or delete before
-starting a new one.
+Hard cap: a small number of active Epics per Account (check `setup` or the
+error message for the current limit) — finish or delete before starting a
+new one.
 
 ## Issue
 

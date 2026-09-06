@@ -13,7 +13,7 @@ Issue to `in_review` with `update_issues` alone does not raise a gate.
 - One `request_review` per decision point. Don't batch two separate
   decisions into one request, and don't raise a second one for the same
   decision while the first is still open.
-- After requesting, wait on `get_changes {cursor, waitMs}` (bounded long
+- After requesting, wait on `get_changes {cursor, wait_ms}` (bounded long
   poll) for the decision. **Never assume approval** — a session that moves
   on without reading the decision back is guessing.
 - On `changes_requested`: the Issue goes back to `in_progress` (or stays
@@ -52,11 +52,12 @@ A typical flow for one Issue with a review gate:
 
 1. Do the work.
 2. `attach_artifact` the deliverable(s) to the Issue.
-3. `claim_issue {id, evidence: "..."}` — state what you ran and observed.
-4. `request_review {parent_id: issue_id, reason: "..."}`.
+3. `claim_issue {issue_id, request_id, expected_version, summary,
+   evidence: [...]}` — state what you ran and observed.
+4. `request_review {target: {kind: "issue", id}, reason: "...", blocking: true}`.
 5. Wait on `get_changes`.
 6. On approval, a **different** principal (or the human, via the app) has
    effectively verified it — or explicitly call `verify_issue` yourself
    from a separate session/agent before treating it as trustworthy.
-7. `update_issues {ids: [issue_id], state: "done"}` (or `complete_issues`
-   if no further step is needed).
+7. `complete_issues {issue_ids: [issue_id], work_stats}` — a human-gate
+   Issue refuses this from an agent; the person accepts it in the app.

@@ -5,20 +5,22 @@ description: >-
   three forks (what · how often · output tier), the label vocabulary, the
   checker and publish gates, key names only, daily brief first, and which
   server does what. Every blog, site and Instagram skill inherits this.
-depends: [rules]
 license: MIT
-version: 5
+metadata:
+  product: context-sites
+  version: 6
+  depends: [context]
 ---
 
 # Context Blog — rules
 
 These rules apply whenever an agent works on **Context Blog** content — blog
 posts, a site or landing page, Instagram posts — for a **tenant** (one brand,
-one site, e.g. `getmeetly.ai`). They sit on top of the Context harness
-(`rules`, which itself sits on `context`): everything there still holds
-(`start_context` first, grill-me + wayfinder verbatim, one map + one combined
-gate, per-ticket documents, handoff before stopping). This file adds only
-what is blog-specific.
+one site, e.g. `getmeetly.ai`). They sit on top of the Context Agent guide
+and the `context` skill: everything there still holds (`setup` first,
+grill-me + wayfinder verbatim, one map + one combined gate, per-ticket
+documents, handoff before stopping). This file adds only what is
+blog-specific.
 
 ## 1. Two servers, one link
 

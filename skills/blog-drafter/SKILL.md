@@ -10,10 +10,12 @@ description: >-
   carrying the markdown draft (for comments) + verdict + the final rendered
   preview (to click and see) + models behind one blocking request_review.
   Never publishes.
-depends: [rules-blog, rules, blog-checker]
 license: MIT
-version: 7
-attach: [templates/draft-notes.md]
+metadata:
+  product: context-sites
+  version: 7
+  depends: [rules-blog, blog-checker]
+  attach: [templates/draft-notes.md]
 ---
 
 # Blog drafter — the maker

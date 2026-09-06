@@ -7,10 +7,12 @@ description: >-
   Perplexity / SerpApi — by NAME, cost-capped), ingest the results, and post
   one report sub-issue under the tenant's Performance Report lane with
   citations found / missing and topic actions for the Topic Lane.
-depends: [rules-blog, rules]
 license: MIT
-version: 2
-attach: [templates/weekly.md, scripts/probe.mjs, routines/chat-routines-section.md]
+metadata:
+  product: context-sites
+  version: 2
+  depends: [rules-blog]
+  attach: [templates/weekly.md, scripts/probe.mjs, routines/chat-routines-section.md]
 ---
 
 # Blog assessment — weekly, agent-side
