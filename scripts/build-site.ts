@@ -10,8 +10,8 @@
  * Product membership is data: skill `product` in manifest.json, `server.product` in a catalog.
  * Every HTML page has a same-content `.md` sibling. No runtime except a version <select> and copy buttons.
  */
-import { execSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { execFileSync, execSync } from "node:child_process";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { marked } from "marked";
 
@@ -50,13 +50,25 @@ const tags = git("tag --list 'v*' --sort=v:refname").split("\n").filter(Boolean)
 const refs: Ref[] = [];
 for (const name of [...tags, "main"]) {
   const raw = show(name, "manifest.json"); if (!raw) continue;
-  refs.push({ name, sha: git(`rev-parse --short ${gitRef(name)}`), full: git(`rev-parse ${gitRef(name)}`), date: git(`log -1 --format=%cI ${gitRef(name)}`), manifest: JSON.parse(raw) });
+  refs.push({ name, sha: git(`rev-parse --short ${gitRef(name)}^{commit}`), full: git(`rev-parse ${gitRef(name)}^{commit}`), date: git(`log -1 --format=%cI ${gitRef(name)}`), manifest: JSON.parse(raw) });
 }
 const latest = refs.filter((r) => r.name !== "main").at(-1)!;
 const beta = refs.find((r) => r.name === "main")!;
 const betaIsLatest = beta.full === latest.full;
 const generatedAt = new Date().toISOString();
 const committedChannels = show("main", "channels.json");
+
+// Ship exactly the same stable snapshot the site advertises. A stale channel
+// projection is an error, not permission to mix beta files into a stable ZIP.
+if (!committedChannels || JSON.parse(committedChannels).latest.sha !== latest.full) {
+  throw new Error("channels.json latest SHA does not match the site's latest tag; refresh channels before building");
+}
+execFileSync("python3", [join(ROOT, "scripts/package-context-plugin.py"), "--repo", ROOT,
+  "--source-ref", MAIN_REF, "--site-out", OUT], { stdio: "inherit" });
+const pluginDownloadBase = `/downloads/context/${latest.full}`;
+const pluginProvenance = JSON.parse(readFileSync(join(OUT, pluginDownloadBase, "provenance.json"), "utf8")) as { archives: Record<string, string> };
+const pluginDownloads = Object.keys(pluginProvenance.archives).sort();
+
 
 // ---------- collect: skills (product from manifest; transitional fallback by key) ----------
 const productOf = (s: ManifestSkill) => s.product ?? (/^(blog-|instagram-)|^(rules-blog|site-builder)$/.test(s.key) ? "context-sites" : CORE);
@@ -228,6 +240,15 @@ Install one: \`curl -fsSL ${HOST}${base(p)}/skills/<key>.md --create-dirs -o .cl
 
 ${skillsTable(p)}
 
+${p === CORE ? `## Download plugin skills
+
+Stable ${latest.name}: ${pluginDownloads.map((name) => `[${name}](${HOST}${pluginDownloadBase}/${name})`).join(" · ")}.
+
+Download each ZIP and upload it directly to the Context plugin listing. Each includes the skill, its reference files, the Context guide and license notices. Installed plugins already contain these files; this download is for installation or preparing a submission.
+
+[Checksums](${HOST}${pluginDownloadBase}/SHA256SUMS) · [Provenance](${HOST}${pluginDownloadBase}/provenance.json). Stable aliases are available under \`/downloads/context/latest/<filename>\`; SHA links identify this exact snapshot.
+` : ""}
+
 Every version is immutable at \`${base(p)}/skills/<key>@vN.md\`; \`@beta.md\` tracks main. Machine indexes: [index.json](${HOST}${base(p)}/skills/index.json), [channels.json](${HOST}/channels.json), per-skill \`versions.json\`.
 ${p === CORE && retired.length ? `\nRetired: ${retired.map((r) => `\`${r.key}\`${r.replacedBy ? ` → [${r.replacedBy}](${HOST}${skillUrl(r.replacedBy)})` : ""}`).join(", ")}.\n` : ""}${p === CORE && products.length > 1 ? `\nExtension skills live with their product: ${products.filter((x) => x !== CORE).map((x) => `[${productTitle(x)}](${HOST}${base(x)}/skills)`).join(", ")}.` : ""}`;
 }
@@ -375,6 +396,7 @@ write(".well-known/agent-skills/index.json", wellKnown);
 
 // ---------- vercel.json (redirects keep every v1 URL alive) ----------
 const redirects: { source: string; destination: string; permanent: boolean }[] = [
+  ...[...pluginDownloads, "provenance.json", "SHA256SUMS"].map((name) => ({ source: `/downloads/context/latest/${name}`, destination: `${pluginDownloadBase}/${name}`, permanent: false })),
   { source: "/README.md", destination: "/index.md", permanent: true },
   { source: "/guide", destination: "/", permanent: true }, { source: "/guide.md", destination: "/index.md", permanent: true },
   { source: "/guides", destination: "/", permanent: true }, { source: "/guides/index.json", destination: "/extensions/index.json", permanent: true },
@@ -395,6 +417,8 @@ write("vercel.json", JSON.stringify({ cleanUrls: true, trailingSlash: false, hea
   { source: "/(.*)llms(.*)\\.txt", headers: [{ key: "Content-Type", value: "text/plain; charset=utf-8" }, { key: "Access-Control-Allow-Origin", value: "*" }] },
   { source: "/(.*)@v(.*)", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
   { source: "/(.*)", headers: [{ key: "Cache-Control", value: "public, max-age=300, must-revalidate" }] },
+  { source: `${pluginDownloadBase}/(.*)`, headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+  { source: "/downloads/context/latest/(.*)", headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }] },
 ], redirects }, null, 2));
 
 console.log(`site/: ${activeKeys.length} skills (${products.map((p) => `${p}: ${activeKeys.filter((k) => skillProduct.get(k) === p).length}`).join(", ")}), ${refs.length} refs (latest ${latest.name}, beta main@${beta.sha}), ${servers.length} servers, guides: ${products.map((p) => `${p}=${guides.get(p)?.path ?? "none"}@${guides.get(p)?.ref ?? "-"}`).join(" ")}, ${redirects.length} redirects`);

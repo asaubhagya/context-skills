@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -47,41 +46,6 @@ jobs:
       - name: Deploy to Vercel (production)
         if: env.VERCEL_TOKEN != ''
         run: npx vercel@latest deploy site --prod --yes --token "$VERCEL_TOKEN"
-
-      # Runs only after a real deployment. Stable SHA is the package identity;
-      # beta-only changes and reruns reuse the retained artifact.
-      - name: Resolve stable plugin package
-        if: env.VERCEL_TOKEN != ''
-        id: plugin
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          STABLE=$(python3 -c "import json; print(json.load(open('channels.json'))['latest']['sha'])")
-          [[ "$STABLE" =~ ^[0-9a-f]{40}$ ]] || exit 1
-          NAME="context-plugin-$STABLE"
-          COUNT=$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts?name=$NAME&per_page=100" --jq '[.artifacts[] | select(.expired == false)] | length' | awk '{sum += $1} END {print sum+0}')
-          echo "name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "needed=$([ "$COUNT" -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-
-      - name: Package stable Context skills
-        if: steps.plugin.outputs.needed == 'true'
-        run: pnpm package-context-plugin --out "$RUNNER_TEMP/context-plugin"
-
-      - name: Store reviewer upload package
-        if: steps.plugin.outputs.needed == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.plugin.outputs.name }}
-          path: ${{ runner.temp }}/context-plugin/
-          retention-days: 90
-          if-no-files-found: error
-
-      - name: Plugin handoff summary
-        if: env.VERCEL_TOKEN != ''
-        run: |
-          echo "### Context plugin" >> "$GITHUB_STEP_SUMMARY"
-          echo "Package: ${{ steps.plugin.outputs.name }} (created this run: ${{ steps.plugin.outputs.needed }})." >> "$GITHUB_STEP_SUMMARY"
-          echo "Download the retained Actions artifact, upload all skill ZIPs to the existing Context portal listing, scan and review, then submit. Publication after approval remains a portal operation; no supported public publishing API is configured." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Summary
         run: |

@@ -28,7 +28,6 @@ concurrency:
 
 permissions:
   contents: write
-  actions: read
 
 jobs:
   register:

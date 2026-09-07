@@ -91,6 +91,16 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'duplicate/reserved'):
             pkg.build(repo)
 
+    def test_site_downloads_repeatable_and_immutable(self):
+        repo, sha = self.fixture()
+        _, outputs = pkg.build(repo)
+        destination = pkg.write_site(repo / 'site', sha, outputs)
+        self.assertEqual(destination, repo / 'site/downloads/context' / sha)
+        self.assertEqual(destination, pkg.write_site(repo / 'site', sha, outputs))
+        self.assertEqual((destination / 'context.zip').read_bytes(), outputs['context.zip'])
+        with self.assertRaisesRegex(ValueError, 'Immutable download differs'):
+            pkg.write_site(repo / 'site', sha, {**outputs, 'context.zip': b'different'})
+
     def test_git_symlink_rejected(self):
         repo, _ = self.fixture()
         (repo / 'link.md').symlink_to('GUIDE.md')

@@ -122,13 +122,30 @@ def build(repo, source_ref='HEAD'):
     return stable, outputs
 
 
+def write_site(root, stable, outputs):
+    destination = root / 'downloads' / 'context' / stable
+    destination.mkdir(parents=True, exist_ok=True)
+    for name, data in outputs.items():
+        path = destination / name
+        if path.exists() and path.read_bytes() != data:
+            raise ValueError(f'Immutable download differs: {path}')
+        path.write_bytes(data)
+    return destination
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=Path(__file__).resolve().parent.parent)
     parser.add_argument('--source-ref', default='HEAD', help='Commit containing canonical channels.json; defaults to HEAD')
-    parser.add_argument('--out', required=True, type=Path, help='New or empty artifact directory')
+    output = parser.add_mutually_exclusive_group(required=True)
+    output.add_argument('--out', type=Path, help='New or empty artifact directory')
+    output.add_argument('--site-out', type=Path, help='Site root: write repeatable immutable downloads')
     args = parser.parse_args()
     stable, outputs = build(args.repo, args.source_ref)
+    if args.site_out:
+        destination = write_site(args.site_out, stable, outputs)
+        print(f'Packaged Context stable {stable} at {destination}')
+        return
     if args.out.exists() and any(args.out.iterdir()):
         parser.error('--out must be new or empty (prevent stale upload files)')
     args.out.mkdir(parents=True, exist_ok=True)
