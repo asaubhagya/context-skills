@@ -20,7 +20,9 @@
     "check-site-links": "tsx scripts/check-site-links.ts",
     "check-tool-names": "tsx scripts/check-tool-names.ts",
     "check-site": "pnpm build-site && pnpm check-site-links",
-    "check": "pnpm check-skills && pnpm check-manifest && pnpm check-tool-names && pnpm check-channels"
+    "check": "pnpm check-skills && pnpm check-manifest && pnpm check-tool-names && pnpm check-channels",
+    "package-context-plugin": "python3 scripts/package-context-plugin.py",
+    "test-plugin-package": "python3 scripts/package-context-plugin.test.py"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

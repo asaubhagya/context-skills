@@ -53,3 +53,6 @@ jobs:
 
       - name: Typecheck scripts
         run: pnpm exec tsc --noEmit
+
+      - name: Test deterministic plugin packaging
+        run: pnpm test-plugin-package
