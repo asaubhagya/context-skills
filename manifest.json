@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T21:18:11.663Z",
+  "generatedAt": "2026-09-07T21:18:48.041Z",
   "skills": [
     {
       "key": "blog-agent",
@@ -239,8 +239,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/context/SKILL.md",
-          "sha256": "3756d6094ea62c6538f7d2430cd5cd7c637d86533b60828b80989dfbdda06098",
-          "bytes": 12528
+          "sha256": "53e16db39fbfd61b80f5c34c20393b27405d469cb02e3b9aff2e02b1d87cd127",
+          "bytes": 12663
         },
         {
           "path": "references/agents-block.md",
@@ -269,8 +269,8 @@
         {
           "path": "references/privacy-and-pairing.md",
           "src": "skills/context/references/privacy-and-pairing.md",
-          "sha256": "36af3070662d9df36a7a6f1939caf2208305bce37b3ea5f746ec6cc0b78084e8",
-          "bytes": 2710
+          "sha256": "d336328b383e88d47399e62a3a73bf82f7a8b599372e42911d562ffa3389a3e3",
+          "bytes": 2681
         },
         {
           "path": "references/reviews.md",

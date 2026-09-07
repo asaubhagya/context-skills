@@ -52,8 +52,10 @@ the product name; Nomi is its agent interface. Setup is not just skill installat
    lower-case, or the literal `unknown`. Missing it is `VALIDATION_FAILED`.
 3. **Credentials by name.** Never solicit, store or echo a secret value.
    Refer to keys by name and scope (`OPENROUTER_API_KEY`, read-only) and say
-   where the user keeps them. Refuse confidential employer data, health or
-   payment data and regulated records; ask for a redacted brief.
+   where the user keeps them. Do not put confidential employer data, health or
+   payment data, or regulated records in Shared work; ask for a redacted brief.
+   Authorized personal-domain reads use the paired Private path, without
+   copying those records into Shared work.
 4. **One Space per session**; say which before writing. Never change
    sharing through MCP tools.
 

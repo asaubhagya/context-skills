@@ -1,0 +1,716 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "Context",
+    "subtitle": "Your context across agents",
+    "description": "Context helps you carry goals and work across AI agents. Sign in with Google to create plans, track Issues, attach documents and request human reviews in your Shared workspace, also available on the web. Nomi guides setup and the first useful workflow. Optionally pair the Context iPhone app and reconnect to access authorized private memories, people, logs, health, calendar and stored playbooks. Access is permissioned; agents cannot approve human review gates.",
+    "category": "PRODUCTIVITY"
+  },
+  "tools": {
+    "setup": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves connection scopes, pairing availability, skill manifests and guide content without installing skills or changing workspace records.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "start_context": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Runs the same read-only setup handler under a deprecated compatibility name.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "search_context": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Searches authorized Shared workspace and, when paired, private records without changing them.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "list_spaces": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists accessible Shared and paired private Spaces without creating or changing them.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "list_epics": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists Epics in accessible Spaces without modifying their records.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_epic": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves one accessible Epic and its current work summary.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "create_epic": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates an Epic and optional child Issues in the selected accessible Space.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "update_epic": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Replaces selected Epic title, goal, labels or Space metadata in the accessible workspace.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Replaces selected Epic title, goal, labels or Space metadata in the accessible workspace."
+      }
+    },
+    "delete_epic": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an Epic and cascades to its Issues after permission checks.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Deletes an Epic and cascades to its Issues after permission checks."
+      }
+    },
+    "list_issues": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists accessible Issues using the requested parent and state filters.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_issue": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves one accessible Issue with its version, criteria and discussion.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "create_issues": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates child Issues beneath an accessible Epic or Issue.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "update_issues": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Updates selected Issue fields using expected versions and enforces lifecycle constraints.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Updates selected Issue fields using expected versions and enforces lifecycle constraints."
+      }
+    },
+    "complete_issues": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Changes eligible Issues to completed with work statistics while enforcing completion and human-gate requirements.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "delete_issues": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes the selected Issues after permission checks.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Deletes the selected Issues after permission checks."
+      }
+    },
+    "post_comment": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Adds a comment to an accessible Epic, Issue or Artifact discussion.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "request_review": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a human review request or an Artifact discussion requiring resolution.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "claim_issue": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Records an agent completion claim and evidence against the expected Issue version.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "verify_issue": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Records criterion verification results and evidence with principal independence checks.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "list_artifacts": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists accessible workspace Artifacts without changing their content.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_artifact": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves an accessible Artifact and its available content or retrieval information.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "attach_artifact": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates an attached Artifact or upload plan for an accessible target.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "revise_artifact": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Appends an immutable Artifact revision and advances its head after an expected revision check.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Preserves prior Artifact revisions and rejects stale heads rather than overwriting an existing revision."
+      }
+    },
+    "update_artifact": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Replaces selected Artifact metadata such as title, labels, kind or Space without changing its content.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Replaces selected Artifact metadata such as title, labels, kind or Space without changing its content."
+      }
+    },
+    "delete_artifacts": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes the selected Artifacts together with their revisions and comment threads after permission checks.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Deletes the selected Artifacts together with their revisions and comment threads after permission checks."
+      }
+    },
+    "get_artifact_transfer": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves the status of an authorized Artifact transfer.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_changes": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Reads changes after a cursor with an optional bounded wait and does not approve or modify work.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "list_mutation_receipts": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves mutation acceptance and delivery receipts without applying a new mutation.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "create_space": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private Space on the paired iPhone.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "delete_space": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an empty private Space while refusing built-in and nonempty Spaces.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Deletes an empty private Space while refusing built-in and nonempty Spaces."
+      }
+    },
+    "list_memories": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists authorized memory metadata from the paired private context.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_memory": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves an authorized private memory record.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "save_memories": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Queues new private memory entries or facts in the paired Context app.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "delete_memories": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes private memories and their associated extracted logs and todos after permission checks.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Deletes private memories and their associated extracted logs and todos after permission checks."
+      }
+    },
+    "list_logs": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Reads authorized private meal, workout, expense or health log records.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "log_meal": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Queues a meal plan and a notification on the paired iPhone; user completion can subsequently log nutrition to Apple Health.",
+        "open_world_justification": "Queues a plan inside Context; the user must complete it on the phone before any subsequent Apple Health nutrition logging.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "log_workout": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Queues a workout plan and notification on the paired iPhone; user completion records the session in the fitness tracker.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "delete_logs": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes selected private log records after permission checks.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Deletes selected private log records after permission checks."
+      }
+    },
+    "list_people": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists authorized private person profiles.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_person": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Reads an authorized person profile and available linked context.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "create_people": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates app-owned person profiles on the paired iPhone without writing system Contacts.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "update_people": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Updates private person profile fields or remembered facts with provenance and confidence restrictions.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Updates private person profile fields or remembered facts with provenance and confidence restrictions."
+      }
+    },
+    "delete_people": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes selected private profiles and unlinks their context while protecting the user’s own profile.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Deletes selected private profiles and unlinks their context while protecting the user’s own profile."
+      }
+    },
+    "merge_people": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Combines private duplicate profiles and relinks their data into a survivor with app-supported undo.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Preserves combined profile data and provides undo in the app rather than permanently deleting the merged information."
+      }
+    },
+    "query_health_samples": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Reads authorized private health samples with range and coverage information.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "summarize_health": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Computes summaries of authorized private health samples without modifying them.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "list_calendar_events": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Reads the authorized synced calendar window without changing Apple or Google calendar events.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_calendar_event": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves a synced calendar event and its linked Context records without editing the event.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "list_skills": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists the user’s private stored playbooks without changing them.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "get_skill": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Reads the markdown of one private stored playbook.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    },
+    "save_skill": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private playbook or overwrites an existing playbook’s markdown without version history.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Creates a private playbook or overwrites an existing playbook’s markdown without version history."
+      }
+    },
+    "request_content": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Enqueues an authorized request for device-held private content and leaves it pending when the phone is offline.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Adds bounded Context records or workflow state without deleting existing user content or publishing externally."
+      }
+    },
+    "get_content_request": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves a private content request’s delivery state and its temporary authorized download URL when ready.",
+        "open_world_justification": "Operates within the user’s authorized Context account and does not publish publicly or send external communications.",
+        "destructive_justification": "Only retrieves or computes authorized information and does not delete or replace user content."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Start a Google-only Shared workspace session.",
+      "user_prompt": "Set up Context.",
+      "file_attachment_urls": null,
+      "tools_triggered": "setup, list_spaces",
+      "expected_output": "Introduces Nomi, reports available Shared access and offers to turn one goal into a plan; bundled onboarding must not require a phone or manual skill upload for the web workflow.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Create a small plan and verify persistence.",
+      "user_prompt": "Create a Shared plan called Weekend reading, with two Issues: choose a book and schedule one reading session.",
+      "file_attachment_urls": null,
+      "tools_triggered": "setup, list_spaces, create_epic, create_issues, get_epic, list_issues",
+      "expected_output": "Creates the requested Epic and two child Issues in Shared, then reads them back and reports saved records without claiming unconfirmed delivery.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Find existing work without changing it.",
+      "user_prompt": "Find my Weekend reading plan in Context and show its unfinished Issues.",
+      "file_attachment_urls": null,
+      "tools_triggered": "setup, search_context, get_epic, list_issues",
+      "expected_output": "Finds the reviewer-created plan and summarizes only the saved unfinished Issues; reports an empty result if the fixture is absent.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Attach a document and preserve its revision history.",
+      "user_prompt": "Attach a short reading checklist to the choose-a-book Issue, then revise the checklist to include a Sunday session.",
+      "file_attachment_urls": null,
+      "tools_triggered": "setup, search_context, get_issue, attach_artifact, get_artifact, revise_artifact",
+      "expected_output": "Attaches a checklist, reads its current revision, appends the requested revision using that version, and reads back the new head while retaining prior content.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Request a human decision without approving it.",
+      "user_prompt": "Ask me to review the reading checklist and wait for my decision.",
+      "file_attachment_urls": null,
+      "tools_triggered": "setup, search_context, get_issue, request_review, get_changes",
+      "expected_output": "Opens a review request on the relevant Issue and reports its pending state; does not approve the request or close a human gate.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not trigger for live weather.",
+      "user_prompt": "What will the weather be in Singapore tomorrow?",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Context should not be invoked because it does not provide live weather forecasts.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for sending external email.",
+      "user_prompt": "Send an email to my accountant asking for the latest invoice.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Context should not be invoked because it cannot send email or external messages.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for live market quotes.",
+      "user_prompt": "What is Apple’s current share price?",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Context should not be invoked because it is not a live financial-market data source.",
+      "expected_output_url": null
+    }
+  ]
+}

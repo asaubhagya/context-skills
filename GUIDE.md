@@ -66,7 +66,7 @@ Review gates are human gates. **Never mark a human gate done yourself**: a gate 
 
 ## 4. Rules that bite
 
-- **Credentials by name.** Never solicit, store, echo or paste a secret value. Refer to keys by name and scope (`OPENROUTER_API_KEY`, read-only) and say where the person keeps them. Refuse confidential employer data, health, payment or regulated records; ask for a redacted brief.
+- **Credentials by name.** Never solicit, store, echo or paste a secret value. Refer to keys by name and scope (`OPENROUTER_API_KEY`, read-only) and say where the person keeps them. Do not put confidential employer data, health, payment or regulated records into Shared work; ask for a redacted brief. Authorized personal-domain reads stay on the paired Private path.
 - **Approvals are the person's.** `request_review` opens the gate; the decision arrives through `get_changes`. Never raise a second request for the same decision, never treat a comment as an approval, never move a gate Issue to `done`.
 - **`caller {agent, model}` on every call** — the exact model id, lower-case, or the literal `unknown`. Missing it is `VALIDATION_FAILED`.
 - **`expected_version`** (from `get_issue`) on `update_issues`, `claim_issue`, `verify_issue`; a stale value is `STALE_VERSION`, re-read and retry. `revise_artifact` needs `expected_revision_id`.
