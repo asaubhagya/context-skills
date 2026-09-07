@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T21:15:53.739Z",
+  "generatedAt": "2026-09-07T21:18:11.663Z",
   "skills": [
     {
       "key": "blog-agent",
@@ -263,8 +263,8 @@
         {
           "path": "references/onboarding.md",
           "src": "skills/context/references/onboarding.md",
-          "sha256": "6f5ab6847f556e097cf51a1bc9e8b5d2131d358f37962f3bbcbaf3067107fd3f",
-          "bytes": 3992
+          "sha256": "6f1fe06c2811be5622e2e7c7ba5abdb702255d27a7b47aa0edf754c3329be9f0",
+          "bytes": 4177
         },
         {
           "path": "references/privacy-and-pairing.md",

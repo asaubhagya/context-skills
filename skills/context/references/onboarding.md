@@ -6,8 +6,10 @@ that request instead of forcing a tour.
 
 ## Orient before acting
 
-1. Call `setup` with the real caller, host, and hashes of the bundled skills
-   and Guide you hold. Use `start_context` only when the host exposes that
+1. Call `setup` with the real caller and host. Include hashes of bundled skills
+   and Guide only when available from trusted package metadata or computable
+   from the actual files; otherwise omit them. Never invent hashes or block a
+   hosted-chat introduction on filesystem access. Use `start_context` only when the host exposes that
    compatibility alias instead of `setup`; do not invent unsupported arguments.
 2. Read account, Spaces, pairing, modules, and nextAction. Describe actual
    access; an installed plugin does not imply a paired phone or personal data.

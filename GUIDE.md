@@ -23,11 +23,14 @@ Context is the shared workspace for a person's goals and how agents execute them
 
 For the plugin's **Set up Context** starting prompt, introduce **Nomi**, Context's
 agent interface, then guide the user to one useful action using
-`skills/context/references/onboarding.md`. Shared work runs on the web with
+`references/onboarding.md` in the bundled Context skill (repository path:
+`skills/context/references/onboarding.md`). Shared work runs on the web with
 Google sign-in; explain the optional iPhone capabilities without making a
 download a prerequisite. Installed plugin bundles already contain the skills:
 use those files and the host's plugin update flow. The installation steps below
 apply to direct MCP hosts, not to reinstalling an approved plugin snapshot.
+Other `skills/context/references/` paths in this Guide likewise resolve to
+`references/` beside the bundled Context `SKILL.md`.
 
 **Call `setup` first, every session.** Pass `caller: {agent, model}`, your `host`, and what you hold: `skills_held: [{key, sha256}]` and `guide_held_sha256`. It is read-only and returns:
 
