@@ -16,12 +16,12 @@
       "stepUp": "Pair your iPhone in the Context app, then Reconnect the connector"
     },
     "contractVersion": "3.0.0",
-    "startingPrompt": "Nomi, get me started",
-    "generatedAt": "2026-09-06T04:21:17.432Z",
-    "publishedAt": "2026-09-06T04:21:17.432Z",
+    "startingPrompt": "Set up Context",
+    "generatedAt": "2026-09-07T21:33:25.056Z",
+    "publishedAt": "2026-09-07T21:33:25.056Z",
     "sourceRepo": "asaubhagya/meetly-macos",
     "sourcePath": "supabase/functions/mcp/tools_v3.ts",
-    "sourceCommit": "3ef96e2",
+    "sourceCommit": "eb810f0",
     "docsUrl": "https://agents.onecontext.me/tools/context"
   },
   "connect": {
@@ -61,7 +61,7 @@
         {
           "name": "setup",
           "title": "Set up this session",
-          "description": "Use this when you need to start — call it first in every session, before anything else, and again when the user greets Nomi or says \"Nomi, get me started\" or whenever account, pairing, Spaces or the Guide is unclear. Read-only (`agent-setup/1`): it reports the signed-in account, whether an iPhone is paired, which Spaces and modules you can reach, the skill channel it resolved (`latest` unless you pass `channel`), the Guide and every `context` skill with sha256 digests and a `status` computed from what you report holding (`skills_held`, `guide_held_sha256`), `drift`, an install plan for this host, and a `nextAction` (`continue | install_skills | update_skills | pair_phone | human_upload`). Pass `include: \"bodies\"` to get the Guide and SKILL.md text inline. It never installs anything itself and never asks you to hand-edit your repository's agent config. Its `spaces` tell you what a Space argument may name next; `pair_phone` means the private half is unavailable until the user pairs.",
+          "description": "Use this when you need to start — call it first in every session, before anything else, and again when the user greets Nomi or says \"Set up Context\" or \"Nomi, get me started\" or whenever account, pairing, Spaces or the Guide is unclear. Read-only (`agent-setup/1`): it reports the signed-in account, whether an iPhone is paired, which Spaces and modules you can reach, the skill channel it resolved (`latest` unless you pass `channel`), the Guide and every `context` skill with sha256 digests and a `status` computed from what you report holding (`skills_held`, `guide_held_sha256`), `drift`, an install plan for this host, and a `nextAction` (`continue | install_skills | update_skills | pair_phone | human_upload`). Pass `include: \"bodies\"` to get the Guide and SKILL.md text inline. It never installs anything itself and never asks you to hand-edit your repository's agent config. Its `spaces` tell you what a Space argument may name next; `pair_phone` means the private half is unavailable until the user pairs.",
           "readOnly": true,
           "destructive": false,
           "idempotent": true,
@@ -6933,7 +6933,7 @@
           "title": "Save a stored skill",
           "description": "Use this when you need to keep a playbook for next time — omit `skill_id` to add a new skill, pass it to overwrite an existing one. Writes to the paired iPhone, so it requires pairing; there is no version history, the content you send becomes the skill. `space` is required when adding. Read it back with `get_skill`.",
           "readOnly": false,
-          "destructive": false,
+          "destructive": true,
           "idempotent": false,
           "scopes": [
             "context:private"
