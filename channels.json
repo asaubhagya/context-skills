@@ -1,10 +1,10 @@
 {
   "schema": "context-skills-channels/1",
-  "generatedAt": "2026-09-07T21:27:56.730Z",
+  "generatedAt": "2026-09-07T21:28:58.671Z",
   "latest": {
-    "ref": "v17",
-    "sha": "3ee44dfd6c8cb2a273ceb2f5249f4d214bacf350",
-    "date": "2026-09-06T15:43:40+08:00"
+    "ref": "v18",
+    "sha": "95c2abceb870286c08187ec49242cc47ea8ee756",
+    "date": "2026-09-08T05:27:36+08:00"
   },
   "beta": {
     "ref": "main",
@@ -43,7 +43,7 @@
       "product": "context-sites"
     },
     "context": {
-      "latest": 3,
+      "latest": 4,
       "beta": 4,
       "product": "context"
     },
