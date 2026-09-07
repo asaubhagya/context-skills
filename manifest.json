@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T07:43:29.340Z",
+  "generatedAt": "2026-09-07T21:18:48.041Z",
   "skills": [
     {
       "key": "blog-agent",
@@ -229,8 +229,8 @@
       "kind": "skill",
       "product": "context",
       "title": "context",
-      "description": "The Context MCP interface — vocabulary, provenance, the read → act → verify loop and the discipline for using its tools: setup first, caller and expected_version on every write, claim → verify → review, work_stats on completion, handoff before stopping. Use whenever an agent is signed in to Context (https://app.onecontext.me) and about to call any of its tools: charting Epics/Issues, attaching Artifacts, posting comments, requesting review, or reading Shared/Private Space data. Ships references for charting a job, the spec template and worked examples.",
-      "version": 3,
+      "description": "Set up Context with Nomi, its agent interface, and use the Context MCP — vocabulary, provenance, the read → act → verify loop and the discipline for using its tools: setup first, caller and expected_version on every write, claim → verify → review, work_stats on completion, handoff before stopping. Use whenever an agent is signed in to Context (https://app.onecontext.me), says \"Set up Context\", \"Set up Nomi\", or asks what Context can do, and when about to call any of its tools: charting Epics/Issues, attaching Artifacts, posting comments, requesting review, or reading Shared/Private Space data. Ships references for charting a job, the spec template and worked examples.",
+      "version": 4,
       "deps": [],
       "license": "MIT",
       "source_url": null,
@@ -239,8 +239,8 @@
         {
           "path": "SKILL.md",
           "src": "skills/context/SKILL.md",
-          "sha256": "aebd0c0f5296f611eb237a809b9d1ff53419c820c3e0fda74c72541a2ec49924",
-          "bytes": 11884
+          "sha256": "53e16db39fbfd61b80f5c34c20393b27405d469cb02e3b9aff2e02b1d87cd127",
+          "bytes": 12663
         },
         {
           "path": "references/agents-block.md",
@@ -261,10 +261,16 @@
           "bytes": 5295
         },
         {
+          "path": "references/onboarding.md",
+          "src": "skills/context/references/onboarding.md",
+          "sha256": "6f1fe06c2811be5622e2e7c7ba5abdb702255d27a7b47aa0edf754c3329be9f0",
+          "bytes": 4177
+        },
+        {
           "path": "references/privacy-and-pairing.md",
           "src": "skills/context/references/privacy-and-pairing.md",
-          "sha256": "36af3070662d9df36a7a6f1939caf2208305bce37b3ea5f746ec6cc0b78084e8",
-          "bytes": 2710
+          "sha256": "d336328b383e88d47399e62a3a73bf82f7a8b599372e42911d562ffa3389a3e3",
+          "bytes": 2681
         },
         {
           "path": "references/reviews.md",

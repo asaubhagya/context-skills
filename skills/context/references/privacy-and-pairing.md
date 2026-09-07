@@ -41,14 +41,13 @@ isn't there yet. The fix has two steps, both required:
 Until both steps happen, keep working in the Shared Space and tell the user
 plainly what you couldn't do and why.
 
-## What "unavailable" vs "pairing required" means
+## Setup state
 
-`setup` reports the pairing state: `paired | not_paired | unavailable`.
-`not_paired` is the case above — pairing is possible, just not
-done yet. `unavailable` means this host/product surface doesn't support
-phone pairing at all (rare) — don't tell the user to pair a phone that
-can't help here; say plainly that Private-Space features aren't reachable
-from this connector.
+`setup` currently reports pairing as `paired | required`. `required` means
+Private access needs pairing; it does not block the available Shared Space.
+Read the returned Spaces and modules as well as `nextAction`. If the server
+reports an unavailable feature or an authorization error, explain that actual
+limit rather than inferring successful pairing or inventing a supported flow.
 
 ## Never
 
