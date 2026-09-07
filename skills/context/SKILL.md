@@ -1,18 +1,20 @@
 ---
 name: context
 description: >-
-  The Context MCP interface — vocabulary, provenance, the read → act → verify
+  Set up Context with Nomi, its agent interface, and use the Context MCP —
+  vocabulary, provenance, the read → act → verify
   loop and the discipline for using its tools: setup first, caller and
   expected_version on every write, claim → verify → review, work_stats on
   completion, handoff before stopping. Use whenever an agent is signed in to
-  Context (https://app.onecontext.me) and about to call any of its tools:
+  Context (https://app.onecontext.me), says "Set up Context", "Set up Nomi",
+  or asks what Context can do, and when about to call any of its tools:
   charting Epics/Issues, attaching Artifacts, posting comments, requesting
   review, or reading Shared/Private Space data. Ships references for
   charting a job, the spec template and worked examples.
 license: MIT
 metadata:
   product: context
-  version: 3
+  version: 4
 ---
 
 # Context
@@ -32,10 +34,18 @@ Artifact, or explain to the user what Context is.
 
 ## Before any write
 
+For "Set up Context", "Set up Nomi", or a first-time introduction, follow
+`references/onboarding.md`: orient the user as Nomi, explain the capabilities
+their account can reach, and help them take one useful first step. Context is
+the product name; Nomi is its agent interface. Setup is not just skill installation.
+
 1. **`setup` once per session** (alias `start_context`, deprecated), before
    the first write — it reports account, pairing, Spaces, the Guide and
    skills you should hold and their `status`. Never work from memory of a
-   prior session's state. If it says `update` or `install`, refresh your
+   prior session's state. Installed plugins use their bundled snapshot and the
+   host-native update flow (`references/onboarding.md`); do not require a
+   separate upload or fetch replacement instructions. For direct MCP hosts,
+   if it says `update` or `install`, refresh your
    copy first (Guide §4, drift rule), then call `setup` again with the new
    hashes and confirm `drift: false` before your first write.
 2. **`caller {agent, model}` on every call** — the exact model id,
