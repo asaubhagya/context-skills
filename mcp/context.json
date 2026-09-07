@@ -17,11 +17,11 @@
     },
     "contractVersion": "3.0.0",
     "startingPrompt": "Set up Context",
-    "generatedAt": "2026-09-07T21:33:25.056Z",
-    "publishedAt": "2026-09-07T21:33:25.056Z",
+    "generatedAt": "2026-09-07T21:51:17.532Z",
+    "publishedAt": "2026-09-07T21:51:17.532Z",
     "sourceRepo": "asaubhagya/meetly-macos",
     "sourcePath": "supabase/functions/mcp/tools_v3.ts",
-    "sourceCommit": "eb810f0",
+    "sourceCommit": "e3f20bc",
     "docsUrl": "https://agents.onecontext.me/tools/context"
   },
   "connect": {
