@@ -32,7 +32,7 @@ apply to direct MCP hosts, not to reinstalling an approved plugin snapshot.
 Other `skills/context/references/` paths in this Guide likewise resolve to
 `references/` beside the bundled Context `SKILL.md`.
 
-**Call `setup` first, every session.** Pass `caller: {agent, model}`, your `host`, and what you hold: `skills_held: [{key, sha256}]` and `guide_held_sha256`. It is read-only and returns:
+**Call `setup` first, every session.** Pass `caller: {agent, model}`. Optionally pass your `host` and what you hold: `skills_held: [{key, sha256}]` and `guide_held_sha256`. It is read-only and returns:
 
 - `guide` — this file: `url`, `sha256`, `target` (`.claude/skills/context/GUIDE.md`), `status: current | update | install`
 - `skills[]` — each with `key`, `product`, `version`, `sha256`, `url`, `target`, `files[]`, `status`

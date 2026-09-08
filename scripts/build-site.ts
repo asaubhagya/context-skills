@@ -168,7 +168,7 @@ if(location.hash){const d=document.getElementById(location.hash.slice(1));if(d&&
 function page(title: string, body: string, opts: { alt: string; desc?: string; product?: string }) {
   const p = opts.product ?? CORE; const b = base(p);
   const nav = p === CORE
-    ? `<a href="/">Guide</a><a href="/skills">Skills</a><a href="/tools">Tools</a><a href="/extensions">Extensions</a>`
+    ? `<a href="/start">Start here</a><a href="/">Guide</a><a href="/skills">Skills</a><a href="/tools">Tools</a><a href="/extensions">Extensions</a>`
     : `<a href="${b}/">${esc(productTitle(p))}</a><a href="${b}/skills">Skills</a><a href="${b}/tools">Tools</a><a href="/" class="mute">← Context</a>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} — agents.onecontext.me</title>${opts.desc ? `<meta name="description" content="${esc(opts.desc)}">` : ""}<link rel="alternate" type="text/markdown" href="${opts.alt}"><style>${CSS}</style></head><body><nav class="top"><a class="brand" href="/">agents.onecontext.me</a>${nav}<span class="r">${latest.name}</span></nav><main>${body}<footer>Built ${time(generatedAt)} from <a href="https://github.com/${REPO}">${REPO}</a> · latest <code>${latest.name}</code> · beta <code>main@${beta.sha}</code> · <a href="${opts.alt}">this page as markdown</a> · <a href="/llms.txt">llms.txt</a> · <a href="/index.md">index.md</a></footer></main><script>${JS}</script></body></html>`;
 }
@@ -351,10 +351,24 @@ function hydrate(md: string, p: string) {
 }
 function homeMd(p: string) {
   const g = guides.get(p);
-  const head = g ? hydrate(g.body, p) : `# ${productTitle(p)} — agent guide\n\n_No GUIDE.md yet._\n${hydrate("", p)}`;
+  const startLink = p === CORE ? `> New to Context? Follow [Start here](${HOST}/start.md) first.\n\n` : "";
+  const head = startLink + (g ? hydrate(g.body, p) : `# ${productTitle(p)} — agent guide\n\n_No GUIDE.md yet._\n${hydrate("", p)}`);
   const foot = `\n\n---\n_${p === CORE ? "This page is the Guide" : `Guide for ${productTitle(p)}`}: \`${g?.path ?? ""}\` at \`${g?.ref ?? ""}\` ([raw](${HOST}${base(p)}/GUIDE.md))${g?.betaDiffers ? " (beta on main differs)" : ""} · built ${generatedAt} · [llms.txt](${HOST}${base(p)}/llms.txt) · [index.md](${HOST}${base(p)}/index.md)${p !== CORE ? ` · [Context](${HOST}/)` : ""}_\n`;
   return head + foot;
 }
+function startMd() {
+  const source = readFileSync(join(ROOT, "START.md"), "utf8");
+  const setupInput = JSON.stringify({ caller: { agent: "<host or agent name>", model: "unknown" }, host: "<optional host>" }, null, 2);
+  return stripFm(source)
+    .replaceAll("{{MCP_ENDPOINT}}", servers.find((s) => s.key === CORE)?.cat.server.endpoint ?? "https://mcp.onecontext.me/mcp")
+    .replaceAll("{{SETUP_INPUT}}", setupInput)
+    .replaceAll("{{GUIDE_URL}}", `${HOST}/GUIDE.md`)
+    .replaceAll("{{SKILLS_URL}}", `${HOST}/skills/index.json`)
+    .replaceAll("{{TOOLS_URL}}", `${HOST}/tools/context.md`)
+    .replaceAll("{{LLMS_URL}}", `${HOST}/llms.txt`);
+}
+const start = startMd();
+mdPage("/start", "Start Context", start, { product: CORE, desc: "The shortest safe path for an agent that has just discovered Context." });
 for (const p of products) {
   const g = guides.get(p);
   mdPage(p === CORE ? "" : `${base(p)}/`, g?.title ?? `${productTitle(p)} — agent guide`, homeMd(p), { product: p, desc: g?.description });
@@ -372,6 +386,9 @@ function llms(p: string) {
 
 > ${g?.description ?? `Agent interface for ${productTitle(p)}: guide, versioned skills (latest ${latest.name} / beta main), and MCP tool catalogs.`}
 
+## Start here
+${p === CORE ? `- Start Context: ${HOST}/start.md` : `- Context core: ${HOST}/start.md`}
+
 ## Guide
 - ${g?.title ?? "Agent guide"}: ${HOST}${b}/index.md
 
@@ -385,6 +402,8 @@ ${p === CORE ? `\n## Extensions\n${products.filter((x) => x !== CORE).map((x) =>
 }
 for (const p of products) write(W(`${base(p)}/llms.txt`), llms(p));
 write("llms-full.txt", [
+  start,
+  "\n\n---\n",
   homeMd(CORE),
   ...products.filter((p) => p !== CORE).map((p) => `\n\n---\n\n${homeMd(p)}`),
   ...activeKeys.map((k) => `\n\n---\n\n<!-- skill: ${k} (${skillProduct.get(k)}) v${current(k).version} -->\n\n${stripFm(show(skillAt(latest.name, k) ? latest.name : "main", current(k).primary) ?? "")}`),
