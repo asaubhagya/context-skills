@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T06:08:34.586Z",
+  "generatedAt": "2026-10-10T05:52:52.107Z",
   "skills": [
     {
       "key": "blog-agent",
@@ -508,7 +508,7 @@
     {
       "key": "context-blog",
       "path": "mcp/context-blog.json",
-      "sha256": "38a5db8d15f79b86bc147831530f3ae582c4f0c729998ddf5cf5b536c02a49b0",
+      "sha256": "cadda416017bfef15bdecfe4629d49beba347a1ff2a6a299edcfec22e6b1c033",
       "bytes": 229833,
       "server": {
         "name": "Context Sites",

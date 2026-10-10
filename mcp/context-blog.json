@@ -17,11 +17,11 @@
     },
     "contractVersion": "blog-1.3.0",
     "startingPrompt": "Call the Context Sites tool `setup` with workflow 'blog' and follow its nextAction.",
-    "generatedAt": "2026-10-09T00:58:45.520Z",
-    "publishedAt": "2026-10-09T00:58:45.520Z",
+    "generatedAt": "2026-10-09T23:05:59.675Z",
+    "publishedAt": "2026-10-09T23:05:59.675Z",
     "sourceRepo": "asaubhagya/context-blog",
     "sourcePath": "lib/mcp/server.ts",
-    "sourceCommit": "e1528d5",
+    "sourceCommit": "bb64de0",
     "docsUrl": "https://agents.onecontext.me/extensions/context-sites/tools/context-blog"
   },
   "connect": {
