@@ -17,11 +17,11 @@
     },
     "contractVersion": "blog-1.3.0",
     "startingPrompt": "Call the Context Sites tool `setup` with workflow 'blog' and follow its nextAction.",
-    "generatedAt": "2026-11-06T23:35:24.229Z",
-    "publishedAt": "2026-11-06T23:35:24.229Z",
+    "generatedAt": "2026-11-20T20:20:21.986Z",
+    "publishedAt": "2026-11-20T20:20:21.986Z",
     "sourceRepo": "asaubhagya/context-blog",
     "sourcePath": "lib/mcp/server.ts",
-    "sourceCommit": "b22a1da",
+    "sourceCommit": "8f0f837",
     "docsUrl": "https://agents.onecontext.me/extensions/context-sites/tools/context-blog"
   },
   "connect": {
@@ -1223,12 +1223,60 @@
                         },
                         "original": {
                           "type": "boolean"
+                        },
+                        "narrowSrc": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "width": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
+                        },
+                        "height": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
                         }
                       },
                       "required": [
                         "type",
                         "src",
                         "alt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "code"
+                        },
+                        "code": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "language": {
+                          "type": "string",
+                          "maxLength": 24,
+                          "pattern": "^[a-z0-9+#-]+$"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "code"
                       ],
                       "additionalProperties": false
                     }
@@ -1286,7 +1334,8 @@
               },
               "design_tokens": {
                 "type": "object",
-                "additionalProperties": {}
+                "additionalProperties": {},
+                "description": "Design tokens: color{background,surface,text,muted,accent,accentText,border,link}, font{heading{family,weight,letterSpacing},body{family},scale{base,lineHeight}}, layout{radius,contentWidth,spacingUnit,answerStyle:'bar'|'plain'}, logo{src:https,alt,height?16-64,wordmark?}, nav{links?:[{label,href:https}]≤5,cta?:{label,href:https}}"
               }
             },
             "required": [
@@ -1385,7 +1434,7 @@
         {
           "name": "content_lint",
           "title": "Lint content",
-          "description": "The MACHINE half of the blog-checker playbook, no side effects: answer-first ≤ 60 words, each H2 followed by a 40–75-word paragraph, table/list for comparison·listicle·how-to, FAQ 3–5 × 80–150 words, inline HTML allowlist (em/strong/a), ≥ 2 outbound citations, ≥ 2 numeric statistics, ≥ 1 original artifact, hub assigned, localised slug/title/description vs master, style rotation vs recent_styles, banned phrases, first-person density. Returns warnings [{code, message, path?, severity}] and stats {words, h2s, citations, numbers, faq, artifacts, urls}. severity \"error\" = playbook rule violated.",
+          "description": "The MACHINE half of the blog-checker playbook, no side effects: answer-first ≤ 60 words, each H2 followed by a 40–75-word paragraph, table/list for comparison·listicle·how-to, FAQ 3–5 × 80–150 words, inline HTML allowlist (em/strong/a; `code` sections are verbatim — never HTML-checked, not body words, not an H2-lead paragraph), ≥ 2 outbound citations, ≥ 2 numeric statistics, ≥ 1 original artifact, hub assigned, localised slug/title/description vs master, style rotation vs recent_styles, banned phrases, first-person density. Returns warnings [{code, message, path?, severity}] and stats {words, h2s, citations, numbers, faq, artifacts, urls}. severity \"error\" = playbook rule violated.",
           "readOnly": true,
           "destructive": false,
           "idempotent": false,
@@ -1644,12 +1693,60 @@
                         },
                         "original": {
                           "type": "boolean"
+                        },
+                        "narrowSrc": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "width": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
+                        },
+                        "height": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
                         }
                       },
                       "required": [
                         "type",
                         "src",
                         "alt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "code"
+                        },
+                        "code": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "language": {
+                          "type": "string",
+                          "maxLength": 24,
+                          "pattern": "^[a-z0-9+#-]+$"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "code"
                       ],
                       "additionalProperties": false
                     }
@@ -1707,7 +1804,8 @@
               },
               "design_tokens": {
                 "type": "object",
-                "additionalProperties": {}
+                "additionalProperties": {},
+                "description": "Design tokens: color{background,surface,text,muted,accent,accentText,border,link}, font{heading{family,weight,letterSpacing},body{family},scale{base,lineHeight}}, layout{radius,contentWidth,spacingUnit,answerStyle:'bar'|'plain'}, logo{src:https,alt,height?16-64,wordmark?}, nav{links?:[{label,href:https}]≤5,cta?:{label,href:https}}"
               },
               "style": {
                 "type": "string",
@@ -2718,7 +2816,7 @@
         {
           "name": "brand_upsert",
           "title": "Upsert brand profile",
-          "description": "Replace the tenant's brand profile: voice (persona, banned_phrases[], …), byline (author name/url), design_tokens (blog-agent/templates/design-tokens.json shape — used by previews and the renderer), optional organization_ld / software_application_ld (JSON-LD). Bumps revision and keeps the previous state in blog.brand_profile_revisions.",
+          "description": "Replace the tenant's brand profile: voice (persona, banned_phrases[], …), byline (author name/url), design_tokens (blog-agent/templates/design-tokens.json shape — used by previews and the renderer; also logo {src https, alt, height?, wordmark?}, nav {links[≤5], cta}, font.heading.letterSpacing, layout.answerStyle 'bar'|'plain' — see docs/contract.md, Design tokens), optional organization_ld / software_application_ld (JSON-LD). Bumps revision and keeps the previous state in blog.brand_profile_revisions.",
           "readOnly": false,
           "destructive": false,
           "idempotent": false,
@@ -2747,7 +2845,8 @@
               },
               "design_tokens": {
                 "type": "object",
-                "additionalProperties": {}
+                "additionalProperties": {},
+                "description": "Design tokens: color{background,surface,text,muted,accent,accentText,border,link}, font{heading{family,weight,letterSpacing},body{family},scale{base,lineHeight}}, layout{radius,contentWidth,spacingUnit,answerStyle:'bar'|'plain'}, logo{src:https,alt,height?16-64,wordmark?}, nav{links?:[{label,href:https}]≤5,cta?:{label,href:https}}"
               },
               "organization_ld": {
                 "$ref": "#/properties/voice"
@@ -3615,12 +3714,60 @@
                         },
                         "original": {
                           "type": "boolean"
+                        },
+                        "narrowSrc": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "width": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
+                        },
+                        "height": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
                         }
                       },
                       "required": [
                         "type",
                         "src",
                         "alt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "code"
+                        },
+                        "code": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "language": {
+                          "type": "string",
+                          "maxLength": 24,
+                          "pattern": "^[a-z0-9+#-]+$"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "code"
                       ],
                       "additionalProperties": false
                     }
@@ -4412,12 +4559,60 @@
                         },
                         "original": {
                           "type": "boolean"
+                        },
+                        "narrowSrc": {
+                          "$ref": "#/properties/sections/items/anyOf/3/properties/source"
+                        },
+                        "width": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
+                        },
+                        "height": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 20000
                         }
                       },
                       "required": [
                         "type",
                         "src",
                         "alt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "code"
+                        },
+                        "code": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20000
+                        },
+                        "language": {
+                          "type": "string",
+                          "maxLength": 24,
+                          "pattern": "^[a-z0-9+#-]+$"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "original": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "code"
                       ],
                       "additionalProperties": false
                     }
@@ -4475,7 +4670,8 @@
               },
               "design_overrides": {
                 "type": "object",
-                "additionalProperties": {}
+                "additionalProperties": {},
+                "description": "Design tokens: color{background,surface,text,muted,accent,accentText,border,link}, font{heading{family,weight,letterSpacing},body{family},scale{base,lineHeight}}, layout{radius,contentWidth,spacingUnit,answerStyle:'bar'|'plain'}, logo{src:https,alt,height?16-64,wordmark?}, nav{links?:[{label,href:https}]≤5,cta?:{label,href:https}}"
               },
               "context_issue_id": {
                 "$ref": "#/properties/id"
