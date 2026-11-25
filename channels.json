@@ -1,6 +1,6 @@
 {
   "schema": "context-skills-channels/1",
-  "generatedAt": "2026-11-21T07:07:38.306Z",
+  "generatedAt": "2026-11-25T21:42:08.441Z",
   "latest": {
     "ref": "v18",
     "sha": "95c2abceb870286c08187ec49242cc47ea8ee756",
@@ -8,8 +8,8 @@
   },
   "beta": {
     "ref": "main",
-    "sha": "382bb2c2ef6dc22c75bd1726f31af01056f79a8c",
-    "date": "2026-11-21T07:07:13Z"
+    "sha": "a44699ff6305ca709b8686797da4aec41231e888",
+    "date": "2026-11-25T21:41:43Z"
   },
   "source": {
     "repo": "asaubhagya/context-skills",
